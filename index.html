@@ -5,9 +5,9 @@
     <title></title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>  
-    <script src="../../packages/jquery-csv.js"></script>  
+    <script src="/packages/jquery-csv.js"></script>  
     <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-    <link href="../../packages/bootstrap-lux/bootstrap.min.css" rel="stylesheet" />
+    <link href="/packages/bootstrap-lux/bootstrap.min.css" rel="stylesheet" />
 
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
@@ -16,7 +16,7 @@
     <script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/fh-3.4.0/r-2.4.1/datatables.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <link href="../../src/site.css" id="site-style" rel="stylesheet" />
+    <link href="/src/site.css" id="site-style" rel="stylesheet" />
 </head>
 
 <body>
@@ -32,8 +32,8 @@
     <div class="sidebar card secondary m-3 shadow rounded-top-left-1 rounded-bottom-right-1" id="sidebar">
         <div id="card-body" class="card-body pb-0" style="min-width: 0;">
             <!-- Arrow by Calvin Goodman from <a href="https://thenounproject.com/browse/icons/term/arrow/" target="_blank" title="Arrow Icons">Noun Project</a> (CC BY 3.0)-->
-            <img id="collapse-sidebar" src="../../src/img/collapse.svg" />
-            <img id="expand-sidebar" src="../../src/img/expand.svg" />
+            <img id="collapse-sidebar" src="/src/img/collapse.svg" />
+            <img id="expand-sidebar" src="/src/img/expand.svg" />
             <div class="row">
             <div class="col-9 h6 font-weight-bold" id="summary"></div><div class="col-3 h6 font-weight-bold text-end" id="total_in_view"></div>
             </div>
@@ -80,10 +80,10 @@
                 </input>
                 </form>
                 <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) --> 
-                <div id="table-toggle" class="btn btn-secondary mx-2 shadow-sm shadow-intensity-lg"><span id="table-toggle-label">Table View <img src="../../src/img/arrow-right.svg" height="50" width="15" style="text-align: center;"></span></div>
+                <div id="table-toggle" class="btn btn-secondary mx-2 shadow-sm shadow-intensity-lg"><span id="table-toggle-label">Table View <img src="/src/img/arrow-right.svg" height="50" width="15" style="text-align: center;"></span></div>
 
-                <div id="basemap-toggle" class="btn btn-secondary mx-2 shadow-sm"><span id="basemap-toggle-label">Basemap <img src="../../src/img/layer.svg" height="50" width="15" style="text-align: center;"></span></div>
-                <div id="projection-toggle" class="btn btn-secondary mx-2 shadow-sm"><span id="projection-toggle-label">Projection <img src="../../src/img/globe.svg" height="50"  width="15" style="text-align: center;"></span></div>
+                <div id="basemap-toggle" class="btn btn-secondary mx-2 shadow-sm"><span id="basemap-toggle-label">Basemap <img src="/src/img/layer.svg" height="50" width="15" style="text-align: center;"></span></div>
+                <div id="projection-toggle" class="btn btn-secondary mx-2 shadow-sm"><span id="projection-toggle-label">Projection <img src="/src/img/globe.svg" height="50"  width="15" style="text-align: center;"></span></div>
                 <!-- Globe by ennbe from <a href="https://thenounproject.com/browse/icons/term/globe/" target="_blank" title="Globe Icons">Noun Project</a> (CC BY 3.0)  -->
                 <!-- table data by Jamil Akhtar from <a href="https://thenounproject.com/browse/icons/term/table-data/" target="_blank" title="table data Icons">Noun Project</a> (CC BY 3.0) -->
             </div>
@@ -102,9 +102,23 @@
             </div>
         </div>
     </div>
-    <script src="../../site-config.js"></script>
-    <script src="./config.js"></script>
-    <script src="../../src/site.js"></script>
+    <script src="/site-config.js"></script>
+    <script>
+        (function () {
+            const parts = window.location.pathname.split("/").filter(Boolean);
+
+            if (parts[0] !== "trackers" || parts.length < 2) {
+                throw new Error("Tracker not specified in URL");
+            }
+
+            const trackerName = parts[1];
+
+            document.write(
+                '<script src="/trackers/' + trackerName + '/config.js"><\/script>'
+            );
+        })();
+    </script>
+    <script src="/src/site.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 
