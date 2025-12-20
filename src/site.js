@@ -127,7 +127,7 @@ function addGeoJSON(jsonData) {
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
-                    "coordinates": [asset[config.locationColumns['lng']], asset[config.locationColumns['lat']]]
+                    "coordinates": [asset[config.locationColumns['long']], asset[config.locationColumns['lat']]]
                 },
                 "properties": {}
             }
@@ -135,7 +135,7 @@ function addGeoJSON(jsonData) {
            
                 if (key == config.capacityField) {
                     feature.properties[key] = Number(asset[key]);
-                } else if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
+                } else if (key != config.locationColumns['long'] && key != config.locationColumns['lat']) {
                     feature.properties[key] = asset[key];
                 }
             }

@@ -1,55 +1,29 @@
+// TODO lots of verifying to do still
+
 var config = {
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gist/2025-10/gist_map_2025-10-07.geojson', 
-    colors: {
-        'light red': '#f28b82',
-        'red': '#c74a48',
-        'light blue': '#5dade2',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'light green': '#66c26e',
-        'light grey': '#e0e0e0',
-        'grey': '#8f8f8e',
-        'orange': '#FF8C00',
-        'yellow': '#f3ff00',
-        'black': '#000000',
-        'purple': '#9370db'
-    },
-    // {'cancelled', 'operating', 'mothballed', 'announced', 'retired', 'mothballed pre-retirement', 'construction', 'operating pre-retirement'}
-    // {'Electric-arc-furnaces', 'DRI-furnaces', 'Open-hearth-furnaces', 'Basic-oxygen-furnaces', 'Blast-furnaces'}
-    color: { 
-        field: 'prod-method-tier', // prod type
-        values: {
-            'Electric': 'light green',
-            'ElectricOxygen': 'blue',
-            'Oxygen': 'orange',
-            'IronmakingBF': 'light red',
-            'IronmakingDRI': 'light blue',
-            'IntegratedBF': 'red',
-            'IntegratedBFandDRI':  'purple',
-            'IntegratedDRI': 'green',
-            'Integratedunknown': 'grey',
-            'Steelotherunspecified': 'light grey',
-            'Ironotherunspecified': 'light grey'
-        }
-    },
+    /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gist/2025-10/gist_map_2025-10-07.geojson',
+
+    /* Labels for describing the assets */
+    assetFullLabel: 'Iron and Steel Plants',
+    assetLabel: 'plants',
+    gistUnit: true,
+    showToolTip: true,
+
+    /* define the column and values used for the filter UI. There can be multiple filters listed.
+       Additionally a custom `label` can be defined (default is the field),
+       and `values_label` (an array matching elements in `values`) */
     filters: [
         {
             field: 'prod-method-tier',
             label: 'Production method',
             /* values need to be specified for ordering */
-            // values: ['BOF','EAF','BOF; EAF','BF','DRI','integrated (bf)', 'integrated (dri)', 'integrated (bf and dri)',
-            //     'Steel other/unspecified','Iron other/unspecified',]
-            values: ['Electric', 'ElectricOxygen','Oxygen', 'IronmakingBF', 'IntegratedBFandDRI', 
-                    'IronmakingDRI', 'IntegratedDRI', 'IntegratedBF','Integratedunknown','Steelotherunspecified','Ironotherunspecified'],
-
-
+            values: ['Electric', 'ElectricOxygen','Oxygen', 'IronmakingBF', 'IntegratedBFandDRI', 'IronmakingDRI',
+                    'IntegratedDRI', 'IntegratedBF','Integratedunknown','Steelotherunspecified','Ironotherunspecified'],
             values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF & DRI)', 'Ironmaking (DRI)',
                     'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified'],
-            // values: ['Electric-arc-furnaces', 'Basic-oxygen-furnaces', 'Open-hearth-furnaces', 'Blast-furnaces', 'DRI-furnaces',],
-            // values-labels: ['Electric arc furnaces', 'Basic oxygen furnaces', 'Open hearth furnaces', 'Blast furnaces', 'DRI furnaces'],
             primary: true,
-            field_hover_text: 'For full descriptions of steelmaking route categories, see the <a href="https://globalenergymonitor.org/projects/global-iron-and-steel-tracker/frequently-asked-questions/"> FAQs</a>.',        
-
+            field_hover_text: 'For full descriptions of steelmaking route categories, see the <a href="https://globalenergymonitor.org/projects/global-iron-and-steel-tracker/frequently-asked-questions/"> FAQs</a>.',
         },
         // do not use status-legend since it is for multi tracker maps
         {
@@ -57,65 +31,35 @@ var config = {
             label: 'Plant status',
             values: ['announced', 'cancelled', 'construction', 'mothballed', 'operating', 'operating-pre-retirement', 'retired'], //'mothballed-pre-retirement',
             values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Operating', 'Operating Pre-Retirement', 'Retired'], // 'Mothballed Pre-Retirement', 
-            field_hover_text: "Status reflects the plant-level status. Some capacities (e.g., announced expansions at a plant that already operates capacity) may not appear under their specific category if the overall plant status is different."
-
-        }
+            field_hover_text: "Status reflects the plant-level status. Some capacities (e.g., announced expansions at a plant that already operates capacity) may not appear under their specific category if the overall plant status is different.",
+        },
     ],
-
-    linkField: 'pid',
-    // lat:'Latitude',
-    // lng: 'Longitude',
-    urlField: 'url',
-    statusField: 'status',
-    statusDisplayField: 'status-display',
-    countryField: 'areas',
-    capacityField: 'scaling-capacity', // change to scaling col once added
-    // capacityDisplayField: 'current-capacity-(ttpa)',
-
-    capacityLabel: '', //'TTPA', 
-    // context-layers: [
-    //     {
-    //         field: 'coalfield',
-    //         'label': 'Coal Fields',
-    //         'tileset': '[mapbox tile url]',
-    //         paint: {}
-    //     }
-    // ],
-
-
-    /* Labels for describing the assets */
-    assetFullLabel: "Iron and Steel Plants",
-    assetLabel: 'plants',
-
-    /* the column that contains the asset name. this varies between trackers */
-    nameField: 'name',
-
     
     /* configure the table view, selecting which columns to show, how to label them, 
-        and designated which column has the link */
+       and designated which column has the link */
     tableHeaders: {
-        values: ['name','owner', 'parent', 'status-display', 'start-year','prod-method-tier-display','main-production-equipment', 'subnat','areas'],
-        labels: ['Plant','Owner','Parent', 'Plant Status', 'Start date', 'Production Method','Main Production Equipment','Subnational Unit','Country/Area'],
+        values: ['name', 'owner', 'parent', 'status-display', 'start-year', 'prod-method-tier-display', 'main-production-equipment', 'subnational', 'areas'],
+        labels: ['Plant', 'Owner', 'Parent', 'Plant Status', 'Start date', 'Production Method', 'Main Production Equipment', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
         toLocaleString: ['capacity'], // not displayed
-        removeLastComma: ['areas']
-
+        removeLastComma: ['areas'],  // TODO remove?
     },
 
     /* configure the search box; 
-        each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Plant': ['name', 'noneng-name'], 
-        'Companies': ['owner', 'parent', 'noneng-owner', 'parent_gem_id', 'owner_gem_id'],
-        'Production Method': ['prod-method-tier-display', 'prod-method-tier'] //'main-production-equipment'
+       each label has a value with the list of fields to search. Multiple fields might be searched */
+    searchFields: {
+        'Plant': ['name', 'name-noneng', 'name-search'],
+        'Companies': ['owner', 'parent', 'owner-noneng', 'parent-gem-id', 'owner-gem-id', 'owner-search'],
+        'Production Method': ['prod-method-tier-display', 'prod-method-tier'], //'main-production-equipment'
     },
 
     /* define fields and how they are displayed. 
-        `'display': 'heading'` displays the field in large type
-        `'display': 'range'` will show the minimum and maximum values.
-        `'display': 'join'` will join together values with a comma separator
-        `'display': 'location'` will show the fields over the detail image
-        `'label': '...'` prepends a label. If a range, two values for singular and plural.
+      `'display': 'heading'` displays the field in large type
+      `'display': 'range'` will show the minimum and maximum values.
+      `'display': 'join'` will join together values with a comma separator
+      `'display': 'location'` will show the fields over the detail image
+      `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
         'name': {'display': 'heading'},
@@ -162,23 +106,43 @@ var config = {
         'retired-nominal-eaf-steel-capacity-(ttpa)': {'display': 'gist-unit-level','label': 'Retired EAF steel capacity (ttpa)'},
         'retired-nominal-ohf-steel-capacity-(ttpa)': {'display': 'gist-unit-level','label': 'Retired OHF steel capacity (ttpa)'},
 
-        'subnat': {'display': 'location'},
-        'areas': {'display': 'location'}
+        'subnational': {'display': 'location'},
+        'areas': {'display': 'location'},
     },
-    /* Mapbox styling applied to all trackers */
-    pointPaint: {
-        'circle-opacity':.85
+
+    /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
+
+    colors: {  // TODO could these be standardized and added to site-config.js?
+        'light red': '#f28b82',
+        'red': '#c74a48',
+        'light blue': '#5dade2',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'light green': '#66c26e',
+        'light grey': '#e0e0e0',
+        'grey': '#8f8f8e',
+        'orange': '#FF8C00',
+        'yellow': '#f3ff00',
+        'black': '#000000',
+        'purple': '#9370db'
     },
-    gistUnit: true,
-    showToolTip: true,
-    /* radius associated with minimum/maximum value on map */
-    // minRadius: 3,
-    // maxRadius: 7,
+    color: {
+        field: 'prod-method-tier', // prod type
+        values: {
+            'Electric': 'light green',
+            'ElectricOxygen': 'blue',
+            'Oxygen': 'orange',
+            'IronmakingBF': 'light red',
+            'IronmakingDRI': 'light blue',
+            'IntegratedBF': 'red',
+            'IntegratedBFandDRI':  'purple',
+            'IntegratedDRI': 'green',
+            'Integratedunknown': 'grey',
+            'Steelotherunspecified': 'light grey',
+            'Ironotherunspecified': 'light grey'
+        }
+    },
 
-    // /* radius to increase min/max to under high zoom */
-    // highZoomMinRadius: 5,
-    // highZoomMaxRadius: 22,
-
-    // showMaxCapacity: true,
-    
+    capacityLabel: '',
+    capacityField: 'capacity-scaled',
 }

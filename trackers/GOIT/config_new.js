@@ -1,89 +1,46 @@
 var config = {
-    geometries: ['LineString'],
-
-    /* name of the data file; use key `csv` if data file is CSV format */
-    // csv: 'GOGET_Earthgenome_file2024-04-01.csv',
-    // can this be a s3 link but not tiles? 
+    /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
     geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/latest/goit_2025-04-09.geojson',
-    
-    /* Define labels for sitewide colors, referenced in tracker config */
-    colors: {
-        'red': '#c74a48',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'grey': '#8f8f8e',
-        'black': '#000000',
-    },
 
-    /* define the column and associated values for color application */
-    countryField: 'areas',
-    linkField: 'url',
-    urlField: 'url',
-
-    color: {
-        field: 'status-legend',
-        values: {
-            'operating': 'red',
-            'construction-plus': 'blue',
-            'proposed-plus': 'blue',
-            'mothballed-plus': 'green',
-            'cancelled': 'green',
-            'retired-plus': 'grey',
-            'shelved': 'grey',
-        }
-    },
+    /* Labels for describing the assets */
+    assetFullLabel: 'Pipelines',
+    assetLabel: 'segments',
 
     /* define the column and values used for the filter UI. There can be multiple filters listed. 
-      Additionally a custom `label` can be defined (default is the field), 
-      and `values_label` (an array matching elements in `values`)
-      */
+       Additionally a custom `label` can be defined (default is the field),
+       and `values_label` (an array matching elements in `values`) */
     filters: [
         {
-            field: 'status-legend',
+            field: 'status-group',
             values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'cancelled', 'retired-plus', 'shelved' ],
-            values_labels: ['Operating','Proposed','Construction','Mothballed','Cancelled','Retired','Shelved']
+            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved'],
         },
         {
             field: 'Fuel',
             values: ['Oil', 'NGL'],
             values_labels: ['Oil', 'NGL'],
             filterFunction: (value, selectedValue) => {
-            // Check if the value contains the selectedValue (Oil or NGL)
-            return value.includes(selectedValue);
+                // Check if the value contains the selectedValue (Oil or NGL)
+                return value.includes(selectedValue);
             }
-        }
+        },
     ],
 
-    
-
-    /* define the field for calculating and showing capacity along with label.
-       this is defined per tracker since it varies widely */
-    capacityField: 'capacity',
-    capacityDisplayField: 'capacity',
-    capacityLabel: 'BOEd', 
-    /* Labels for describing the assets */
-    assetFullLabel: "Pipelines",
-    assetLabel: 'segments',
-
-    /* the column that contains the asset name. this varies between trackers */
-    nameField: 'name',
-    statusDisplayField: 'status',
     /* configure the table view, selecting which columns to show, how to label them, 
-        and designated which column has the link */
-    
+       and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'owner', 'parent', 'status', 'areas', 'subnat', 'capacity-table', 'units-of-m','start-year'],        
-        labels: ['Name', 'Owner','Parent', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Capacity', '','Start Year'],
+        values: ['name', 'owner', 'parent', 'status', 'areas', 'subnational', 'capacity-display', 'units-of-m', 'start-year'],
+        labels: ['Name', 'Owner','Parent', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Capacity', '', 'Start Year'],
         clickColumns: ['name'],
-        rightAlign: ['name', 'start-year', 'capacity' ],
+        rightAlign: ['name', 'start-year', 'capacity'],
         toLocaleString: ['capacity'],
-    
     },
 
     /* configure the search box; 
-        each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Pipeline': ['name'], 
-        'Companies': ['owner', 'operator', 'parent'],
+       each label has a value with the list of fields to search. Multiple fields might be searched */
+    searchFields: {
+        'Pipeline': ['name', 'name-search'],
+        'Companies': ['owner', 'operator', 'parent', 'owner-search'],
         'Start Year': ['start-year'],
     },
 
@@ -96,16 +53,38 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
-        // 'loc_accuracy': {'label': 'Location Accuracy'}, # RouteAccuracy
         'owner': {'label': 'Owner'},
-
         'parent': {'label': 'Parent'},
         'start-year': {'label': 'Start Year'},
-
-        'areas-subnat-sat-display': {'display': 'location'}
+        'location-display': {'display': 'location'},
     },
-    // countryFile: './countries.js',
+
+    /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
+
+    colors: {  // TODO could these be standardized and added to site-config.js?
+        'red': '#c74a48',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'grey': '#8f8f8e',
+        'black': '#000000',
+    },
+    color: {
+        field: 'status-group',
+        values: {
+            'operating': 'red',
+            'construction-plus': 'blue',
+            'proposed-plus': 'blue',
+            'mothballed-plus': 'green',
+            'cancelled': 'green',
+            'retired-plus': 'grey',
+            'shelved': 'grey',
+        },
+    },
+
+    capacityLabel: 'BOEd',
     showMaxCapacity: false,
     multiCountry: true,
 
+    linkField: 'url',
+    geometries: ['LineString'],
 }

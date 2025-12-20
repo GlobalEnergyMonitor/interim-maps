@@ -9,69 +9,85 @@ var site_config = {
 
     /* Zoom level that asset detail cards open at; this is a good one to override in tracker config,
      depending on scale of facilities */
-
     img_detail_zoom: 15,
 
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
-        'red': '#c74a48',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'grey': '#8f8f8e'
+        'red': '#c00',
+        'light blue': '#74add1',
+        'blue': '#4575b4',
+        'green': '#7dd47d',
+        'light grey': '#ccc',
+        'grey': '#666',
+        'orange': '#fd7e14',
+        'yellow': '#f3ff00',
     },
     /* style test parameters!
 
+    /* define the column and associated values for color application */
+    color: {
+        field: 'status',
+        values: {
+            'operating': 'green',
+            'construction': 'yellow',
+            'pre-construction': 'orange',
+            'announced': 'red',
+            'mothballed': 'blue',
+            'shelved': 'light blue',
+            'retired': 'grey',
+            'cancelled': 'light grey',
+        },
+    },
+
     /* Mapbox styling applied to all trackers */
     pointPaint: {
-        'circle-opacity':.85
+        'circle-opacity': 0.85
     },
     linePaint: {
-        'line-opacity':.85
+        'line-opacity': 0.85
     },
     lineLayout: {
         'line-cap': 'round', 
         'line-join': 'round'
     },
 
+    /* radius associated with minimum/maximum value on map */
+    /* Defined by pixels and be 1- infinity, 0 is invisible */
     minRadius: 1,
     maxRadius: 10,
-    highZoomMinRadius: 4,
-    highZoomMaxRadius: 32,
-
-    /* radius associated with minimum/maximum value on map */
-    // /* Defined by pixels and be 1- infinity, 0 is invisible */
-    // minRadius: 2,
-    // maxRadius: 30,
-    minLineWidth: .5,
+    minLineWidth: 0.5,
     maxLineWidth: 7,
     
-    // /* radius to increase min/max to under high zoom */
-    // /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
-    // highZoomMinRadius: 4,
-    // highZoomMaxRadius: 32,
-    highZoomMinLineWidth: .5,
+    /* radius to increase min/max to under high zoom */
+    /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
+    highZoomMinRadius: 4,
+    highZoomMaxRadius: 32,
+    highZoomMinLineWidth: 0.5,
     highZoomMaxLineWidth: 7,
     
     /* define column names to pull data from */
-    linkField: 'url',
-
+    nameField: 'name',
+    linkField: 'project-id',
     urlField: 'url',
-    countryField: 'country',
+    countryField: 'areas',
     statusField: 'status',
-    statusDisplayField: 'status',
-    capacityField: 'capacity', // 
-    capacityDisplayField: 'capacity', // this is what gets used in the details summary unit feature where applicable
+    statusDisplayField: 'status-display',
+    capacityField: 'capacity',
+    capacityDisplayField: 'capacity-display', // this is what gets used in the details summary unit feature where applicable
+    capacityLabel: '(MW)',
     locationColumns:{
-        lat: 'lat',
-        lng: 'lng'
+        lat: 'Latitude',
+        long: 'Longitude'
     },
 
     /* by default, no all phases link; override in tracker config where appropriate */
     showAllPhases: false,
     showMaxCapacity: true,
+    showMinCapacity: true,  // TODO default false?
+    showCapacityTable: true,
 
     /* zoom level to set map when viewing all phases */
-    phasesZoom: 8,
+    phasesZoom: 10,
 
     /* initial load zoom multiplier */
     zoomFactor: 1,
