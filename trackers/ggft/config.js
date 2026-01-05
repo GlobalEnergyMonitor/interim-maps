@@ -1,12 +1,12 @@
 var config = {
-    geojson:'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggft/2025-12/ggft_map_2025-12-05.geojson',
-
-    // csv: '../../trialfile.csv',
+    // geojson:'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggft/2025-12/ggft_map_2025-12-05.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggft/2025-12/ggft_map_2025-12-19.geojson',
     geometries: ['Point'],
     // copied starting coords from Asia map for now
-    center: [60, 20],
-    zoomFactor: 1.9,
-    img_detail_zoom: 10,
+    // center: [60, 20], # was for Asia, commenting out now.
+    // zoomFactor: 1.9,
+    // img_detail_zoom: 10,
+    center: [0, 0],
 
     statusField: 'finstatus', // financing status
     statusDisplayField: 'finstatus', // need shorter names? where does ficing come from ... should not be there
@@ -69,8 +69,9 @@ var config = {
     // multiCountry: true,
     capacityDisplayField: 'fin-by-transac', // need this since it'll sum .. need to make float, this is what gets used in site.js for all details. 
     
-    scaling_not_by_cap: true,
-    // HOLD TODO not sure if they want this this badly ... will make site.js more complicated.
+    scale_by_capacity: false, //originally created this to allow for both finance data and capacity data by unit in the popup, but should be useful to fix the issue when there is one unit and we do not want capacity (in this case financing info) to show up because project level financing is already shown when available
+
+    // if they want to include capacity values by unit in the popup would need this, but they don't say it's a priority so comment out
     // capacityLabel2:  {       
     //     field: 'infra-filter',
     //     values: {
@@ -83,7 +84,7 @@ var config = {
     // 'debug capacityField project-fin-scaling','debug capacityDisplayField fin-by-transac',
     tableHeaders: {
         values: ['fin', 'name', 'unitname', 'debtequityelse','owner', 'parent', 'importexport','opstatus', 'areas', 'startyear', 'capacitymw', 'capacitymtpa'],
-        labels: ['Financier', 'Project Name','Unit Name', 'Financing Type','Owner', 'Parent','Terminal Facility Type', 'Operational Status','Country/Area(s)','Start year', 'Capacity (MW)', 'Capacity (MTPA)'],
+        labels: ['Financier', 'Project Name', 'Unit Name','Financing Type','Owner', 'Parent','Terminal Facility Type', 'Operational Status','Country/Area(s)','Start year', 'Capacity (MW)', 'Capacity (MTPA)'],
         clickColumns: ['name'],
         rightAlign: ['startyear',], 
         removeLastComma: ['areas'], 
@@ -99,7 +100,7 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'unitname': {'label': 'Unit Name'},
+        // 'unitname': {'label': 'Unit Name'},
         'debt-project-financing': {'label': 'Debt Project Financing ($ million)'},
         'equity-project-financing': {'label': 'Equity Project Financing ($ million)'},
         // 'debtequityelse': {'label': 'Financing Type'},
