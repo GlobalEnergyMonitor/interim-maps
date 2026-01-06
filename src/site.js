@@ -3,7 +3,7 @@ processConfig();
 function processConfig() {
     // Merge site-config.js and config.js
     config = Object.assign(site_config, config);
-    config.baseMap = "Streets";
+    config.baseMap = 'Streets';
     config.icons = [];
 
     Object.keys(config.color.values).forEach((color_key) => {
@@ -11,15 +11,16 @@ function processConfig() {
     });
 }
 
+// TODO move these to site-config.js?
 let userInteracting = false;
 const diacriticMap = {
-    a: ["a", "á", "à", "â", "ã", "ä", "å"],
-    e: ["e", "é", "è", "ê", "ë"],
-    i: ["i", "í", "ì", "î", "ï"],
-    o: ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
-    u: ["u", "ú", "ù", "û", "ü"],
-    c: ["c", "ç"],
-    n: ["n", "ñ"],
+    a: ['a', 'á', 'à', 'â', 'ã', 'ä', 'å'],
+    e: ['e', 'é', 'è', 'ê', 'ë'],
+    i: ['i', 'í', 'ì', 'î', 'ï'],
+    o: ['o', 'ó', 'ò', 'ô', 'õ', 'ö', 'ø'],
+    u: ['u', 'ú', 'ù', 'û', 'ü'],
+    c: ['c', 'ç'],
+    n: ['n', 'ñ'],
 };
 
 
@@ -63,8 +64,7 @@ function determineZoom() {
   Load data in from various formats, and prepare for use in application
 */
 function loadData() {
-    if ("tiles" in config) {
-        console.log('addTiles');
+    if ('tiles' in config) {
         addTiles();
         Papa.parse(config.csv, {
             download: true,
@@ -74,35 +74,21 @@ function loadData() {
                 console.log(file);
             },
             complete: function(results) {
-                console.log('addGeoJSON');
                 addGeoJSON(results.data);   
             }
         });
-    // handle parquet files
-    // } else if ("parquet" in config) {
-        
-    //     console.log('adding parquet')
-    //     const url = config.parquet
-    //     const file = await asyncBufferFromUrl({ url });
-    //     const data = await parquetReadObjects({ file });
-        // import { parquetRead } from 'hyparquet'
-        // await parquetRead({
-        //     file,
-        //     rowFormat: 'object',
-        //     onComplete: data => console.log(data),
-        //   })
-    } else if ("geojson" in config) {
+    } else if ('geojson' in config) {
         $.ajax({
-            type: "GET",
+            type: 'GET',
             url: config.geojson,
-            dataType: "json",
-            success: function(jsonData) { addGeoJSON(jsonData);}
+            dataType: 'json',
+            success: function(jsonData) { addGeoJSON(jsonData); }
         });
-    } else if ("json" in config) {
+    } else if ('json' in config) {
         $.ajax({
-            type: "GET",
+            type: 'GET',
             url: config.json,
-            dataType: "json",
+            dataType: 'json',
             success: function(jsonData) {addGeoJSON(jsonData);}
         });
     } else {
@@ -122,18 +108,18 @@ function addGeoJSON(jsonData) {
         config.geojson = jsonData;
     } else {
         config.geojson = {
-            "type": "FeatureCollection",
-            "features": []
+            'type': 'FeatureCollection',
+            'features': []
         };
 
         jsonData.forEach((asset) => {
             let feature = {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [asset[config.locationColumns['long']], asset[config.locationColumns['lat']]]
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [asset[config.locationColumns['long']], asset[config.locationColumns['lat']]]
                 },
-                "properties": {}
+                'properties': {}
             }
             for (let key in asset) {
                 if (key == config.capacityField) {
@@ -151,15 +137,9 @@ function addGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = config.geojson; // copy  // TODO verify if copy and if so, if deep
 
-    console.log('setMinMax');
-    setMinMax(); 
-    console.log('findLinkedAssets');
-    findLinkedAssets(); 
+    setMinMax();
+    findLinkedAssets();
 
-    // map.addSource('assets-source', {
-    //     'type': 'geojson',
-    //     'data': config.processedGeoJSON
-    // });
     // part to optimize csv only maps 
     if (!config.tiles) {
         map.addSource('assets-source', {
@@ -168,10 +148,8 @@ function addGeoJSON(jsonData) {
         });
     }
 
-    // console.log('addLayers');
     addLayers();
     setTimeout(enableUX, 3000);
-    // console.log('enableUX');
     map.on('idle', enableUX); // enableUX starts to render data
 }
 
@@ -191,13 +169,13 @@ function geoJSONFromTiles() {
     if (config.geometries.includes('Point')) layers.push('assets-minmax-point');
     if (config.geometries.includes('LineString')) layers.push('assets-minmax-line');
     config.geojson = {
-        "type": "FeatureCollection", 
-        "features": map.queryRenderedFeatures({layers: layers})  
+        'type': 'FeatureCollection',
+        'features': map.queryRenderedFeatures({layers: layers})
     }
 
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
-    
-    setMinMax(); 
+
+    setMinMax();
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
@@ -210,7 +188,6 @@ function geoJSONFromTiles() {
 // and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
     map.off('idle', findLinkedAssets);
-
     config.preLinkedGeoJSON = config.processedGeoJSON;
     config.totalCount = 0;
 
@@ -228,7 +205,7 @@ function findLinkedAssets() {
     config.processedGeoJSON.features.forEach((feature) => {
         if ('geometry' in feature && feature.geometry != null) {
             if ('coordinates' in feature.geometry) {
-                let key = feature.properties[config.linkField] + "," + feature.geometry.coordinates[0] + "," + feature.geometry.coordinates[1];
+                let key = feature.properties[config.linkField] + ',' + feature.geometry.coordinates[0] + ',' + feature.geometry.coordinates[1];
                 if (! (key in grouped)) {
                     grouped[key] = [];
                 }
@@ -240,8 +217,8 @@ function findLinkedAssets() {
 
     // Rebuild GeoJSON with summed capacity, and custom icon for single point display of the grouped assets
     config.processedGeoJSON = {
-        "type": "FeatureCollection",
-        "features": []
+        'type': 'FeatureCollection',
+        'features': []
     };
 
     Object.keys(grouped).forEach((key) => {
@@ -254,8 +231,7 @@ function findLinkedAssets() {
 
         features[0].properties[config.capacityField] = capacity;
 
-        // Build summary count of capacity across all linked assets
-        // and generate icon based on that label if more than one status
+        // Build summary count of capacity across all linked assets and generate icon based on that label if more than one status
         if (features[0].geometry.type == 'Point') {
             let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
             features.forEach((feature) => {  
@@ -280,8 +256,6 @@ function findLinkedAssets() {
         // Build summary count of filters for legend
         let summary_count = {};
         config.filters.forEach((filter) => {
-            // console.log('filter.field')
-            // console.log(filter.field)
             summary_count[filter.field] = Object.assign(...filter.values.map(f => ({[f]: 0})));
             features.forEach((feature) => {
                 summary_count[filter.field][feature.properties[filter.field]]++;
@@ -304,7 +278,7 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
-    context.globalAlpha = config.pointPaint["circle-opacity"];
+    context.globalAlpha = config.pointPaint['circle-opacity'];
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
@@ -344,7 +318,7 @@ function setMinMax() {
     let maxCapacityKey;
     let minCapacityKey;
     config.processedGeoJSON.features.forEach((feature) => {
-        if (feature.geometry.type == "LineString") {
+        if (feature.geometry.type == 'LineString') {
             minCapacityKey = 'minLineCapacity';
             maxCapacityKey = 'maxLineCapacity';
         } else {
@@ -372,25 +346,18 @@ function setMinMax() {
 function enableUX() {
     map.off('idle', enableUX);
     if (config.UXEnabled) {
-        console.log('ux already enabled');
         return
     };
     config.UXEnabled = true;
-    
-    console.log('buildFilters');
+
     buildFilters();
-    console.log('updateSummary');
     updateSummary();
-    console.log('buildTable');
-    buildTable(); 
-    console.log('enableModal');
+    buildTable();
     enableModal();
-    console.log('enableNavFilters');
     enableNavFilters();
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
     if (config.projection == 'globe') {
-        console.log('spinGlobe');
         spinGlobe();
     }
 }
@@ -402,8 +369,8 @@ function addLayers() {
 
     map.addLayer({
         id: 'satellite',
-        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
-        type: "raster",
+        source: { 'type': 'raster', 'url': 'mapbox://mapbox.satellite', 'tileSize': 256 },
+        type: 'raster',
         layout: { 'visibility': 'none' }
         },
         config.layers[0]
@@ -436,40 +403,40 @@ function addPointLayer() {
     //  build style json for circle-color based on config.color
     let paint = config.pointPaint;
     if ('color' in config) {
-        paint["circle-color"] = [
-            "match",
-            ["get", config.color.field],
+        paint['circle-color'] = [
+            'match',
+            ['get', config.color.field],
             ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
-            "#000000"
+            '#000000'
         ];
     }
-    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ['linear'];
 
     try {
         // Handle case where all capacity values are the same
         if (config.minPointCapacity === config.maxPointCapacity) {
             paint['circle-radius'] = [
-                "interpolate", ["exponential", .5], ["zoom"],
+                'interpolate', ['exponential', .5], ['zoom'],
                 1, config.minRadius,
                 10, config.highZoomMinRadius
             ];
         } else {
             paint['circle-radius'] = [
-                "interpolate", ["exponential", .5], ["zoom"],
-                1,  ["interpolate", interpolateExpression,
-                    ["to-number",["get", config.capacityField]],
+                'interpolate', ['exponential', .5], ['zoom'],
+                1,  ['interpolate', interpolateExpression,
+                    ['to-number',['get', config.capacityField]],
                     config.minPointCapacity, config.minRadius,
                     config.maxPointCapacity, config.maxRadius
                 ],
-                10, ["interpolate", interpolateExpression,
-                    ["to-number",["get", config.capacityField]],
+                10, ['interpolate', interpolateExpression,
+                    ['to-number',['get', config.capacityField]],
                     config.minPointCapacity, config.highZoomMinRadius,
                     config.maxPointCapacity, config.highZoomMaxRadius
                 ]
             ];
         }
     } catch (e) {
-        console.error("Error setting circle-radius. config.capacityField:", config.capacityField);
+        console.error('Error setting circle-radius. config.capacityField:', config.capacityField);
         throw e;
     }
 
@@ -477,7 +444,7 @@ function addPointLayer() {
         'id': 'assets-points',
         'type': 'circle',
         'source': 'assets-source',
-        'filter': ["==",["geometry-type"],'Point'],
+        'filter': ['==', ['geometry-type'], 'Point'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {},
         'paint': paint
@@ -486,34 +453,29 @@ function addPointLayer() {
 
     // Add layer with proportional icons
     if (config.sqrt === true) {
-        // interpolateExpression = ["exponential", 1.5]
-        // console.log('in sqrt')
         const sqrtMin = Math.sqrt(config.minPointCapacity);
         const sqrtMax = Math.sqrt(config.maxPointCapacity);
-        // console.log(sqrtMin, sqrtMax)
 
         map.addLayer({
             'id': 'assets-symbol', 
             'type': 'symbol',
             'source': 'assets-source',
-            'filter': ["==",["geometry-type"],'Point'],
+            'filter': ['==', ['geometry-type'], 'Point'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'layout': {
-                'icon-image': ["get", "icon"],
+                'icon-image': ['get', 'icon'],
                 'icon-allow-overlap': true,
                 'icon-size': [
-                    "interpolate", ["linear"], ["zoom"],
+                    'interpolate', ['linear'], ['zoom'],
                     1,  ['interpolate', interpolateExpression,
-                        ['sqrt',["to-number", ['get', config.capacityField]]],
-                        // ["to-number", ["get", config.capacityField]],
+                        ['sqrt', ['to-number', ['get', config.capacityField]]],
                         sqrtMin, config.minRadius * 2 / 64,
                         sqrtMax, config.maxRadius * 2 / 64],
                     10, ['interpolate', interpolateExpression,
-                        ['sqrt',["to-number", ['get', config.capacityField]]],
-                        // ["to-number", ["get", config.capacityField]],
+                        ['sqrt',['to-number', ['get', config.capacityField]]],
                         sqrtMin, config.highZoomMinRadius * 2 / 64,
                         sqrtMax, config.highZoomMaxRadius * 2 / 64]
-                    ]
+                ]
             }
         });
     }
@@ -524,19 +486,19 @@ function addPointLayer() {
             'id': 'assets-symbol', 
             'type': 'symbol',
             'source': 'assets-source',
-            'filter': ["==",["geometry-type"],'Point'],
+            'filter': ['==', ['geometry-type'], 'Point'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'layout': {
-                'icon-image': ["get", "icon"],
+                'icon-image': ['get', 'icon'],
                 'icon-allow-overlap': true,
                 'icon-size': [
-                    "interpolate", ["exponential", .5], ["zoom"],
+                    'interpolate', ['exponential', .5], ['zoom'],
                     1,  ['interpolate', interpolateExpression,
-                        ["to-number", ["get", config.capacityField]],
+                        ['to-number', ['get', config.capacityField]],
                         config.minPointCapacity, config.minRadius * 2 / 64,
                         config.maxPointCapacity, config.maxRadius * 2 / 64],
                     10, ['interpolate', interpolateExpression,
-                        ["to-number", ["get", config.capacityField]],
+                        ['to-number', ['get', config.capacityField]],
                         config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
                         config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
                 ]
@@ -546,73 +508,69 @@ function addPointLayer() {
 
     // Add highlight layer
     paint = config.pointPaint;
-    paint["circle-color"] = '#FFEA00';
-    map.addLayer(
-        {
-            'id': 'assets-points-highlighted',
-            'type': 'circle',
-            'source': 'assets-source',
-            'filter': ["==",["geometry-type"],'Point'],
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'layout': {},
-            'paint': paint,
-            'filter': ['in', (config.linkField), '']
+    paint['circle-color'] = '#FFEA00';
+    map.addLayer({
+        'id': 'assets-points-highlighted',
+        'type': 'circle',
+        'source': 'assets-source',
+        'filter': ['==', ['geometry-type'], 'Point'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': {},
+        'paint': paint,
+        'filter': ['in', (config.linkField), '']
+    });
+    map.addLayer({
+        'id': 'assets-labels',
+        'type': 'symbol',
+        'source': 'assets-source',
+        'filter': ['==', ['geometry-type'], 'Point'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'minzoom': 8,
+        'layout': {
+            'text-field': '{' + config.nameField + '}',
+            'text-font': ['DIN Pro Italic'],
+            'text-variable-anchor': ['top'],
+            'text-offset': [0, 1],
+            'text-size': 14
+        },
+        'paint': {
+            'text-color': '#000000',
+            'text-halo-color': 'hsla(220, 8%, 100%, 0.75)',
+            'text-halo-width': 1
         }
-    );
-    map.addLayer(
-        {
-            'id': 'assets-labels',
-            'type': 'symbol',
-            'source': 'assets-source',
-            'filter': ["==",["geometry-type"],'Point'],
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'minzoom': 8,
-            'layout': {
-                'text-field': '{' + config.nameField + '}', 
-                'text-font': ["DIN Pro Italic"],
-                'text-variable-anchor': ['top'],
-                'text-offset': [0, 1],
-                'text-size': 14
-            },
-            'paint': {
-                'text-color': '#000000',
-                'text-halo-color': "hsla(220, 8%, 100%, 0.75)",
-                'text-halo-width': 1
-            }
-        }
-    );
+    });
 }
 
 function addLineLayer() {
     let paint = config.linePaint;
 
     if ('color' in config) {
-        paint["line-color"] = [
-            "match",
-            ["get", config.color.field],
+        paint['line-color'] = [
+            'match',
+            ['get', config.color.field],
             ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
-            "#000000"
+            '#000000'
         ];
     }
 
-    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ['linear'];
     // Handle case where all capacity values are the same
     if (config.minLineCapacity === config.maxLineCapacity) {
         paint['line-width'] = [
-            "interpolate", ["linear"], ["zoom"],
+            'interpolate', ['linear'], ['zoom'],
             1, config.minLineWidth,
             10, config.highZoomMinLineWidth
         ];
     } else {
         paint['line-width'] = [
-            "interpolate", ["linear"], ["zoom"],
-            1,  ["interpolate", interpolateExpression,
-                ["to-number",["get", config.capacityField]],
+            'interpolate', ['linear'], ['zoom'],
+            1,  ['interpolate', interpolateExpression,
+                ['to-number', ['get', config.capacityField]],
                 config.minLineCapacity, config.minLineWidth,
                 config.maxLineCapacity, config.maxLineWidth
             ],
-            10, ["interpolate", interpolateExpression,
-                ["to-number",["get", config.capacityField]],
+            10, ['interpolate', interpolateExpression,
+                ['to-number', ['get', config.capacityField]],
                 config.minLineCapacity, config.highZoomMinLineWidth,
                 config.maxLineCapacity, config.highZoomMaxLineWidth
             ]
@@ -621,8 +579,8 @@ function addLineLayer() {
 
     // TODO what is this?
             config.maxLineCapacity, config.maxLineWidth
-        10, ["interpolate", interpolateExpression,
-            ["to-number",["get", config.capacityField]],
+        10, ['interpolate', interpolateExpression,
+            ['to-number',['get', config.capacityField]],
             config.minLineCapacity, config.highZoomMinLineWidth,
             config.maxLineCapacity, config.highZoomMaxLineWidth
 
@@ -632,26 +590,24 @@ function addLineLayer() {
         'id': 'assets-lines', 
         'type': 'line',
         'source': 'assets-source',
-        'filter': ["==",["geometry-type"],'LineString'],
+        'filter': ['==', ['geometry-type'], 'LineString'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': config.lineLayout,
         'paint': paint
     }); 
     config.layers.push('assets-lines');
 
-    paint["line-color"] = '#FFEA00';
-    map.addLayer(
-        {
-            'id': 'assets-lines-highlighted', 
-            'type': 'line',
-            'source': 'assets-source',
-            'filter': ["==",["geometry-type"],'LineString'],
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'layout': config.lineLayout,
-            'paint': paint,
-            'filter': ['in', (config.linkField), '']
-        }
-    );
+    paint['line-color'] = '#FFEA00';
+    map.addLayer({
+        'id': 'assets-lines-highlighted',
+        'type': 'line',
+        'source': 'assets-source',
+        'filter': ['==', ['geometry-type'], 'LineString'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': config.lineLayout,
+        'paint': paint,
+        'filter': ['in', (config.linkField), '']
+    });
 }
 
 function addEvents() {
@@ -660,7 +616,6 @@ function addEvents() {
         spinGlobe();
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
         const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
-        // console.log('selected features' + selectedFeatures)
 
         if (selectedFeatures.length == 0) return;
 
@@ -674,13 +629,13 @@ function addEvents() {
             config.selectModal = '';
             displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
         } else {
-            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
+            var modalText = '<h6 class="p-3">There are multiple ' + config.assetFullLabel + ' near this location. Select one for more details</h6>';
 
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
-                var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + "</li>");
+                var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + '</li>');
                 link.attr('data-feature', JSON.stringify(config.linked[feature.properties[config.linkField]]));
-                link.attr('onClick', "displayDetails(this.dataset.feature)");
+                link.attr('onClick', 'displayDetails(this.dataset.feature)');
                 ul.append(link);
             });
             modalText += ul[0].outerHTML;
@@ -694,7 +649,7 @@ function addEvents() {
     config.layers.forEach(layer => {
         map.on('mouseenter', layer, (e) => {
             map.getCanvas().style.cursor = 'pointer';
-            const coordinates = (map.getLayer(layer).type == "line" ? e.lngLat : e.features[0].geometry.coordinates.slice());
+            const coordinates = (map.getLayer(layer).type == 'line' ? e.lngLat : e.features[0].geometry.coordinates.slice());
             const description = e.features[0].properties[config.nameField];
             popup.setLngLat(coordinates).setHTML(description).addTo(map);
         });
@@ -707,32 +662,31 @@ function addEvents() {
         }); 
     });
 
-    $('#basemap-toggle').on("click", function() {
-        if (config.baseMap == "Streets") {
-           // $('#basemap-toggle').text("Streets");
-           config.baseMap = "Satellite";
+    $('#basemap-toggle').on('click', function() {
+        if (config.baseMap == 'Streets') {
+           config.baseMap = 'Satellite';
            map.setLayoutProperty('satellite', 'visibility', 'visible');
            map.setFog({
-            "range": [0.8, 8],
-            "color": "#dc9f9f",
-            "horizon-blend": 0.5,
-            "high-color": "#245bde",
-            "space-color": "#000000",
-            "star-intensity": 0.3
+            'range': [0.8, 8],
+            'color': '#dc9f9f',
+            'horizon-blend': 0.5,
+            'high-color': '#245bde',
+            'space-color': '#000000',
+            'star-intensity': 0.3
             });
         } else {
-           config.baseMap = "Streets";
+           config.baseMap = 'Streets';
            map.setLayoutProperty('satellite', 'visibility', 'none');
 
            map.setFog(null);
         }
     });
 
-    $('#reset-all-button').on("click", function() {
+    $('#reset-all-button').on('click', function() {
         enableResetAll(); 
     });
 
-    $('#collapse-sidebar').on("click", function() {
+    $('#collapse-sidebar').on('click', function() {
         $('#filter-form').hide();
         $('#all-select').hide();
         $('#all-select-section-level').hide();
@@ -740,7 +694,7 @@ function addEvents() {
         $('#expand-sidebar').show();
     });
 
-    $('#expand-sidebar').on("click", function() {
+    $('#expand-sidebar').on('click', function() {
         $('#filter-form').show();
         $('#all-select').show();
         $('#all-select-section-level').show();
@@ -749,15 +703,15 @@ function addEvents() {
     });
 }
 
-$('#projection-toggle').on("click", function() {
+$('#projection-toggle').on('click', function() {
     if (config.projection == 'globe') {
-        config.projection = "naturalEarth";
+        config.projection = 'naturalEarth';
         map.setProjection('naturalEarth');
         map.setCenter(config.center);
         map.setZoom(determineZoom());
     } else {
-        config.projection = "globe";
-        map.setProjection("globe");
+        config.projection = 'globe';
+        map.setProjection('globe');
         map.setCenter(config.center);
         spinGlobe();
         map.setZoom(determineZoom());
@@ -775,30 +729,27 @@ function buildFilters() {
         if (config.showToolTip) {
             // create more space for europe legend  // TODO ?
             if (filter.primary && filter.field_hover_text) {
-            $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + 
+            $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
             '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + 
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
             // add eventlistener for infobox and tooltip to show on hover  // TODO ?
             }
             else if (filter.field_hover_text) {
-            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + 
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text +
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
             }
             else {
             // do same as below but append infobox  // TODO ?
-            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + 
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
             }
         }
         // this creates the section title and adds the select all feature only to the sections after the first one, if there is no tooltip logic so for all non europe maps
         else if (config.color.field != filter.field) {
-            // console.log('here in else if of build filters')
-            // console.log(config.color.field)
-            // console.log(filter.field)
-            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + 
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
         }
@@ -847,7 +798,7 @@ function buildFilters() {
     });
     
     $('.filter-row').each(function() {
-        this.addEventListener("click", function() {
+        this.addEventListener('click', function() {
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
 
@@ -896,9 +847,7 @@ function clearAllFilter(fieldRow) {
 }
 
 // TODO ISSUE HERE
-// only for infra type tab-type 
-// console.log('fieldRow')
-// console.log(fieldRow)
+// only for infra type tab-type
 // for section level select all and clear all
 function clearAllFilterSection(fieldRow) {
     $('.filter-row').each(function() {
@@ -923,7 +872,7 @@ function countFilteredFeatures() {
     config.maxFilteredCapacity = 0;
     config.minFilteredCapacity = 1000000;
 
-    let ref = "config.processedGeoJSON.features";
+    let ref = 'config.processedGeoJSON.features';
 
     eval(ref).forEach(feature => {
         if ('summary_count' in feature.properties) {
@@ -979,14 +928,14 @@ function filterTiles() {
     if (config.searchText.length >= 3) {
         let searchExpression = ['any'];
         config.selectedSearchFields.split(',').forEach((field) => {
-            searchExpression.push(['in', ['literal', config.searchText], ['downcase', ["get", field]]]);
+            searchExpression.push(['in', ['literal', config.searchText], ['downcase', ['get', field]]]);
 
         });
         config.filterExpression.push(searchExpression);
     }
     if (config.selectedCountries.length > 0) {
         // updated to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
-        // added ";" at end of each country
+        // added ';' at end of each country
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
@@ -1005,11 +954,11 @@ function filterTiles() {
     if (config.filterExpression.length == 0) {
         config.filterExpression = null;
     } else {
-        config.filterExpression.unshift("all");
+        config.filterExpression.unshift('all');
     }
     config.layers.forEach(layer => {
-        config.filterExpression.push(["==", ["geometry-type"],
-            map.getLayer(layer).type == "line" ? "LineString" : "Point"
+        config.filterExpression.push(['==', ['geometry-type'],
+            map.getLayer(layer).type == 'line' ? 'LineString' : 'Point'
         ]);
         map.setFilter(layer, config.filterExpression);
         config.filterExpression.pop();
@@ -1039,8 +988,8 @@ function filterGeoJSON() {
         }
     });
     let filteredGeoJSON = {
-        "type": "FeatureCollection",
-        "features": []
+        'type': 'FeatureCollection',
+        'features': []
     };
     config.geojson.features.forEach(feature => {
         let include = true;
@@ -1066,7 +1015,7 @@ function filterGeoJSON() {
                     include = false;
                 }
             } catch (err) {
-                console.error("Country field error for feature:", feature.properties[config.nameField], err);
+                console.error('Country field error for feature:', feature.properties[config.nameField], err);
                 include = false;
             }
         }
@@ -1090,10 +1039,9 @@ function filterGeoJSON() {
 
 function updateSummary() {
     $('#spinner-container').addClass('d-none')
-    $('#spinner-container').removeClass('d-flex')   
-    console.log('Removed spinner') 
+    $('#spinner-container').removeClass('d-flex')
     $('#total_in_view').text(config.totalCount.toLocaleString())
-    $('#summary').html("Total " + config.assetFullLabel + " selected");
+    $('#summary').html('Total ' + config.assetFullLabel + ' selected');
     countFilteredFeatures();
     config.filters.forEach((filter) => {
         for (let i=0; i<filter.values.length; i++) {
@@ -1105,24 +1053,24 @@ function updateSummary() {
     if (config.showMinCapacity & config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
             $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
+            $('#capacity_summary').html('Maximum ' + config.maxCapacityLabel);
             $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
-            $('#capacity_summary_min').html("Minimum " + config.maxCapacityLabel);
+            $('#capacity_summary_min').html('Minimum ' + config.maxCapacityLabel);
         } else {
             $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html("Maximum " + config.capacityLabel);
+            $('#capacity_summary').html('Maximum ' + config.capacityLabel);
             $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
-            $('#capacity_summary_min').html("Minimum " + config.capacityLabel);
+            $('#capacity_summary_min').html('Minimum ' + config.capacityLabel);
         }
     }
 
     else if (config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
             $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
+            $('#capacity_summary').html('Maximum ' + config.maxCapacityLabel);
         } else {
             $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html("Maximum " + config.capacityLabel);
+            $('#capacity_summary').html('Maximum ' + config.capacityLabel);
         }
     }
 }
@@ -1132,9 +1080,9 @@ function updateSummary() {
   Table View
 */
 function buildTable() {
-    $('#table-toggle').on("click", function() {
+    $('#table-toggle').on('click', function() {
         if (! $('#table-container').is(':visible')) {
-            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
+            $('#table-toggle-label').html('Map view <img src="../../src/img/arrow-right.svg" width="15" height="50" style="text-align: center;">');
             $('#map').hide();
             $('#btn-spin').hide();
             $('#sidebar').hide();
@@ -1143,7 +1091,7 @@ function buildTable() {
             $('#projection-toggle').hide();
             updateTable(true);
         } else {
-            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
+            $('#table-toggle-label').html('Table view <img src="../../src/img/arrow-right.svg" width="15" height="50" style="text-align: center;">');
             $('#map').show();
             $('#btn-spin').show();
             $('#sidebar').show();
@@ -1158,12 +1106,12 @@ function buildTable() {
 function createTable() {
     if ('rightAlign' in config.tableHeaders) {
         config.tableHeaders.rightAlign.forEach((col) => {
-            $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
+            $('#site-style').get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
         });
     }
     if ('noWrap' in config.tableHeaders) {
         config.tableHeaders.noWrap.forEach((col) => {
-            $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { white-space: nowrap }', 0);
+            $('#site-style').get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { white-space: nowrap }', 0);
         });        
     }
     config.table = $('#table').DataTable({
@@ -1208,18 +1156,16 @@ function geoJSON2Table() {  // TODO rework?
                 value = config[config.tableHeaders.displayValue[header]].values[value];
             }
             if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
-                value += ' ' + config[config.tableHeaders.appendValue[header]].values[
-                        feature.properties[config[config.tableHeaders.appendValue[header]].field]
-                    ];
+                value += ' ' + config[config.tableHeaders.appendValue[header]].values[feature.properties[config[config.tableHeaders.appendValue[header]].field]];
             }
             if ('removeLastComma' in config.tableHeaders && config.tableHeaders.removeLastComma.includes(header)) {
                 value = removeLastComma(value);
             }
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                value =  "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>'; 
+                value = "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>';
             }
             if ('makeCase' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                value =  makeCase(value); 
+                value = makeCase(value);
             }  
             return value;
         });
@@ -1248,8 +1194,8 @@ function setHighlightFilter(links) {
     let filter;
     let highlightExpression = [
         'in',
-        ["get", config.linkField],
-        ["literal", links]
+        ['get', config.linkField],
+        ['literal', links]
     ];
     if (config.filterExpression != null) {
         filter = JSON.parse(JSON.stringify(config.filterExpression));
@@ -1258,8 +1204,8 @@ function setHighlightFilter(links) {
         filter = ['all', highlightExpression];
     }
     config.layers.forEach(layer => {
-        filter.push(["==", ["geometry-type"],
-            map.getLayer(layer).type == "line" ? "LineString" : "Point"
+        filter.push(['==', ['geometry-type'],
+            map.getLayer(layer).type == 'line' ? 'LineString' : 'Point'
         ]);
         map.setFilter(layer + '-highlighted', filter);
     });
@@ -1278,10 +1224,10 @@ function buildGistTable(all_details_gist) {
     Object.entries(all_details_gist).forEach(([status, tuples]) => {
         tuples.forEach(tupleLike => {
             // extract production method and capacity from tupleLike string
-            // Assume format: "prod method "capacity (ttpa)" capacity"
+            // Assume format: 'prod method 'capacity (ttpa)' capacity'
             let prodMethod = tupleLike;
             let capacity = '';
-            // prod method is all before "capacity (ttpa)" minus steel and capacity is all after
+            // prod method is all before 'capacity (ttpa)' minus steel and capacity is all after
             let match = tupleLike.match(/(.+?)\s*capacity\s*\(ttpa\)\s*(.*)/i);
             if (match) {
                 prodMethod = match[1].trim().replace('steel', '');
@@ -1296,7 +1242,7 @@ function buildGistTable(all_details_gist) {
 
 // this function is responsible for creating the information in the modal that pops up after clicking an asset
 function displayDetails(features) {
-    if (typeof features == "string") {
+    if (typeof features == 'string') {
         features = JSON.parse(features);
     }
     var detail_text = '';
@@ -1304,7 +1250,7 @@ function displayDetails(features) {
     let all_details_gist = [];
 
     Object.keys(config.detailView).forEach((detail) => {
-        if (features[0].properties[detail] == "" || features[0].properties[detail] == 'unknown' || features[0].properties[detail] == 'undefined' || features[0].properties[detail] ==0 || features[0].properties[detail] == NaN || features[0].properties[detail] == 'nan' || features[0].properties[detail] == null) {
+        if (features[0].properties[detail] == '' || features[0].properties[detail] == 'unknown' || features[0].properties[detail] == 'undefined' || features[0].properties[detail] ==0 || features[0].properties[detail] == NaN || features[0].properties[detail] == 'nan' || features[0].properties[detail] == null) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
             if (config.detailView[detail]['display'] == 'heading') {
@@ -1337,13 +1283,12 @@ function displayDetails(features) {
                     }
                     detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';
                 }
-
             } else if (config.detailView[detail]['display'] == 'range') {
                 let greatest = features.reduce((accumulator, feature) => {
-                        return (feature.properties[detail] != '' && feature.properties[detail] > accumulator ?  feature.properties[detail] : accumulator);
+                    return (feature.properties[detail] != '' && feature.properties[detail] > accumulator ?  feature.properties[detail] : accumulator);
                 }, 0);
                 let least = features.reduce((accumulator, feature) => {
-                        return (feature.properties[detail] != '' && feature.properties[detail] < accumulator ?  feature.properties[detail] : accumulator);
+                    return (feature.properties[detail] != '' && feature.properties[detail] < accumulator ?  feature.properties[detail] : accumulator);
                 }, 5000);
 
                 if (least != 5000) {
@@ -1368,8 +1313,8 @@ function displayDetails(features) {
                 // matches up the field name, uses fieldLabel to display label and then also uses color
                 let colorLabel = features.map((feature) => feature.properties[detail]);
                 detail_text += '<span class="fw-bold">' + config.color.fieldLabel + '</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.color.field] ]
-                + '"></span><span class="text-capitalize">' + features[0].properties[config.color.field] + '</span><br/>';
+                    '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.color.field] ] + '"></span>' +
+                    '<span class="text-capitalize">' + features[0].properties[config.color.field] + '</span><br/>';
             } else if (config.detailView[detail]['display'] == 'gist-unit-level') {
                 // cycle through all of them to only group them if there is value there 
                 if (features[0].properties[detail] === 0 && features[0].properties[detail] === 0.0) {
@@ -1393,7 +1338,7 @@ function displayDetails(features) {
                             return;
                         }
                         else if (config.detailView[detail]['label'].includes(status)) {
-                            // Remove the status from the label to get the "newLabel"
+                            // Remove the status from the label to get the 'newLabel'
                             let newLabel = config.detailView[detail]['label'].replace(status, '').trim();
                             // Compose the tupleLike value
                             let tupleLike = newLabel + features[0].properties[detail];
@@ -1407,7 +1352,7 @@ function displayDetails(features) {
                 }
             }
         } else {
-            if (features[0].properties[detail] !== "" && features[0].properties[detail] !== undefined && features[0].properties[detail] !==0 && features[0].properties[detail] !== 'nan' && features[0].properties[detail] !== null && features[0].properties[detail] !== 'Unknown [unknown %]' && features[0].properties[detail] !== 'unknown') {
+            if (features[0].properties[detail] !== '' && features[0].properties[detail] !== undefined && features[0].properties[detail] !==0 && features[0].properties[detail] !== 'nan' && features[0].properties[detail] !== null && features[0].properties[detail] !== 'Unknown [unknown %]' && features[0].properties[detail] !== 'unknown') {
                 if (config.multiCountry == true && config.detailView[detail] && config.detailView[detail]['label'] && config.detailView[detail]['label'].includes('Country')) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
                 }
@@ -1438,14 +1383,9 @@ function displayDetails(features) {
                 }
             }
 
-            // TODO clear out these comments
             // Initialize capacity and count objects using reduce to avoid summary build bug
             // first builds an array of filter values then with reduce makes it an object
-            // then initializes the start point with 0 though the bug is showing NaN, is it being cached??, because it also shows 2.5 in operating
-
-            // TODO why are these (capacity and count) the same?
-            // starting fresh so no reuse of capacity value to prevent bug where some statuses start with NaN or undefined so cannot add any capacity value and shows up as NaN
-            // even though the data is correctly displayed in the table view
+            // then initializes the start point with 0
             let capacity = Object.fromEntries(
                 config.filters[filterIndex].values.map(f => [f, 0])
             );
@@ -1456,94 +1396,87 @@ function displayDetails(features) {
 
             features.forEach((feature) => {
                 let capacityFloat = feature.properties[config.capacityDisplayField]
-                // THIS IS THE ISSUE GGFT
-                // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
 
                 if (typeof feature.properties[config.capacityDisplayField] === 'string') {
                     capacityFloat = Number(capacityFloat);
-                    // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
-                } // or typeof === string
-                else {
+
+                } else {
                     capacityFloat = parseFloat(capacityFloat);
-                    // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
                 }
 
                 if (typeof capacity[feature.properties[config.statusField]] === 'undefined') {
-                    capacity[feature.properties[config.statusField]] = 0
-                    // console.log('this is feature.properties[config.statusField]')
-                    // console.log(feature.properties[config.statusField])
+                    capacity[feature.properties[config.statusField]] = 0;
                 }
                 capacity[feature.properties[config.statusField]] += capacityFloat;
 
                 if (typeof count[feature.properties[config.statusField]] === 'undefined') {
-                    count[feature.properties[config.statusField]] = 0
+                    count[feature.properties[config.statusField]] = 0;
                 }
-                count[feature.properties[config.statusField]]++;
 
+                count[feature.properties[config.statusField]]++;
             });
 
             let detail_capacity = '';
             Object.keys(count).forEach((k) => {
-                // here do the status legend mapping to an appopriate status display
-                /*
-                OR TODO make a dictionary look up to not map status to display because there will be a different count.. but just rename any with /
-                Proposed/Announced/Discovered
-                Mothballed/Idle/Shut in
-                Construction/In development
-                Retired/Closed/Decommissioned
-                */
-
-                // console.log(k)
+                // status legend mapping
                 if (k === 'proposed-plus') {
                     display_k = 'proposed/announced/<br>discovered';
-                }
-                else if (k === 'mothballed-plus') {
+                } else if (k === 'mothballed-plus') {
                     display_k = 'mothballed/idle/shut in';
-                }
-                else if (k === 'construction-plus') {
+                } else if (k === 'construction-plus') {
                     display_k = 'construction/in development'
-                }
-                else if (k === 'retired-plus') {
+                } else if (k === 'retired-plus') {
                     display_k = 'retired/closed/<br>decommissioned';
-                }
-                else {
+                } else {
                     display_k = k;
                 }
-                // console.log(display_k)
-                // console.log('This is capacity... find out how to make 0 that is really "" be Not found')
-                // console.log(capacity[k]) // it is a dictionary, the key is the status k, so if a value is 0 ... but what if it is truly 0 not Not found
 
                 if (capacity[k] === 0) {
                     if (config.color.field == config.statusField) {
                         if (count[k] != 0) {
-                            // console.log('this is k when config.color.field == config.statusDisplayField') // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still
-                            // filter by status legend but show the status display via k
-                            // console.log(k)
-                            detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + display_k + '</div><div class="col-4">' + 'Not found or N/A' + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                            // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
+                            detail_capacity +=
+                                '<div class="row">' +
+                                    '<div class="col-5">' +
+                                        '<span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' +
+                                        display_k +
+                                    '</div>' +
+                                    '<div class="col-4">' + 'Not found or N/A' + '</div>' +
+                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '</div>';
                         }
-                    }
-                    else {
+                    } else {
                         if (count[k] != 0) {
-                            // console.log('this is k when config.color.field DOES NOT EQUAL config.statusDisplayField')
-                            // console.log(k)
-                            detail_capacity += '<div class="row"><div class="col-5">' + display_k + '</div><div class="col-4">' + 'Not found or N/A' + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                            detail_capacity +=
+                                '<div class="row">' +
+                                    '<div class="col-5">' + display_k + '</div>' +
+                                    '<div class="col-4">' + 'Not found or N/A' + '</div>' +
+                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '</div>';
                         }
                     }
-                }
-                else {
+                } else {
                     if (config.color.field == config.statusField) {
                         if (count[k] != 0) {
-                            // console.log('this is k when config.color.field == config.statusDisplayField') // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still
-                            // filter by status legend but show the status display via k
-                            // console.log(k)
-                            detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + display_k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                            // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
+                            detail_capacity +=
+                                '<div class="row">' +
+                                    '<div class="col-5">' +
+                                        '<span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' +
+                                        display_k +
+                                    '</div>' +
+                                    '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
+                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '</div>';
                         }
-                    }
-                    else {
+                    } else {
                         if (count[k] != 0) {
-                            // console.log('this is k when config.color.field DOES NOT EQUAL config.statusDisplayField')
-                            // console.log(k)
-                            detail_capacity += '<div class="row"><div class="col-5">' + display_k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                            detail_capacity +=
+                                '<div class="row">' +
+                                    '<div class="col-5">' + display_k + '</div>' +
+                                    '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
+                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '</div>';
                         }
                     }
                 }
@@ -1554,60 +1487,57 @@ function displayDetails(features) {
             }
             detail_text +=
                 '<div>' +
-                '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
-                '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5 text-capitalize">' + config.statusDisplayField + '</div><div class="col-4">' +
-                capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
-                detail_capacity +
+                    '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+                    '<div class="row" style="height: 2px"><hr/></div>' +
+                    '<div class="row ">' +
+                        '<div class="col-5 text-capitalize">' + config.statusDisplayField + '</div>' +
+                        '<div class="col-4">' + capacityLabel + '</div>' +
+                        '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
+                    '</div>' +
+                    detail_capacity +
                 '</div>';
         }
         // else when there is only one feature or one unit per project in the popup modal
         else {
             // if ggft gas finance then we want to override this always since the project level financing info is already printed 
             // and this else only executes if there is just one unit for the project so it'd be redundant and the word 'Capacity' is hardcoded in this feature and makes no sense for ggft
-            if (config.scale_by_capacity==false) {
-                console.log('Skipping single unit project capacity for ggft since it is finance info and is covered already, but displaying status info since it is useful and not redundant.')
+            if (config.scale_by_capacity == false) {
                 // we do not want the capacity but we do want status since that is relevant for single unit ggft projects
-                // since we know for ggft the status is a color field we do not need the extra logic seen below with "config.color.field != config.statusDisplayField"
+                // since we know for ggft the status is a color field we do not need the extra logic seen below with 'config.color.field != config.statusDisplayField'
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-
+                    '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span>' +
+                    '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             }
             else {
                 capacityFloat = Number(features[0].properties[config.capacityDisplayField])
 
                 // if capacity is a string and when you convert with Number it is 0 then we can say it is NA or Not found
                 if (features[0].properties[config.capacityDisplayField] === '') {
-                        capacityFloatandLabel = 'Not found or N/A'
-                }
-
-                // if it is not a string then we are good ...  
-                else { 
-                    // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
-                    // try Number() instead of parseFloat()
+                    capacityFloatandLabel = 'Not found or N/A'
+                } else {
                     capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel
-                    // console.log(capacityFloatandLabel)
                 }
                 // this handles capacity adjustment for solo projects where it looks redundant to have Capacity written out twice
-                // Remove 'Capacity' prefix and parentheses from capacityLabel TODO look into a better way to handle, issue if capacity is nan or undefined like intentionally is for GOGET
+                // Remove 'Capacity' prefix and parentheses from capacityLabel // TODO look into a better way to handle, issue if capacity is nan or undefined like intentionally is for GOGET
                 // capacityLabel = capacityLabel.replace(/^Capacity\s*/i, '').replace(/[()]/g, '');
 
                 // and it allows status outside of the summary table to have the colored dot when status is the highest filter section
                 if (config.color.field != config.statusDisplayField) {
-                    // for filter field in filter, if primary = True then take field name "type" in intg and use it to find the color dictionary in the colors dict above
+                    // for filter field in filter, if primary = True then take field name 'type' in intg and use it to find the color dictionary in the colors dict above
                     // and then display the projects type field with the appropriate color based on the value and the dictionary
                     detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-                    detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
-                }
-                else {
+                        '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
+                        '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
+                } else {
                     detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                        '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-                    detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
-                }
+                        '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span>' +
+                        '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
+                        '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
                 }
             }
+        }
     }
+
     // This is where you remove the colored circle primary = true
     // we use the primary tag in config to color code the type for integrated
     else {
@@ -1617,35 +1547,35 @@ function displayDetails(features) {
         
         } else if (config.color.field != config.statusDisplayField) {
             detail_text += '';
-        }
-        // assign color if equal to status field BUT ignore the capacity part when no capacity label
-        else {
+        } else {  // assign color if equal to status field BUT ignore the capacity part when no capacity label
             // handle for statuses that have needless hyphens when / if not handled in preprocessing with statusDisplay column
             if (features[0].properties[config.statusDisplayField] === 'operating-pre-retirement') {
                 statusEdited = features[0].properties[config.statusDisplayField].replace('operating-pre-retirement', 'Operating Pre-Retirement')
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span><span class="text-lowercase">' + statusEdited + '</span><br/>';
-            }
-            else {
+                    '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
+                    '<span class="text-lowercase">' + statusEdited + '</span><br/>';
+            } else {
                 // add status part not capacity part 
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span><span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+                    '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
+                    '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             }
         }
     }
+
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
-    $('.modal-body').html('<div class="row m-0">' +
-        '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
-            (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
-            '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
+    $('.modal-body').html(
+        '<div class="row m-0">' +
+            '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
+                (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
+                '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
 
-            '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
-            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
-            (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
-
-        '</div>' +
-        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
+                '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
+                '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
+                (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
+            '</div>' +
+            '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
         '</div>');
 
     setHighlightFilter(features[0].properties[config.linkField]);
@@ -1684,9 +1614,9 @@ function enableNavFilters() {
     enableSearchSelect();
     enableCountrySelect();
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener('DOMContentLoaded', function() {
         // make it as accordion for smaller screens
-        if (window.innerWidth < 992) {
+        if (window.innerWidth < 992) {  // TODO Magic number
             // close all inner dropdowns when parent is closed
             $('.navbar .dropup').forEach((everydropdown) => {
                 everydropdown.addEventListener('hidden.bs.dropdown', function () {
@@ -1719,9 +1649,9 @@ function enableNavFilters() {
 
 function enableCountrySelect() {
     $.ajax({
-        type: "GET",
+        type: 'GET',
         url: config.countryFile,
-        dataType: "json",
+        dataType: 'json',
         success: function(jsonData) { config.countries = jsonData; buildCountrySelect(); }
     });
 }
@@ -1741,7 +1671,7 @@ function buildCountrySelect() {
                 dropdown_html += '<li><hr class="dropdown-divider"></li>';
             }
         });
-        dropdown_html += "</ul></li>";
+        dropdown_html += '</ul></li>';
 
         if (continent_idx != Object.keys(config.countries).length - 1) {
             dropdown_html += '<li><hr class="dropdown-divider"></li>';
@@ -1752,11 +1682,11 @@ function buildCountrySelect() {
 
     // Click handler: select continent or country
     $('.country-dropdown-item').each(function() {
-        this.addEventListener("click", function(e) {
+        this.addEventListener('click', function(e) {
             // Only filter if not just expanding submenu
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ? this.dataset.countries.split(";") : []);
-            $('#selectedCountryLabel').text(config.selectedCountryText || "all");
+            config.selectedCountries = (this.dataset.countries.length > 0 ? this.dataset.countries.split(';') : []);
+            $('#selectedCountryLabel').text(config.selectedCountryText || 'all');
 
             filterData();
         });
@@ -1800,6 +1730,7 @@ function buildCountrySelect() {
 // this removes diacritics in the data so that when you search you get all the possible options ignored special diacritics
 // this is applied so that only the non tile maps are impacted
 // for tile maps it'll be too slow so we do it in data prep (having a special search column and adding that to the column options to search within)
+// TODO possibly make redundant by prepping geojson files properly
 function removeDiacritics(value) {
     let noDiacriticsValue = value;
     for (const char of value) {
@@ -1833,7 +1764,7 @@ function enableSearchSelect() {
     $('#search_type_select').append(dropdown_html);
 
     $('.search-dropdown-item').each(function() {
-        this.addEventListener("click", function() {
+        this.addEventListener('click', function() {
             config.selectedSearchFields = this.dataset.searchfields;
             $('#selectedSearchLabel').text(this.dataset.searchfieldtext);
 
@@ -1845,7 +1776,7 @@ function enableSearchSelect() {
 }
 
 function enableResetAll() {
-    $('#selectedCountryLabel').text("all");
+    $('#selectedCountryLabel').text('all');
     config.selectedCountryText = '';
     config.selectedCountries = [];
     
@@ -1859,7 +1790,7 @@ function enableResetAll() {
         allSearchFields = allSearchFields.concat(config.searchFields[field_label]);
     });
     config.selectedSearchFields = allSearchFields.join(',');
-    $('#selectedSearchLabel').text("all");
+    $('#selectedSearchLabel').text('all');
 
     filterData();
 }  
@@ -1932,7 +1863,7 @@ function getCoordinatesDump(gj) {
             },[]));
         },[]);
     } else if (gj.type == 'Feature') {
-        coords =  getCoordinatesDump(gj.geometry);
+        coords = getCoordinatesDump(gj.geometry);
     } else if (gj.type == 'GeometryCollection') {
         coords = gj.geometries.reduce(function(dump,g) {
             return dump.concat(getCoordinatesDump(g));
@@ -1945,7 +1876,7 @@ function getCoordinatesDump(gj) {
     return coords;
 }
 
-function removeLastComma(str) {
+function removeLastComma(str) {  // TODO this removes the last semicolon
     if (str.charAt(str.length - 1) === ';') {
         str = str.slice(0, -1);
     }
@@ -1959,6 +1890,7 @@ function makeCase(str) {
     return str;
 }
 
+// TODO can be moved to site-config.js?
 // The following values can be changed to control rotation speed:
 // At low zooms, complete a revolution every two minutes.
 const secondsPerRevolution = 150;
@@ -1967,8 +1899,6 @@ const maxSpinZoom = 5;
 // Rotate at intermediate speeds between zoom levels 3 and 5.
 const slowSpinZoom = 3;
 
-
-// let userInteracting = false;
 let spinEnabled = true;
 
 // the function in charge of spinning the globe projection of the map
@@ -2007,7 +1937,7 @@ map.on('moveend', () => {
 // adding option to pause spin with space important for smaller screens
 document.addEventListener('keydown', (e) => {
     spinEnabled = !spinEnabled;
-    if (e.code === "Space") {
+    if (e.code === 'Space') {
         if (spinEnabled) {
             userInteracting = !userInteracting;
             spinGlobe();
