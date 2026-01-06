@@ -1,4 +1,5 @@
 processConfig();
+
 function processConfig() {
     // Merge site-config.js and config.js
     config = Object.assign(site_config, config);
@@ -9,6 +10,7 @@ function processConfig() {
         config.color.values[color_key] = config.colors[ config.color.values[color_key] ];
     });
 }
+
 let userInteracting = false;
 const diacriticMap = {
     a: ["a", "á", "à", "â", "ã", "ä", "å"],
@@ -18,7 +20,8 @@ const diacriticMap = {
     u: ["u", "ú", "ù", "û", "ü"],
     c: ["c", "ç"],
     n: ["n", "ñ"],
-  };
+};
+
 
 /*
   Set up mapboxgljs instance, and trigger data load
@@ -39,13 +42,14 @@ const popup = new mapboxgl.Popup({
 });
 
 map.on('load', function () {
-    if (config.projection != 'globe'){
+    if (config.projection != 'globe') {
         // map.setFog({}); // Set the default atmosphere style
         // $('#btn-spin-toggle').hide();
-
+        // TODO why empty?
     }
     loadData();
 });
+
 function determineZoom() {
     let modifier = 650;
     if (window.innerWidth < 1000) { modifier = 500; }
@@ -56,7 +60,7 @@ function determineZoom() {
 
 
 /*
-  load data in various formats, and prepare for use in application
+  Load data in from various formats, and prepare for use in application
 */
 function loadData() {
     if ("tiles" in config) {
@@ -102,16 +106,16 @@ function loadData() {
             success: function(jsonData) {addGeoJSON(jsonData);}
         });
     } else {
-     
         Papa.parse(config.csv, {
             download: true,
             header: true,
             complete: function(results) {
                 addGeoJSON(results.data);   
             }  
-    });
+        });
+    }
 }
-}
+
 function addGeoJSON(jsonData) {
     // converts all to geojson 
     if ('type' in jsonData && jsonData['type'] == 'FeatureCollection') {
@@ -132,23 +136,20 @@ function addGeoJSON(jsonData) {
                 "properties": {}
             }
             for (let key in asset) {
-           
                 if (key == config.capacityField) {
                     feature.properties[key] = Number(asset[key]);
                 } else if (key != config.locationColumns['long'] && key != config.locationColumns['lat']) {
                     feature.properties[key] = asset[key];
                 }
             }
-            if (feature.properties[config['countryField']]){
+            if (feature.properties[config['countryField']]) {
                 config.geojson.features.push(feature);
             }
-
         });
-
     }
 
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
-    config.processedGeoJSON = config.geojson; // copy
+    config.processedGeoJSON = config.geojson; // copy  // TODO verify if copy and if so, if deep
 
     console.log('setMinMax');
     setMinMax(); 
@@ -169,9 +170,7 @@ function addGeoJSON(jsonData) {
 
     // console.log('addLayers');
     addLayers();
-
     setTimeout(enableUX, 3000);
-
     // console.log('enableUX');
     map.on('idle', enableUX); // enableUX starts to render data
 }
@@ -185,6 +184,7 @@ function addTiles() {
     });
 
 }
+
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
     let layers = [];
@@ -203,16 +203,12 @@ function geoJSONFromTiles() {
     });
     findLinkedAssets();
     addLayers();
-    map.on('idle', enableUX); // enableUX starts to renders data 
-    
-
+    map.on('idle', enableUX); // enableUX starts to renders data
 }
 
 // Builds lookup of linked assets by the link column
 // and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
-
 function findLinkedAssets() {
-    
     map.off('idle', findLinkedAssets);
 
     config.preLinkedGeoJSON = config.processedGeoJSON;
@@ -259,7 +255,7 @@ function findLinkedAssets() {
         features[0].properties[config.capacityField] = capacity;
 
         // Build summary count of capacity across all linked assets
-        //  and generate icon based on that label if more than one status
+        // and generate icon based on that label if more than one status
         if (features[0].geometry.type == 'Point') {
             let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
             features.forEach((feature) => {  
@@ -277,7 +273,6 @@ function findLinkedAssets() {
                 if (! config.icons.includes(string_icon)) {
                     generateIcon(icon);
                     config.icons.push(string_icon);
-
                 }
             }
         }
@@ -296,9 +291,9 @@ function findLinkedAssets() {
         config.totalCount += features.length;
 
         config.processedGeoJSON.features.push(features[0]);
-
     });
 }
+
 function generateIcon(icon) {
     let label = JSON.stringify(icon);
     if (map.hasImage(label)) return;
@@ -315,7 +310,7 @@ function generateIcon(icon) {
     let centerX = canvas.width / 2;
     let centerY = canvas.height / 2;
 
-    let current = .75; //start at vertical
+    let current = .75;  // start at vertical
     let slices = Object.values(icon).reduce((previous, current) => {
         return previous + Number(current);
     }, 0);
@@ -340,6 +335,7 @@ function generateIcon(icon) {
         if (! map.hasImage(label)) map.addImage(label, image);
     });
 }
+
 function setMinMax() {
     config.maxPointCapacity = 0;
     config.minPointCapacity = 1000000;
@@ -355,11 +351,11 @@ function setMinMax() {
             minCapacityKey = 'minPointCapacity';
             maxCapacityKey = 'maxPointCapacity';
         }
-        // this says, if the capacity is more than the max capacity so far then it should be used
+
+        // if the capacity is more than the max capacity so far then it should be used
         // vice versa for min capacity
         // later this is used to size the assets along smoothly by interpolation across the width between min and maxPoint and LineWidth
         // this min and max Line and Point Capacity is crucial to the scaling, along with the unit's capacity
-
         if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
             config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
         }
@@ -369,8 +365,9 @@ function setMinMax() {
     });
 }
 
+
 /*
-  render data
+  Render Data
 */
 function enableUX() {
     map.off('idle', enableUX);
@@ -399,7 +396,6 @@ function enableUX() {
 }
 
 function addLayers() {
- 
     config.layers = [];
     if (config.geometries.includes('LineString')) addLineLayer();
     if (config.geometries.includes('Point')) addPointLayer();
@@ -409,12 +405,15 @@ function addLayers() {
         source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
         type: "raster",
         layout: { 'visibility': 'none' }
-    }, config.layers[0]);
+        },
+        config.layers[0]
+    );
 
     map.addSource('countries', {
         'type': 'vector',
         'url': 'mapbox://mapbox.country-boundaries-v1'
     });
+
     map.addLayer(
         {
             'id': 'country-layer',
@@ -425,13 +424,15 @@ function addLayers() {
             'paint': {
                 'fill-color': 'hsla(219, 0%, 100%, 0%)'
             }
-        }
-    , config.layers[0]);
+        },
+        config.layers[0]
+    );
 
     addEvents();
 }
+
 function addPointLayer() {
-     // First build circle layer
+    // First build circle layer
     //  build style json for circle-color based on config.color
     let paint = config.pointPaint;
     if ('color' in config) {
@@ -443,6 +444,7 @@ function addPointLayer() {
         ];
     }
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+
     try {
         // Handle case where all capacity values are the same
         if (config.minPointCapacity === config.maxPointCapacity) {
@@ -454,7 +456,7 @@ function addPointLayer() {
         } else {
             paint['circle-radius'] = [
                 "interpolate", ["exponential", .5], ["zoom"],
-                1, ["interpolate", interpolateExpression,
+                1,  ["interpolate", interpolateExpression,
                     ["to-number",["get", config.capacityField]],
                     config.minPointCapacity, config.minRadius,
                     config.maxPointCapacity, config.maxRadius
@@ -470,6 +472,7 @@ function addPointLayer() {
         console.error("Error setting circle-radius. config.capacityField:", config.capacityField);
         throw e;
     }
+
     map.addLayer({
         'id': 'assets-points',
         'type': 'circle',
@@ -500,7 +503,7 @@ function addPointLayer() {
                 'icon-allow-overlap': true,
                 'icon-size': [
                     "interpolate", ["linear"], ["zoom"],
-                    1, ['interpolate', interpolateExpression,
+                    1,  ['interpolate', interpolateExpression,
                         ['sqrt',["to-number", ['get', config.capacityField]]],
                         // ["to-number", ["get", config.capacityField]],
                         sqrtMin, config.minRadius * 2 / 64,
@@ -528,7 +531,7 @@ function addPointLayer() {
                 'icon-allow-overlap': true,
                 'icon-size': [
                     "interpolate", ["exponential", .5], ["zoom"],
-                    1, ['interpolate', interpolateExpression,
+                    1,  ['interpolate', interpolateExpression,
                         ["to-number", ["get", config.capacityField]],
                         config.minPointCapacity, config.minRadius * 2 / 64,
                         config.maxPointCapacity, config.maxRadius * 2 / 64],
@@ -579,6 +582,7 @@ function addPointLayer() {
         }
     );
 }
+
 function addLineLayer() {
     let paint = config.linePaint;
 
@@ -602,7 +606,7 @@ function addLineLayer() {
     } else {
         paint['line-width'] = [
             "interpolate", ["linear"], ["zoom"],
-            1, ["interpolate", interpolateExpression,
+            1,  ["interpolate", interpolateExpression,
                 ["to-number",["get", config.capacityField]],
                 config.minLineCapacity, config.minLineWidth,
                 config.maxLineCapacity, config.maxLineWidth
@@ -614,6 +618,8 @@ function addLineLayer() {
             ]
         ];
     }
+
+    // TODO what is this?
             config.maxLineCapacity, config.maxLineWidth
         10, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
@@ -667,10 +673,8 @@ function addEvents() {
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
             displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-
         } else {
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
-
 
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
@@ -686,6 +690,7 @@ function addEvents() {
 
         config.modal.show();
     });
+
     config.layers.forEach(layer => {
         map.on('mouseenter', layer, (e) => {
             map.getCanvas().style.cursor = 'pointer';
@@ -694,12 +699,14 @@ function addEvents() {
             popup.setLngLat(coordinates).setHTML(description).addTo(map);
         });
     });
+
     config.layers.forEach(layer => {
         map.on('mouseleave', layer, () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
         }); 
     });
+
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
@@ -725,7 +732,6 @@ function addEvents() {
         enableResetAll(); 
     });
 
-
     $('#collapse-sidebar').on("click", function() {
         $('#filter-form').hide();
         $('#all-select').hide();
@@ -733,6 +739,7 @@ function addEvents() {
         $('#collapse-sidebar').hide();
         $('#expand-sidebar').show();
     });
+
     $('#expand-sidebar').on("click", function() {
         $('#filter-form').show();
         $('#all-select').show();
@@ -748,54 +755,52 @@ $('#projection-toggle').on("click", function() {
         map.setProjection('naturalEarth');
         map.setCenter(config.center);
         map.setZoom(determineZoom());
-
     } else {
         config.projection = "globe";
         map.setProjection("globe");
         map.setCenter(config.center);
         spinGlobe();
         map.setZoom(determineZoom());
-
     }
 })
 
 
 /*
-  legend filters
-*/ 
-
+  Legend Filters
+*/
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
         // go through each filter in config 
-        if (config.showToolTip){
-            // create more space for europe legend
-            if (filter.primary && filter.field_hover_text){
+        if (config.showToolTip) {
+            // create more space for europe legend  // TODO ?
+            if (filter.primary && filter.field_hover_text) {
             $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + 
             '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + 
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' + filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
-        // add eventlistener for infobox and tooltip to show on hover
+            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
+            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
+            // add eventlistener for infobox and tooltip to show on hover  // TODO ?
             }
-            else if (filter.field_hover_text){
+            else if (filter.field_hover_text) {
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + 
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' + filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
-
+            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
+            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
             }
             else {
-            // do same as below but append infobox
+            // do same as below but append infobox  // TODO ?
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + 
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' + filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
+            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
+            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
             }
-
         }
         // this creates the section title and adds the select all feature only to the sections after the first one, if there is no tooltip logic so for all non europe maps
         else if (config.color.field != filter.field) {
-
             // console.log('here in else if of build filters')
             // console.log(config.color.field)
             // console.log(filter.field)
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + 
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' + filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
+            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
+            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
         }
 
         for (let i=0; i<filter.values.length; i++) {
@@ -808,36 +813,37 @@ function buildFilters() {
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
-    // add eventlistener for infobox and tooltip to show on hover 
-    $('.infobox').each(function() {
-        $(this).on('mouseover', function() {
-            const infoBox = document.getElementById('infobox');
-            const toolTip = document.getElementById('tooltip');
-            const infoBoxRect = infoBox.getBoundingClientRect();
-            const toolTipRect = toolTip.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            if (infoBoxRect.top < toolTipRect.height + 20) {
-                // Position the tooltip below the infobox
-                toolTip.style.bottom = 'auto';
-                toolTip.style.top = '110%';
-            } else {
-                // Position the tooltip above the infobox
-                toolTip.style.top = 'auto';
-                toolTip.style.bottom = '110%';
-            }
-            
-            $(this).find('.tooltip').css({
-                'opacity': '1',
-                'visibility': 'visible'
+
+        // add eventlistener for infobox and tooltip to show on hover
+        $('.infobox').each(function() {
+            $(this).on('mouseover', function() {
+                const infoBox = document.getElementById('infobox');
+                const toolTip = document.getElementById('tooltip');
+                const infoBoxRect = infoBox.getBoundingClientRect();
+                const toolTipRect = toolTip.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                if (infoBoxRect.top < toolTipRect.height + 20) {
+                    // Position the tooltip below the infobox
+                    toolTip.style.bottom = 'auto';
+                    toolTip.style.top = '110%';
+                } else {
+                    // Position the tooltip above the infobox
+                    toolTip.style.top = 'auto';
+                    toolTip.style.bottom = '110%';
+                }
+
+                $(this).find('.tooltip').css({
+                    'opacity': '1',
+                    'visibility': 'visible'
+                });
+            });
+            $(this).on('mouseout', function() {
+                $(this).find('.tooltip').css({
+                    'opacity': '0',
+                    'visibility': 'hidden'
+                });
             });
         });
-        $(this).on('mouseout', function() {
-            $(this).find('.tooltip').css({
-                'opacity': '0',
-                'visibility': 'hidden'
-            });
-        });
-    });
     });
     
     $('.filter-row').each(function() {
@@ -848,15 +854,13 @@ function buildFilters() {
             filterData();
         });
     });
-
 }
-
 
 function toggleFilter(id) {
     $('#' + id + '-checkmark').toggleClass('checkmark uncheckmark');
 }
-// for legend level select all and clear all
 
+// for legend level select all and clear all
 function selectAllFilter() {
     $('.filter-row').each(function() {
         if (! $('#' + this.dataset.checkid)[0].checked) {
@@ -864,10 +868,9 @@ function selectAllFilter() {
             toggleFilter(this.dataset.checkid);
         }
     });
-
     filterData();
-
 }
+
 // for section level select all and clear all
 // needs to know field name to distinguish which filter rows to clear and what not to
 function selectAllFilterSection(fieldRow) {
@@ -878,11 +881,10 @@ function selectAllFilterSection(fieldRow) {
             toggleFilter(this.dataset.checkid);
         }
     });
-
     filterData();
 }
-// for legend level select all and clear all
 
+// for legend level select all and clear all
 function clearAllFilter(fieldRow) {
     $('.filter-row').each(function() {
         if ($('#' + this.dataset.checkid)[0].checked) {
@@ -891,10 +893,9 @@ function clearAllFilter(fieldRow) {
         }
     });
     filterData();
-
 }
 
-// ISSUE HERE 
+// TODO ISSUE HERE
 // only for infra type tab-type 
 // console.log('fieldRow')
 // console.log(fieldRow)
@@ -908,7 +909,6 @@ function clearAllFilterSection(fieldRow) {
         }
     });
     filterData();
-
 }
 
 function countFilteredFeatures() {
@@ -951,18 +951,15 @@ function countFilteredFeatures() {
         }       
     });
 }
+
 function filterData() {
     $('#spinner-container').removeClass('d-none')
     $('#spinner-container').addClass('d-flex')
 
     if (config.tiles) {
-
         filterTiles();
-     
     } else {
-
         filterGeoJSON();
-
     }
 }
 
@@ -988,20 +985,20 @@ function filterTiles() {
         config.filterExpression.push(searchExpression);
     }
     if (config.selectedCountries.length > 0) {
-        //updated to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
+        // updated to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
         // added ";" at end of each country
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
-                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region
-                countryExpression.push(['in', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
+                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region // TODO verify if actually needed, at any stage in processing
+                countryExpression.push(['in', ['string', country], ['string', ['get', removeLastComma(config.countryField)]]]);
             } else {
-                countryExpression.push(['==', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
+                countryExpression.push(['==', ['string', country], ['string', ['get', removeLastComma(config.countryField)]]]);
             }
         })
         config.filterExpression.push(countryExpression);
-
     }
+
     for (let field in filterStatus) {
         config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
     }
@@ -1011,7 +1008,7 @@ function filterTiles() {
         config.filterExpression.unshift("all");
     }
     config.layers.forEach(layer => {
-        config.filterExpression.push(["==",["geometry-type"],
+        config.filterExpression.push(["==", ["geometry-type"],
             map.getLayer(layer).type == "line" ? "LineString" : "Point"
         ]);
         map.setFilter(layer, config.filterExpression);
@@ -1023,7 +1020,6 @@ function filterTiles() {
 
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
-
     } else {
         map.on('idle', filterGeoJSON);
     }
@@ -1049,21 +1045,19 @@ function filterGeoJSON() {
     config.geojson.features.forEach(feature => {
         let include = true;
         for (let field in filterStatus) {
-            if (! filterStatus[field].includes(feature.properties[field])) include = false;
+            if (!filterStatus[field].includes(feature.properties[field])) include = false;
         }
         // filter by text search bar
         if (config.searchText.length >= 3) {
             if (config.selectedSearchFields.split(',').filter((field) => {
                 // remove diacritics from mapValue
-                if (feature.properties[field] != null){
-
+                if (feature.properties[field] != null) {
                     let mapValue = removeDiacritics(feature.properties[field]);
-
                     return mapValue.toLowerCase().includes(config.searchText);
-                }}).length == 0) include = false;
+                }
+            }).length == 0) include = false;
         }
         // filter by country select, gets hit when just filtering by legend too
-
         if (config.selectedCountries.length > 0) {
             // This checks if any of the selected countries are associated with the project
             try {
@@ -1078,7 +1072,6 @@ function filterGeoJSON() {
         }
 
         // for those projects that aren't associated with selected countries it makes the include flag false so it is not displayed
-
         if (include) {
             filteredGeoJSON.features.push(feature);
         }
@@ -1089,11 +1082,12 @@ function filterGeoJSON() {
     updateTable();
     updateSummary();
 
-    // perhaps remove this qualifier for gipt/tiles 
-    if (! config.tiles) { //maybe just use map filter for points and lines, no matter if tiles of geojson
+    // TODO perhaps remove this qualifier for gipt/tiles
+    if (!config.tiles) {  // maybe just use map filter for points and lines, no matter if tiles of geojson
         map.getSource('assets-source').setData(config.processedGeoJSON);
     }
 }
+
 function updateSummary() {
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')   
@@ -1107,7 +1101,6 @@ function updateSummary() {
             $('#' + count_id).text(config.filterCount[filter.field][filter.values[i]]);
         }
     });
-
 
     if (config.showMinCapacity & config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
@@ -1132,11 +1125,11 @@ function updateSummary() {
             $('#capacity_summary').html("Maximum " + config.capacityLabel);
         }
     }
-
 }
 
+
 /*
-  table view
+  Table View
 */
 function buildTable() {
     $('#table-toggle').on("click", function() {
@@ -1161,6 +1154,7 @@ function buildTable() {
         }
     });
 }
+
 function createTable() {
     if ('rightAlign' in config.tableHeaders) {
         config.tableHeaders.rightAlign.forEach((col) => {
@@ -1187,9 +1181,10 @@ function createTable() {
         searching: false,
         pageLength: 100,
         fixedHeader: true,
-        columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
+        columns: config.tableHeaders.labels.map((header) => { return {'title': header} })
     });
 }
+
 function updateTable(force) {
     // table create/update with large number of rows is slow, only do it if visible
     if ($('#table-container').is(':visible') || force) {
@@ -1204,18 +1199,17 @@ function updateTable(force) {
         config.tableDirty = true;
     }
 }
-function geoJSON2Table() {
+
+function geoJSON2Table() {  // TODO rework?
     return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
-
             value = feature.properties[header];
             if ('displayValue' in config.tableHeaders && Object.keys(config.tableHeaders.displayValue).includes(header)) {
                 value = config[config.tableHeaders.displayValue[header]].values[value];
-
             }
             if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
                 value += ' ' + config[config.tableHeaders.appendValue[header]].values[
-                    feature.properties[config[config.tableHeaders.appendValue[header]].field]
+                        feature.properties[config[config.tableHeaders.appendValue[header]].field]
                     ];
             }
             if ('removeLastComma' in config.tableHeaders && config.tableHeaders.removeLastComma.includes(header)) {
@@ -1223,8 +1217,7 @@ function geoJSON2Table() {
             }
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
                 value =  "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>'; 
-            } 
-
+            }
             if ('makeCase' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
                 value =  makeCase(value); 
             }  
@@ -1232,14 +1225,16 @@ function geoJSON2Table() {
         });
     });
 }
+
 function geoJSON2Headers() {
     return Object.keys(config.geojson.features[0].properties).map((k) => {
         return {'title': k}
     });
 }
 
+
 /*
-  modals
+  Modals
 */
 function enableModal() {
     config.modal = new bootstrap.Modal($('#modal'));
@@ -1247,6 +1242,7 @@ function enableModal() {
         setHighlightFilter('');
     })
 }
+
 function setHighlightFilter(links) {
     if (! Array.isArray(links)) links = [links];
     let filter;
@@ -1262,13 +1258,12 @@ function setHighlightFilter(links) {
         filter = ['all', highlightExpression];
     }
     config.layers.forEach(layer => {
-        filter.push(["==",["geometry-type"],
+        filter.push(["==", ["geometry-type"],
             map.getLayer(layer).type == "line" ? "LineString" : "Point"
         ]);
-        map.setFilter(layer + '-highlighted',filter);
+        map.setFilter(layer + '-highlighted', filter);
     });
 }
-
 
 // TODO Move the table creation logic into a helper function
 function buildGistTable(all_details_gist) {
@@ -1299,8 +1294,7 @@ function buildGistTable(all_details_gist) {
     return tableHtml;
 }
 
-// this function is responsible for creating the information in the modal that pops up after clicking an asset 
-
+// this function is responsible for creating the information in the modal that pops up after clicking an asset
 function displayDetails(features) {
     if (typeof features == "string") {
         features = JSON.parse(features);
@@ -1310,11 +1304,9 @@ function displayDetails(features) {
     let all_details_gist = [];
 
     Object.keys(config.detailView).forEach((detail) => {
-        
-        if (features[0].properties[detail] == "" || features[0].properties[detail] == 'unknown' || features[0].properties[detail] == 'undefined' || features[0].properties[detail] ==0 || features[0].properties[detail] == NaN || features[0].properties[detail] == 'nan' || features[0].properties[detail] == null){
+        if (features[0].properties[detail] == "" || features[0].properties[detail] == 'unknown' || features[0].properties[detail] == 'undefined' || features[0].properties[detail] ==0 || features[0].properties[detail] == NaN || features[0].properties[detail] == 'nan' || features[0].properties[detail] == null) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
-
             if (config.detailView[detail]['display'] == 'heading') {
                 detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
 
@@ -1331,9 +1323,7 @@ function displayDetails(features) {
                         detail_text += '<br/><div>' + value + '</div><br/>';
                     }
                 }
-
             } else if (config.detailView[detail]['display'] == 'join') {
-
                 let join_array = features.map((feature) => feature.properties[detail]);
                 join_array = join_array.filter((value, index, array) => array.indexOf(value) === index);
                 if (join_array.length > 1) {
@@ -1345,21 +1335,17 @@ function displayDetails(features) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' +config.detailView[detail]['label'][0] + '</span>: ';
                     }
-                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';;
+                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';
                 }
 
             } else if (config.detailView[detail]['display'] == 'range') {
-
                 let greatest = features.reduce((accumulator, feature) => {
                         return (feature.properties[detail] != '' && feature.properties[detail] > accumulator ?  feature.properties[detail] : accumulator);
-                    },
-                    0
-                ); 
+                }, 0);
                 let least = features.reduce((accumulator, feature) => {
                         return (feature.properties[detail] != '' && feature.properties[detail] < accumulator ?  feature.properties[detail] : accumulator);
-                    },
-                    5000
-                );
+                }, 5000);
+
                 if (least != 5000) {
                     if (least == greatest) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][0] + '</span>: ' + least.toString() + '<br/>';
@@ -1368,19 +1354,15 @@ function displayDetails(features) {
                     }
                 }
             } else if (config.detailView[detail]['display'] == 'hyperlink') {
-
                 detail_text += '<br/><a href="' + features[0].properties[detail] + '" target="_blank">More Info on the related infrastructure project here</a><br/>';
-            
             } else if (config.detailView[detail]['display'] == 'location') {
-
                 if (Object.keys(features[0].properties).includes(detail)) {
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
-
                     location_text += features[0].properties[detail];
                 }
-            } else if (config.detailView[detail]['display'] == 'colorcoded'){
+            } else if (config.detailView[detail]['display'] == 'colorcoded') {
                 // to create the circle dot we have for most status 
                 // if it has this colorcoded label then it goes to the color dictionary 
                 // matches up the field name, uses fieldLabel to display label and then also uses color
@@ -1388,15 +1370,12 @@ function displayDetails(features) {
                 detail_text += '<span class="fw-bold">' + config.color.fieldLabel + '</span>: ' +
                 '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.color.field] ]
                 + '"></span><span class="text-capitalize">' + features[0].properties[config.color.field] + '</span><br/>';
-            }             
-            else if (config.detailView[detail]['display'] == 'gist-unit-level'){
-
+            } else if (config.detailView[detail]['display'] == 'gist-unit-level') {
                 // cycle through all of them to only group them if there is value there 
-                if (features[0].properties[detail] === 0 && features[0].properties[detail] === 0.0){
+                if (features[0].properties[detail] === 0 && features[0].properties[detail] === 0.0) {
                     // skip to next iteration in a Object.keys(config.detailView).forEach((detail) => {
                     return;
                 } else {
-
                     // Define the status types you want to check
                     const statusTypes = [
                         'Operating',
@@ -1409,10 +1388,7 @@ function displayDetails(features) {
                     ];
 
                     statusTypes.forEach(status => {
-                        if (
-                            status === 'Operating' &&
-                            config.detailView[detail]['label'].includes('Operating pre-retirement')
-                        ) {
+                        if (status === 'Operating' && config.detailView[detail]['label'].includes('Operating pre-retirement')) {
                             // Skip to avoid false 'Operating' match
                             return;
                         }
@@ -1428,10 +1404,8 @@ function displayDetails(features) {
                             all_details_gist[status].push(tupleLike);
                         }
                     });
-
                 }
             }
-
         } else {
             if (features[0].properties[detail] !== "" && features[0].properties[detail] !== undefined && features[0].properties[detail] !==0 && features[0].properties[detail] !== 'nan' && features[0].properties[detail] !== null && features[0].properties[detail] !== 'Unknown [unknown %]' && features[0].properties[detail] !== 'unknown') {
                 if (config.multiCountry == true && config.detailView[detail] && config.detailView[detail]['label'] && config.detailView[detail]['label'].includes('Country')) {
@@ -1441,9 +1415,7 @@ function displayDetails(features) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                 }
             }
-
         }
-
     });
 
     let assetLabel = typeof config.assetLabel === 'string'
@@ -1457,102 +1429,95 @@ function displayDetails(features) {
     // This helps customize for trackers that do not need summary table in pop up because there are no units 
     // Build capacity summary by unit
     // Make sure capacity and parenthese get removed if there is only one feature
-    if (capacityLabel != ''){
-
+    if (capacityLabel != '') {
         if (features.length > 1) { 
-        let filterIndex = 0;
+            let filterIndex = 0;
             for (const[index, filter] of config.filters.entries()) {
-                if (filter.field == config.statusField) { 
-
+                if (filter.field == config.statusField) {
                     filterIndex = index;
                 }
             }
 
-        // Initialize capacity and count objects using reduce to avoid summary build bug
-        // first builds an array of filter values then with reduce makes it an object
-        // then initializes the start point with 0 though the bug is showing NaN, is it being cached??, because it also shows 2.5 in operating
-        
-        // starting fresh so no reuse of capacity value to prevent bug where some statuses start with NaN or undefined so cannot add any capacity value and shows up as NaN
-        // even though the data is correctly displayed in the table view
-        let capacity = Object.fromEntries(
-            config.filters[filterIndex].values.map(f => [f, 0])
-        );
-        
-        let count = Object.fromEntries(
-            config.filters[filterIndex].values.map(f => [f, 0])
-        );
+            // TODO clear out these comments
+            // Initialize capacity and count objects using reduce to avoid summary build bug
+            // first builds an array of filter values then with reduce makes it an object
+            // then initializes the start point with 0 though the bug is showing NaN, is it being cached??, because it also shows 2.5 in operating
 
-        features.forEach((feature) => {
-            let capacityFloat = feature.properties[config.capacityDisplayField]
-            // THIS IS THE ISSUE GGFT
-            // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
+            // TODO why are these (capacity and count) the same?
+            // starting fresh so no reuse of capacity value to prevent bug where some statuses start with NaN or undefined so cannot add any capacity value and shows up as NaN
+            // even though the data is correctly displayed in the table view
+            let capacity = Object.fromEntries(
+                config.filters[filterIndex].values.map(f => [f, 0])
+            );
 
-            if (typeof feature.properties[config.capacityDisplayField] === 'string' ){
-                capacityFloat = Number(capacityFloat);
-                // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
-            } // or typeof === string
-            else {
-                capacityFloat = parseFloat(capacityFloat);
+            let count = Object.fromEntries(
+                config.filters[filterIndex].values.map(f => [f, 0])
+            );
+
+            features.forEach((feature) => {
+                let capacityFloat = feature.properties[config.capacityDisplayField]
+                // THIS IS THE ISSUE GGFT
                 // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
 
+                if (typeof feature.properties[config.capacityDisplayField] === 'string') {
+                    capacityFloat = Number(capacityFloat);
+                    // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
+                } // or typeof === string
+                else {
+                    capacityFloat = parseFloat(capacityFloat);
+                    // console.log(capacityFloat) // Himeji-Okayama Gas Pipeline
+                }
 
-            }
+                if (typeof capacity[feature.properties[config.statusField]] === 'undefined') {
+                    capacity[feature.properties[config.statusField]] = 0
+                    // console.log('this is feature.properties[config.statusField]')
+                    // console.log(feature.properties[config.statusField])
+                }
+                capacity[feature.properties[config.statusField]] += capacityFloat;
 
-            
-            if (typeof capacity[feature.properties[config.statusField]] === 'undefined') {
-                capacity[feature.properties[config.statusField]] = 0
-                // console.log('this is feature.properties[config.statusField]')
-                // console.log(feature.properties[config.statusField])
-            }
-            capacity[feature.properties[config.statusField]] += capacityFloat;
+                if (typeof count[feature.properties[config.statusField]] === 'undefined') {
+                    count[feature.properties[config.statusField]] = 0
+                }
+                count[feature.properties[config.statusField]]++;
 
-            if (typeof count[feature.properties[config.statusField]] === 'undefined') {
-                count[feature.properties[config.statusField]] = 0
-            }
-            count[feature.properties[config.statusField]]++;
-
-        });
+            });
 
             let detail_capacity = '';
             Object.keys(count).forEach((k) => {
-                
-                // here do the status legend mapping to an appopriate status display 
-                /* 
-                OR TODO make a dictionary look up to not map status to display because there will be a different count.. but just rename any with / 
-
+                // here do the status legend mapping to an appopriate status display
+                /*
+                OR TODO make a dictionary look up to not map status to display because there will be a different count.. but just rename any with /
                 Proposed/Announced/Discovered
                 Mothballed/Idle/Shut in
                 Construction/In development
                 Retired/Closed/Decommissioned
-
                 */
+
                 // console.log(k)
-                if (k === 'proposed-plus'){
+                if (k === 'proposed-plus') {
                     display_k = 'proposed/announced/<br>discovered';
                 }
-                else if (k === 'mothballed-plus'){
+                else if (k === 'mothballed-plus') {
                     display_k = 'mothballed/idle/shut in';
                 }
-                else if (k === 'construction-plus'){
+                else if (k === 'construction-plus') {
                     display_k = 'construction/in development'
                 }
-                else if (k === 'retired-plus'){
+                else if (k === 'retired-plus') {
                     display_k = 'retired/closed/<br>decommissioned';
                 }
                 else {
                     display_k = k;
                 }
                 // console.log(display_k)
-
                 // console.log('This is capacity... find out how to make 0 that is really "" be Not found')
                 // console.log(capacity[k]) // it is a dictionary, the key is the status k, so if a value is 0 ... but what if it is truly 0 not Not found
 
-
-                if (capacity[k] === 0){
-                    if (config.color.field == config.statusField){ 
+                if (capacity[k] === 0) {
+                    if (config.color.field == config.statusField) {
                         if (count[k] != 0) {
-                            // console.log('this is k when config.color.field == config.statusDisplayField') // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still 
-                            // filter by status legend but show the status display via k 
+                            // console.log('this is k when config.color.field == config.statusDisplayField') // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still
+                            // filter by status legend but show the status display via k
                             // console.log(k)
                             detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + display_k + '</div><div class="col-4">' + 'Not found or N/A' + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                         }
@@ -1563,13 +1528,13 @@ function displayDetails(features) {
                             // console.log(k)
                             detail_capacity += '<div class="row"><div class="col-5">' + display_k + '</div><div class="col-4">' + 'Not found or N/A' + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                         }
-                    }                    
+                    }
                 }
                 else {
-                    if (config.color.field == config.statusField){ 
+                    if (config.color.field == config.statusField) {
                         if (count[k] != 0) {
-                            // console.log('this is k when config.color.field == config.statusDisplayField') // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still 
-                            // filter by status legend but show the status display via k 
+                            // console.log('this is k when config.color.field == config.statusDisplayField') // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still
+                            // filter by status legend but show the status display via k
                             // console.log(k)
                             detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + display_k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                         }
@@ -1583,20 +1548,21 @@ function displayDetails(features) {
                     }
                 }
             });
-            // special for GGFT ... should change the variable name in the script to be status not finstatus I suppose.
-            if (config.statusDisplayField === 'finstatus'){
+            // special for GGFT ... should change the variable name in the script to be status not finstatus I suppose.  // TODO
+            if (config.statusDisplayField === 'finstatus') {
                 config.statusDisplayField = 'Status'
             }
-            detail_text += '<div>' + 
+            detail_text +=
+                '<div>' +
                 '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
                 '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5 text-capitalize">' + config.statusDisplayField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
+                '<div class="row "><div class="col-5 text-capitalize">' + config.statusDisplayField + '</div><div class="col-4">' +
+                capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
                 detail_capacity +
                 '</div>';
         }
         // else when there is only one feature or one unit per project in the popup modal
         else {
-
             // if ggft gas finance then we want to override this always since the project level financing info is already printed 
             // and this else only executes if there is just one unit for the project so it'd be redundant and the word 'Capacity' is hardcoded in this feature and makes no sense for ggft
             if (config.scale_by_capacity==false) {
@@ -1608,11 +1574,10 @@ function displayDetails(features) {
 
             }
             else {
-
                 capacityFloat = Number(features[0].properties[config.capacityDisplayField])
 
                 // if capacity is a string and when you convert with Number it is 0 then we can say it is NA or Not found
-                if (features[0].properties[config.capacityDisplayField] === ''){
+                if (features[0].properties[config.capacityDisplayField] === '') {
                         capacityFloatandLabel = 'Not found or N/A'
                 }
 
@@ -1628,7 +1593,7 @@ function displayDetails(features) {
                 // capacityLabel = capacityLabel.replace(/^Capacity\s*/i, '').replace(/[()]/g, '');
 
                 // and it allows status outside of the summary table to have the colored dot when status is the highest filter section
-                if (config.color.field != config.statusDisplayField){
+                if (config.color.field != config.statusDisplayField) {
                     // for filter field in filter, if primary = True then take field name "type" in intg and use it to find the color dictionary in the colors dict above
                     // and then display the projects type field with the appropriate color based on the value and the dictionary
                     detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
@@ -1650,7 +1615,7 @@ function displayDetails(features) {
         if (config.gistUnit == true) {
             detail_text += buildGistTable(all_details_gist);
         
-        } else if (config.color.field != config.statusDisplayField){
+        } else if (config.color.field != config.statusDisplayField) {
             detail_text += '';
         }
         // assign color if equal to status field BUT ignore the capacity part when no capacity label
@@ -1698,68 +1663,69 @@ function buildSatImage(features) {
 
     return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
 }
+
 function showAllPhases(link) {
     config.modal.hide();
     setHighlightFilter(link);
     var bbox = geoJSONBBox({'type': 'FeatureCollection', features: config.linked[link] });
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
+
 function showSelectModal() {
     $('.modal-body').html(config.selectModal);
 }
 
-/* 
-  toolbar filters
-*/
 
+/* 
+  Toolbar Filters
+*/
 function enableNavFilters() {
     enableSearch();
     enableSearchSelect();
     enableCountrySelect();
 
     document.addEventListener("DOMContentLoaded", function() {
-
         // make it as accordion for smaller screens
         if (window.innerWidth < 992) {
-        
-        // close all inner dropdowns when parent is closed
-         $('.navbar .dropup').forEach((everydropdown) => {
-            everydropdown.addEventListener('hidden.bs.dropdown', function () {
-              // after dropdown is hidden, then find all submenus
-                $('.submenu').forEach((everysubmenu) => {
-                  // hide every submenu as well
-                  everysubmenu.style.display = 'none';
+            // close all inner dropdowns when parent is closed
+            $('.navbar .dropup').forEach((everydropdown) => {
+                everydropdown.addEventListener('hidden.bs.dropdown', function () {
+                    // after dropdown is hidden, then find all submenus
+                    $('.submenu').forEach((everysubmenu) => {
+                        // hide every submenu as well
+                        everysubmenu.style.display = 'none';
+                    });
+                })
+            });
+
+            $('.dropdown-menu a').forEach((element) => {
+                element.addEventListener('click', function (e) {
+                    let nextEl = this.nextElementSibling;
+                    if (nextEl && nextEl.classList.contains('submenu')) {
+                        // prevent opening link if link needs to open dropdown
+                        e.preventDefault();
+                        if (nextEl.style.display == 'block') {
+                            nextEl.style.display = 'none';
+                        } else {
+                            nextEl.style.display = 'block';
+                        }
+                    }
                 });
             })
-          });
-        
-        $('.dropdown-menu a').forEach((element) => {
-            element.addEventListener('click', function (e) {
-                let nextEl = this.nextElementSibling;
-                if(nextEl && nextEl.classList.contains('submenu')) {	
-                  // prevent opening link if link needs to open dropdown
-                  e.preventDefault();
-                  if(nextEl.style.display == 'block'){
-                    nextEl.style.display = 'none';
-                  } else {
-                    nextEl.style.display = 'block';
-                  }
-        
-                }
-            });
-          })
         }
-        // end if innerWidth
+        // end if innerWidth  // TODO?
     }); 
 }
+
 function enableCountrySelect() {
     $.ajax({
         type: "GET",
         url: config.countryFile,
         dataType: "json",
-        success: function(jsonData) { config.countries = jsonData; buildCountrySelect();}
+        success: function(jsonData) { config.countries = jsonData; buildCountrySelect(); }
     });
 }
+
 function buildCountrySelect() {
     if (config.allCountrySelect) {
         $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>');
@@ -1831,7 +1797,6 @@ function buildCountrySelect() {
     config.selectedCountryText = '';
 }
 
-  
 // this removes diacritics in the data so that when you search you get all the possible options ignored special diacritics
 // this is applied so that only the non tile maps are impacted
 // for tile maps it'll be too slow so we do it in data prep (having a special search column and adding that to the column options to search within)
@@ -1847,15 +1812,15 @@ function removeDiacritics(value) {
     return noDiacriticsValue;
 }
 
-
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
-        filterData();
 
+        filterData();
     }, 500));
     config.searchText = '';
 }
+
 function enableSearchSelect() {
     let dropdown_html = '';
     let allSearchFields = [];
@@ -1880,7 +1845,6 @@ function enableSearchSelect() {
 }
 
 function enableResetAll() {
-
     $('#selectedCountryLabel').text("all");
     config.selectedCountryText = '';
     config.selectedCountries = [];
@@ -1897,17 +1861,13 @@ function enableResetAll() {
     config.selectedSearchFields = allSearchFields.join(',');
     $('#selectedSearchLabel').text("all");
 
-
     filterData();
-
 }  
 
 
-
 /* 
-  Util functions
+  Util Functions
 */
-
 function getUniqueFeatures(features, comparatorProperty) {
     const uniqueIds = new Set();
     const uniqueFeatures = [];
@@ -1937,48 +1897,50 @@ function debounce(func, wait, immediate) {
 };
 
 /* from https://github.com/geosquare/geojson-bbox */
-function geoJSONBBox (gj) {
+function geoJSONBBox(gj) {
     var coords, bbox;
     if (!gj.hasOwnProperty('type')) return;
     coords = getCoordinatesDump(gj);
-    bbox = [ Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,
-        Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY,];
+    bbox = [
+        Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY,
+        Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY,
+    ];
     return coords.reduce(function(prev,coord) {
-      return [
-        Math.min(coord[0], prev[0]),
-        Math.min(coord[1], prev[1]),
-        Math.max(coord[0], prev[2]),
-        Math.max(coord[1], prev[3])
-      ];
+        return [
+            Math.min(coord[0], prev[0]),
+            Math.min(coord[1], prev[1]),
+            Math.max(coord[0], prev[2]),
+            Math.max(coord[1], prev[3])
+        ];
     }, bbox);
-  };
+};
   
 function getCoordinatesDump(gj) {
     var coords;
     if (gj.type == 'Point') {
-      coords = [gj.coordinates];
+        coords = [gj.coordinates];
     } else if (gj.type == 'LineString' || gj.type == 'MultiPoint') {
-      coords = gj.coordinates;
+        coords = gj.coordinates;
     } else if (gj.type == 'Polygon' || gj.type == 'MultiLineString') {
-      coords = gj.coordinates.reduce(function(dump,part) {
-        return dump.concat(part);
-      }, []);
+        coords = gj.coordinates.reduce(function(dump,part) {
+            return dump.concat(part);
+        }, []);
     } else if (gj.type == 'MultiPolygon') {
-      coords = gj.coordinates.reduce(function(dump,poly) {
-        return dump.concat(poly.reduce(function(points,part) {
-          return points.concat(part);
-        },[]));
-      },[]);
+        coords = gj.coordinates.reduce(function(dump,poly) {
+            return dump.concat(poly.reduce(function(points,part) {
+                return points.concat(part);
+            },[]));
+        },[]);
     } else if (gj.type == 'Feature') {
-      coords =  getCoordinatesDump(gj.geometry);
+        coords =  getCoordinatesDump(gj.geometry);
     } else if (gj.type == 'GeometryCollection') {
-      coords = gj.geometries.reduce(function(dump,g) {
-        return dump.concat(getCoordinatesDump(g));
-      },[]);
+        coords = gj.geometries.reduce(function(dump,g) {
+            return dump.concat(getCoordinatesDump(g));
+        },[]);
     } else if (gj.type == 'FeatureCollection') {
-      coords = gj.features.reduce(function(dump,f) {
-        return dump.concat(getCoordinatesDump(f));
-      },[]);
+        coords = gj.features.reduce(function(dump,f) {
+            return dump.concat(getCoordinatesDump(f));
+        },[]);
     }
     return coords;
 }
@@ -1990,7 +1952,6 @@ function removeLastComma(str) {
     return str;
 }
 
-
 function makeCase(str) {
     str = str.replace(/\w\S*/g, function(txt) {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
@@ -1999,7 +1960,6 @@ function makeCase(str) {
 }
 
 // The following values can be changed to control rotation speed:
-
 // At low zooms, complete a revolution every two minutes.
 const secondsPerRevolution = 150;
 // Above zoom level 5, do not rotate.
@@ -2013,10 +1973,8 @@ let spinEnabled = true;
 
 // the function in charge of spinning the globe projection of the map
 function spinGlobe() {
-
     const zoom = map.getZoom();
-    if (config.projection == 'globe'){
-
+    if (config.projection == 'globe') {
         if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
             let distancePerSecond = 360 / secondsPerRevolution;
             if (zoom > slowSpinZoom) {
@@ -2040,16 +1998,13 @@ function getStandardDeviation (array) {
     const n = array.length
     const mean = array.reduce((a, b) => a + b) / n
     return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
-    }
-
-
+}
 
 map.on('moveend', () => {
     spinGlobe();
 });
 
-
-// # adding option to pause spin with space important for smaller screens
+// adding option to pause spin with space important for smaller screens
 document.addEventListener('keydown', (e) => {
     spinEnabled = !spinEnabled;
     if (e.code === "Space") {
@@ -2062,4 +2017,3 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
