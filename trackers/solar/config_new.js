@@ -64,7 +64,7 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    color: {
+    color_association: {
         field: 'status',
         values: {
             'operating': 'green',
@@ -80,5 +80,5 @@ var config = {
 
     minRadius: 0.8,
 
-    showMinCapacity: true  // TODO where/how is this used?
+    showMinCapacity: true,
 }

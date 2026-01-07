@@ -66,18 +66,17 @@ var config = {
     
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    color: {
+    color_association: {
         field: 'status-group',
         values: {
             'operating': 'red',
             'proposed-plus': 'green',
-            // 'pre-construction-plus': 'green',
             'construction-plus': 'blue',
             'retired-plus': 'grey',
             'cancelled': 'grey',
             'shelved': 'grey',
             'mothballed-plus': 'grey',
-            'announced': 'green'
+            'announced': 'green',
         },
     },
 

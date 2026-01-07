@@ -51,11 +51,11 @@ var config = {
         'start-year': {'label': 'Start year'},
         'subnational': {'display': 'location'},
         'areas': {'display': 'location'},
-    }
+    },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    color: {
+    color_association: {
         field: 'status',
         values: {
             'operating': 'red',

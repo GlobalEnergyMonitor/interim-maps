@@ -80,21 +80,14 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    colors: {  // TODO could these be standardized and added to site-config.js?
-        'light red': '#f28b82',
+    site_colors: {  // TODO could these be standardized and added to site-config.js?
         'red': '#c74a48',
-        'light blue': '#5dade2',
         'blue': '#5c62cf',
         'green': '#4c9d4f',
-        'light green': '#66c26e',
-        'light grey': '#e0e0e0',
-        'grey': '#8f8f8e',
         'orange': '#FF8C00',
-        'yellow': '#f3ff00',
         'black': '#000000',
-        'purple': '#9370db'
     },
-    color: {
+    color_association: {
         field: 'status', // prod type
         values: {
             'announced': 'orange',
@@ -104,7 +97,7 @@ var config = {
             'cancelled': 'red',
             'retired': 'red',
             'mothballed': 'blue',
-            'unknown': 'black'
+            'unknown': 'black',
         },
     },
 

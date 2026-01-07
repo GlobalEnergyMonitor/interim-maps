@@ -71,7 +71,7 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    colors: {
+    site_colors: {
         'red': '#c74a48',
         'light blue greeninfo': '#74add1',
         'blue': '#5c62cf',
@@ -82,9 +82,10 @@ var config = {
         'orange': '#FF8C00',
         'yellow': '#f3ff00',
     },
-    color: { /* will be processed both into style json for paint circle-color property, and for legend.
-            what's right property name?? is color also listing values used in the summary?
-            should this just be made part of the filter? that might allow to address multiple properties */
+    /* will be processed both into style json for paint circle-color property, and for legend.
+       what's right property name?? is color also listing values used in the summary?
+       should this just be made part of the filter? that might allow to address multiple properties */
+    color_association: {
         field: 'status',
         values: {
             'operating': 'red',

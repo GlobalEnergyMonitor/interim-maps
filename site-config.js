@@ -12,7 +12,7 @@ var site_config = {
     img_detail_zoom: 15,
 
     /* Define labels for sitewide colors, referenced in tracker config */
-    colors: {
+    site_colors: {
         'red': '#c00',
         'light blue': '#74add1',
         'blue': '#4575b4',
@@ -24,7 +24,7 @@ var site_config = {
     },
 
     /* define the column and associated values for color application */
-    color: {
+    color_association: {
         field: 'status',
         values: {
             'operating': 'green',

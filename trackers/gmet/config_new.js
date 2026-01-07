@@ -109,7 +109,14 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    color: {
+    site_colors: {  // TODO could these be standardized and added to site-config.js?
+        'red': '#c74a48',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'orange': '#FF8C00',
+        'yellow': '#d4af00'
+    },
+    color_association: {
         field: 'legend-filter',
         label: 'Plume and Infrastructure Projects',
         values: {
@@ -121,17 +128,6 @@ var config = {
             'lng-import': 'green',
             'lng-export': 'green',
         },
-    },
-    colors: {  // TODO could these be standardized and added to site-config.js?
-        'red': '#c74a48',
-        'light blue greeninfo': '#74add1',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'light grey greeninfo': '#ccc',
-        'grey': '#8f8f8e',
-        'dark grey': '#4B4B4B',
-        'orange': '#FF8C00',
-        'yellow': '#d4af00'
     },
 
     capacityField: 'capacity-scaled',
@@ -147,5 +143,5 @@ var config = {
     highZoomMinLineWidth: 4,
     highZoomMaxLineWidth: 32,
 
-    geometries: ['Point','LineString'],
+    geometries: ['Point', 'LineString'],
 }

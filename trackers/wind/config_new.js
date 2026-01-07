@@ -64,7 +64,7 @@ var config = {
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
     /* define the column and associated values for color application */
-    color: {
+    color_association: {
         field: 'status',
         values: {
             'operating': 'green',

@@ -6,8 +6,8 @@ function processConfig() {
     config.baseMap = 'Streets';
     config.icons = [];
 
-    Object.keys(config.color.values).forEach((color_key) => {
-        config.color.values[color_key] = config.colors[config.color.values[color_key]];
+    Object.keys(config.color_association.values).forEach((color_key) => {
+        config.color_association.values[color_key] = config.site_colors[config.color_association.values[color_key]];
     });
 }
 
@@ -210,9 +210,9 @@ function findLinkedAssets() {
 
         // Build summary count of capacity across all linked assets and generate icon based on that label if more than one status
         if (features[0].geometry.type === 'Point') {
-            let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
+            let icon = Object.assign(...Object.keys(config.color_association.values).map(k => ({ [config.color_association.values[k]]: 0 })));
             features.forEach((feature) => {  
-                icon[config.color.values[feature.properties[config.color.field]]] += Number(feature.properties[config.capacityField]);
+                icon[config.color_association.values[feature.properties[config.color_association.field]]] += Number(feature.properties[config.capacityField]);
             });
             if (Object.values(icon).filter(v => v != 0).length > 1) {
                 // normalize values to 10
@@ -377,13 +377,13 @@ function addLayers() {
 
 function addPointLayer() {
     // First build circle layer
-    //  build style json for circle-color based on config.color
+    //  build style json for circle-color based on config.color_association
     let paint = config.pointPaint;
-    if ('color' in config) {
+    if ('color_association' in config) {
         paint['circle-color'] = [
             'match',
-            ['get', config.color.field],
-            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+            ['get', config.color_association.field],
+            ...Object.keys(config.color_association.values).flatMap(key => [key, config.color_association.values[key]]),
             '#000000'
         ];
     }
@@ -521,11 +521,11 @@ function addPointLayer() {
 function addLineLayer() {
     let paint = config.linePaint;
 
-    if ('color' in config) {
+    if ('color_association' in config) {
         paint['line-color'] = [
             'match',
-            ['get', config.color.field],
-            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+            ['get', config.color_association.field],
+            ...Object.keys(config.color_association.values).flatMap(key => [key, config.color_association.values[key]]),
             '#000000'
         ];
     }
@@ -716,7 +716,7 @@ function buildFilters() {
             }
         }
         // this creates the section title and adds the select all feature only to the sections after the first one, if there is no tooltip logic so for all non europe maps
-        else if (config.color.field !== filter.field) {
+        else if (config.color_association.field !== filter.field) {
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
@@ -727,7 +727,7 @@ function buildFilters() {
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
             check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
-            check += (config.color.field === filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
+            check += (config.color_association.field === filter.field ? '<span class="legend-dot" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
@@ -1275,9 +1275,9 @@ function displayDetails(features) {
                 // if it has this colorcoded label then it goes to the color dictionary 
                 // matches up the field name, uses fieldLabel to display label and then also uses color
                 let colorLabel = features.map((feature) => feature.properties[detail]);
-                detail_text += '<span class="fw-bold">' + config.color.fieldLabel + '</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.color.field] ] + '"></span>' +
-                    '<span class="text-capitalize">' + features[0].properties[config.color.field] + '</span><br/>';
+                detail_text += '<span class="fw-bold">' + config.color_association.fieldLabel + '</span>: ' +
+                    '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.color_association.field] ] + '"></span>' +
+                    '<span class="text-capitalize">' + features[0].properties[config.color_association.field] + '</span><br/>';
             } else if (config.detailView[detail]['display'] === 'gist-unit-level') {
                 // cycle through all of them to only group them if there is value there 
                 if (features[0].properties[detail] === 0 && features[0].properties[detail] === 0.0) {
@@ -1397,13 +1397,13 @@ function displayDetails(features) {
                 }
 
                 if (capacity[k] === 0) {
-                    if (config.color.field === config.statusField) {
+                    if (config.color_association.field === config.statusField) {
                         if (count[k] !== 0) {
                             // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
                             detail_capacity +=
                                 '<div class="row">' +
                                     '<div class="col-5">' +
-                                        '<span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' +
+                                        '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
                                         display_k +
                                     '</div>' +
                                     '<div class="col-4">' + 'Not found or N/A' + '</div>' +
@@ -1421,13 +1421,13 @@ function displayDetails(features) {
                         }
                     }
                 } else {
-                    if (config.color.field === config.statusField) {
+                    if (config.color_association.field === config.statusField) {
                         if (count[k] !== 0) {
                             // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
                             detail_capacity +=
                                 '<div class="row">' +
                                     '<div class="col-5">' +
-                                        '<span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' +
+                                        '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
                                         display_k +
                                     '</div>' +
                                     '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
@@ -1468,9 +1468,9 @@ function displayDetails(features) {
             // and this else only executes if there is just one unit for the project so it'd be redundant and the word 'Capacity' is hardcoded in this feature and makes no sense for ggft
             if (config.scale_by_capacity === false) {
                 // we do not want the capacity but we do want status since that is relevant for single unit ggft projects
-                // since we know for ggft the status is a color field we do not need the extra logic seen below with 'config.color.field != config.statusDisplayField'
+                // since we know for ggft the status is a color field we do not need the extra logic seen below with 'config.color_association.field != config.statusDisplayField'
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span>' +
+                    '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.statusDisplayField] ] + '"></span>' +
                     '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             }
             else {
@@ -1488,7 +1488,7 @@ function displayDetails(features) {
                 // capacityLabel = capacityLabel.replace(/^Capacity\s*/i, '').replace(/[()]/g, '');
 
                 // and it allows status outside of the summary table to have the colored dot when status is the highest filter section
-                if (config.color.field !== config.statusDisplayField) {
+                if (config.color_association.field !== config.statusDisplayField) {
                     // for filter field in filter, if primary = True then take field name 'type' in intg and use it to find the color dictionary in the colors dict above
                     // and then display the projects type field with the appropriate color based on the value and the dictionary
                     detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
@@ -1496,7 +1496,7 @@ function displayDetails(features) {
                         '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
                 } else {
                     detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                        '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
+                        '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
                         '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
                         '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
                 }
@@ -1511,19 +1511,19 @@ function displayDetails(features) {
         if (config.gistUnit === true) {
             detail_text += buildGistTable(all_details_gist);
         }
-        if (config.color.field !== config.statusDisplayField) {
+        if (config.color_association.field !== config.statusDisplayField) {
             detail_text += '';
         } else {  // assign color if equal to status field BUT ignore the capacity part when no capacity label
             // handle for statuses that have needless hyphens when / if not handled in preprocessing with statusDisplay column
             if (features[0].properties[config.statusDisplayField] === 'operating-pre-retirement') {
                 let statusEdited = features[0].properties[config.statusDisplayField].replace('operating-pre-retirement', 'Operating Pre-Retirement')
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
+                    '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
                     '<span class="text-lowercase">' + statusEdited + '</span><br/>';
             } else {
                 // add status part not capacity part 
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
+                    '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
                     '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             }
         }
