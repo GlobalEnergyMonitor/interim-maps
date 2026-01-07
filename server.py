@@ -2,7 +2,7 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 import os
 
 
-class FrontController(SimpleHTTPRequestHandler):
+class FrontController(SimpleHTTPRequestHandler):  # Written by ChatGPT
     def do_GET(self):
         # Only rewrite if the path is a directory or doesn't exist
         file_path = self.path.lstrip("/")

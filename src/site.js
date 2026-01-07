@@ -7,7 +7,7 @@ function processConfig() {
     config.icons = [];
 
     Object.keys(config.color.values).forEach((color_key) => {
-        config.color.values[color_key] = config.colors[ config.color.values[color_key] ];
+        config.color.values[color_key] = config.colors[config.color.values[color_key]];
     });
 }
 
@@ -1475,12 +1475,13 @@ function displayDetails(features) {
             }
             else {
                 let capacityFloat = Number(features[0].properties[config.capacityDisplayField])
+                let capacityFloatandLabel;
 
                 // if capacity is a string and when you convert with Number it is 0 then we can say it is NA or Not found
                 if (features[0].properties[config.capacityDisplayField] === '') {
-                    let capacityFloatandLabel = 'Not found or N/A'
+                    capacityFloatandLabel = 'Not found or N/A'
                 } else {
-                    let capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel
+                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel
                 }
                 // this handles capacity adjustment for solo projects where it looks redundant to have Capacity written out twice
                 // Remove 'Capacity' prefix and parentheses from capacityLabel // TODO look into a better way to handle, issue if capacity is nan or undefined like intentionally is for GOGET

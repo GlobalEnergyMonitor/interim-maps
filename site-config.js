@@ -8,7 +8,7 @@ var site_config = {
     projection: 'naturalEarth',
 
     /* Zoom level that asset detail cards open at; this is a good one to override in tracker config,
-     depending on scale of facilities */
+       depending on scale of facilities */
     img_detail_zoom: 15,
 
     /* Define labels for sitewide colors, referenced in tracker config */
@@ -22,7 +22,6 @@ var site_config = {
         'orange': '#fd7e14',
         'yellow': '#f3ff00',
     },
-    /* style test parameters!
 
     /* define the column and associated values for color application */
     color: {
@@ -83,7 +82,7 @@ var site_config = {
     /* by default, no all phases link; override in tracker config where appropriate */
     showAllPhases: false,
     showMaxCapacity: true,
-    showMinCapacity: true,  // TODO default false?
+    showMinCapacity: false,
     showCapacityTable: true,
 
     /* zoom level to set map when viewing all phases */
