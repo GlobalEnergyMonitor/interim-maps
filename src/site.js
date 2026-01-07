@@ -161,27 +161,6 @@ function addTiles() {
     });
 }
 
-// function geoJSONFromTiles() {
-//     map.off('idle', geoJSONFromTiles);
-//     let layers = [];
-//     if (config.geometries.includes('Point')) layers.push('assets-minmax-point');
-//     if (config.geometries.includes('LineString')) layers.push('assets-minmax-line');
-//     config.geojson = {
-//         'type': 'FeatureCollection',
-//         'features': map.queryRenderedFeatures({layers: layers})
-//     }
-//
-//     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
-//
-//     setMinMax();
-//     layers.forEach(layer => {
-//         map.removeLayer(layer);
-//     });
-//     findLinkedAssets();
-//     addLayers();
-//     map.on('idle', enableUX); // enableUX starts to renders data
-// }
-
 // Builds lookup of linked assets by the link column
 // and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
@@ -574,15 +553,6 @@ function addLineLayer() {
             ]
         ];
     }
-
-    // TODO what is this?
-    //         config.maxLineCapacity, config.maxLineWidth
-    //     10, ['interpolate', interpolateExpression,
-    //         ['to-number',['get', config.capacityField]],
-    //         config.minLineCapacity, config.highZoomMinLineWidth,
-    //         config.maxLineCapacity, config.highZoomMaxLineWidth
-    //
-    // ];
 
     map.addLayer({
         'id': 'assets-lines', 
@@ -1169,12 +1139,6 @@ function geoJSON2Table() {  // TODO rework?
         });
     });
 }
-
-// function geoJSON2Headers() {
-//     return Object.keys(config.geojson.features[0].properties).map((k) => {
-//         return {'title': k}
-//     });
-// }
 
 
 /*
@@ -1848,7 +1812,7 @@ function geoJSONBBox(gj) {
 };
   
 function getCoordinatesDump(gj) {
-    var coords;
+    let coords;
     if (gj.type === 'Point') {
         coords = [gj.coordinates];
     } else if (gj.type === 'LineString' || gj.type === 'MultiPoint') {
@@ -1922,14 +1886,6 @@ function spinGlobe() {
         }
     }
 }
-
-// function getStandardDeviation (array) {
-//     if (!array || array.length === 0) {return 0;}
-//
-//     const n = array.length
-//     const mean = array.reduce((a, b) => a + b) / n
-//     return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
-// }
 
 map.on('moveend', () => {
     spinGlobe();
