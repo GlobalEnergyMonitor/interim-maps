@@ -38,8 +38,7 @@ var config = {
         'parent-port': {'label': 'Parent Port'},
         'start-year': {'label': 'Start Year'},
         'end-year': {'label': 'Retired Year'},
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

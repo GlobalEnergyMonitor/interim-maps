@@ -43,8 +43,7 @@ var config = {
         'owner': {'label': 'Owner'},
         'start-year': {'label': 'Start date'},
         'location-accuracy': {'label': 'Coordinate Accuracy'},
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

@@ -1328,11 +1328,11 @@ function displayDetails(features) {
         }
     });
 
-    let assetLabel = typeof config.assetLabel === 'string'
+    let assetLabel = typeof config.assetLabel === 'string'  // TODO what are these doing? remove? always a string?
         ? config.assetLabel 
         : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
 
-    let capacityLabel = typeof config.capacityLabel === 'string'
+    let capacityLabel = typeof config.capacityLabel === 'string'  // TODO what are these doing? remove? always a string?
         ? config.capacityLabel 
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 

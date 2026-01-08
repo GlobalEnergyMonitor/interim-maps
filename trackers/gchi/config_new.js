@@ -40,8 +40,7 @@ var config = {
         'product-secondary': {'label': 'Secondary Products'},
         'feedstock': {'label': 'Feedstock'},
         'feedstock-accuracy': {'label': 'Feedstock Accuracy'},
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

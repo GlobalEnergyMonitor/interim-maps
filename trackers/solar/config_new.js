@@ -40,8 +40,7 @@ var config = {
         'start-year': {'label': 'Start Year'},
         'tech-type': {'label': 'Technology Type'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

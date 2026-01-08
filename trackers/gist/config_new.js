@@ -81,8 +81,7 @@ var config = {
         'retired-nominal-eaf-steel-capacity-(ttpa)': {'display': 'gist-unit-level','label': 'Retired EAF steel capacity (ttpa)'},
         'retired-nominal-ohf-steel-capacity-(ttpa)': {'display': 'gist-unit-level','label': 'Retired OHF steel capacity (ttpa)'},
 
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

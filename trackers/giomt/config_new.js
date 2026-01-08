@@ -36,12 +36,12 @@ var config = {
     detailView: {
         'name': {'display': 'heading'},
         'capacity-display': {'label': 'Design Capacity (ttpa)'},
-        'location-display': {'display': 'location'},
         'total-reserves-proven-and-probable': {'label': 'Reserves (thousand tonnes)'},
         'total-resource-inferred': {'label': 'Resources (thousand tonnes)'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'location-accuracy': {'label': 'Location Accuracy'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

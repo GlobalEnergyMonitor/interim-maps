@@ -39,8 +39,7 @@ var config = {
         'tech-type': {'label': 'Turbine/Engine Technology'},
         'fuel': {'label': 'Fuel'},
         'start-year': {'label': 'Start year'},
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

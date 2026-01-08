@@ -35,9 +35,7 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
-        // 'status': {'label': 'Status'},
         'unit-name': {'label': 'Unit/Segment'},
-        // 'capacity-display': {'label': 'Capacity'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'start-year': {'label': 'Start Year'},

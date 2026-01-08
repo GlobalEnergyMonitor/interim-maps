@@ -75,7 +75,8 @@ var config = {
         'instrument': {'label': 'Instrument'},
         'areas': {'label': 'Country/Area(s)'},
         // 'geminfrawiki': {'label': 'Infrastructure Wiki'}, // or display md to just display as text md
-        'areas-subnat-sat-display': {'display': 'location'}, 
+
+        'location-display': {'display': 'location'},
         'infra-wiki-md': {'display': 'simple_markup'},
         'carbon-mapper-md': {'display': 'simple_markup'},
     },

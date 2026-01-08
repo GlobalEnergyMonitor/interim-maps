@@ -34,8 +34,8 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
-        'reactor-type': {'Label': 'Reactor'},  // TODO why are some labels capitalized?
-        'model': {'Label': 'Model'},
+        'reactor-type': {'label': 'Reactor'},
+        'model': {'label': 'Model'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'location-accuracy': {'label': 'Location Accuracy'},

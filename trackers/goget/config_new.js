@@ -43,8 +43,7 @@ var config = {
         'prod-year-gas': {'label': 'Production Year - Gas'},
         'prod-oil': {'label': 'Production - Oil (Million bbl/y)'},
         'prod-gas': {'label': 'Production - Gas (Million m³/y)'},
-        'subnational': {'display': 'location'},
-        'areas': {'display': 'location'},
+        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
