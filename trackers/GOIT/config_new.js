@@ -6,26 +6,6 @@ var config = {
     assetFullLabel: 'Pipelines',
     assetLabel: 'segments',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed. 
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status-group',
-            values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'cancelled', 'retired-plus', 'shelved' ],
-            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved'],
-        },
-        {
-            field: 'Fuel',
-            values: ['Oil', 'NGL'],
-            values_labels: ['Oil', 'NGL'],
-            filterFunction: (value, selectedValue) => {
-                // Check if the value contains the selectedValue (Oil or NGL)
-                return value.includes(selectedValue);
-            }
-        },
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -80,6 +60,23 @@ var config = {
             'shelved': 'grey',
         },
     },
+
+    filters: [
+        {
+            field: 'status-group',
+            values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'cancelled', 'retired-plus', 'shelved' ],
+            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved'],
+        },
+        {
+            field: 'Fuel',
+            values: ['Oil', 'NGL'],
+            values_labels: ['Oil', 'NGL'],
+            filterFunction: (value, selectedValue) => {
+                // Check if the value contains the selectedValue (Oil or NGL)
+                return value.includes(selectedValue);
+            }
+        },
+    ],
 
     capacityLabel: 'BOEd',
     showMaxCapacity: false,

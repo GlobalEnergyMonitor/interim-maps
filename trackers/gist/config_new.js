@@ -10,31 +10,6 @@ var config = {
     gistUnit: true,
     showToolTip: true,
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed.
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'prod-method-tier',
-            label: 'Production method',
-            /* values need to be specified for ordering */
-            values: ['Electric', 'ElectricOxygen','Oxygen', 'IronmakingBF', 'IntegratedBFandDRI', 'IronmakingDRI',
-                    'IntegratedDRI', 'IntegratedBF','Integratedunknown','Steelotherunspecified','Ironotherunspecified'],
-            values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF & DRI)', 'Ironmaking (DRI)',
-                    'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified'],
-            primary: true,
-            field_hover_text: 'For full descriptions of steelmaking route categories, see the <a href="https://globalenergymonitor.org/projects/global-iron-and-steel-tracker/frequently-asked-questions/"> FAQs</a>.',
-        },
-        // do not use status-legend since it is for multi tracker maps
-        {
-            field: 'status',
-            label: 'Plant status',
-            values: ['announced', 'cancelled', 'construction', 'mothballed', 'operating', 'operating-pre-retirement', 'retired'], //'mothballed-pre-retirement',
-            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Operating', 'Operating Pre-Retirement', 'Retired'], // 'Mothballed Pre-Retirement', 
-            field_hover_text: "Status reflects the plant-level status. Some capacities (e.g., announced expansions at a plant that already operates capacity) may not appear under their specific category if the overall plant status is different.",
-        },
-    ],
-    
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -142,6 +117,28 @@ var config = {
             'Ironotherunspecified': 'light grey',
         },
     },
+
+    filters: [
+        {
+            field: 'prod-method-tier',
+            label: 'Production method',
+            /* values need to be specified for ordering */
+            values: ['Electric', 'ElectricOxygen','Oxygen', 'IronmakingBF', 'IntegratedBFandDRI', 'IronmakingDRI',
+                'IntegratedDRI', 'IntegratedBF','Integratedunknown','Steelotherunspecified','Ironotherunspecified'],
+            values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF & DRI)', 'Ironmaking (DRI)',
+                'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified'],
+            primary: true,
+            field_hover_text: 'For full descriptions of steelmaking route categories, see the <a href="https://globalenergymonitor.org/projects/global-iron-and-steel-tracker/frequently-asked-questions/"> FAQs</a>.',
+        },
+        // do not use status-legend since it is for multi tracker maps
+        {
+            field: 'status',
+            label: 'Plant status',
+            values: ['announced', 'cancelled', 'construction', 'mothballed', 'operating', 'operating-pre-retirement', 'retired'], //'mothballed-pre-retirement',
+            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Operating', 'Operating Pre-Retirement', 'Retired'], // 'Mothballed Pre-Retirement',
+            field_hover_text: "Status reflects the plant-level status. Some capacities (e.g., announced expansions at a plant that already operates capacity) may not appear under their specific category if the overall plant status is different.",
+        },
+    ],
 
     capacityLabel: '',
     capacityField: 'capacity-scaled',

@@ -6,17 +6,6 @@ var config = {
     assetFullLabel: 'Oil & Gas Extraction Areas',
     assetLabel: 'areas',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed. 
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            values: ['operating', 'in-development', 'discovered', 'shut-in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ''],
-            values_labels: ['Operating', 'In development', 'Discovered', 'Shut in', 'Decommissioned', 'Cancelled', 'Abandoned', 'UGS', 'Not found'],
-        },
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -81,6 +70,14 @@ var config = {
             'not found': 'black'
         }
     },
+
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'in-development', 'discovered', 'shut-in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ''],
+            values_labels: ['Operating', 'In development', 'Discovered', 'Shut in', 'Decommissioned', 'Cancelled', 'Abandoned', 'UGS', 'Not found'],
+        },
+    ],
 
     nameField: 'wiki-name',
     countryFile: './countries.js',

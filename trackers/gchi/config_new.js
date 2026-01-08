@@ -5,19 +5,6 @@ var config = {
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
     assetLabel: 'projects',
-    
-    /* define the column and values used for the filter UI. There can be multiple filters listed.
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            label: 'Status',
-            values: ['operating'],
-            values_labels: ['Operating'],
-            primary: true
-        },
-    ],
 
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
@@ -58,6 +45,13 @@ var config = {
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
+
+    filters: [
+        {
+            field: 'status',
+            values: ['operating'],
+        },
+    ],
 
     minRadius: 4,
     highZoomMinRadius: 6,

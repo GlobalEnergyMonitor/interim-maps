@@ -5,31 +5,7 @@ var config = {
     /* Labels for describing the assets */
     assetFullLabel: 'Coal Mine Projects',
     assetLabel: 'projects',
-
-    /* define the column and values used for the filter UI. There can be multiple filters listed.
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            values: ['operating', 'proposed', 'cancelled', 'retired', 'shelved', 'mothballed'],
-            primary: true
-        },
-        {
-            field: 'mine-type',
-            label: 'Mine Type',
-            values: ['surface', 'underground', 'underground-surface', '-'],
-            values_labels: ['Surface', 'Underground', 'Underground & Surface', 'Not found']
-
-        },
-        {
-            field: 'coal-grade',
-            label: 'Coal Grade',
-            values: ['thermal', 'met', 'thermal-met', '-'],
-            values_labels: ['Thermal', 'Met', 'Thermal & Met', 'Not found']
-        },
-    ],
-
+    
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -96,6 +72,27 @@ var config = {
             'mothballed': 'grey',
         },
     },
+
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'proposed', 'cancelled', 'retired', 'shelved', 'mothballed'],
+            primary: true
+        },
+        {
+            field: 'mine-type',
+            label: 'Mine Type',
+            values: ['surface', 'underground', 'underground-surface', '-'],
+            values_labels: ['Surface', 'Underground', 'Underground & Surface', 'Not found']
+
+        },
+        {
+            field: 'coal-grade',
+            label: 'Coal Grade',
+            values: ['thermal', 'met', 'thermal-met', '-'],
+            values_labels: ['Thermal', 'Met', 'Thermal & Met', 'Not found']
+        },
+    ],
 
     showMaxCapacity: false,
     // capacityLabel: '(Mt)',

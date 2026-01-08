@@ -91,6 +91,16 @@ var site_config = {
     /* initial load zoom multiplier */
     zoomFactor: 1,
 
+    /* define the column and values used for the filter UI. There can be multiple filters listed.
+       Additionally, a custom `label` can be defined (default is the field),
+       and `values-label` (an array matching elements in `values`) */
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'construction', 'pre-construction', 'announced', 'shelved', 'mothballed', 'retired', 'cancelled'],
+        },
+    ],
+
     countryFile: '../../src/countries.json', 
     allCountrySelect: true,
     multiCountry: false,

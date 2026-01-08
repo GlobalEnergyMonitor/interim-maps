@@ -6,24 +6,6 @@ var config = {
     assetFullLabel: "Wind farm phases",
     assetLabel: 'phase',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed. 
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
-            values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
-            primary: true
-        },
-        {
-            field: 'installation-type',
-            label: 'Installation Type',
-            values: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
-            values_labels: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
-        },
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -77,4 +59,19 @@ var config = {
             'cancelled': 'grey',  // not light grey
         },
     },
+
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
+            values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
+            primary: true
+        },
+        {
+            field: 'installation-type',
+            label: 'Installation Type',
+            values: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
+            values_labels: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
+        },
+    ],
 }

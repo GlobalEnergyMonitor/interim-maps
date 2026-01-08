@@ -6,16 +6,6 @@ var config = {
     assetFullLabel: "Coal-fired Units",
     assetLabel: 'units',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed. 
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            values: ['operating','construction','permitted','pre-permit', 'announced','retired','cancelled', 'shelved','mothballed'],
-        },
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
@@ -68,4 +58,11 @@ var config = {
             'shelved': 'grey',
         },
     },
+
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'construction', 'permitted', 'pre-permit', 'announced', 'retired', 'cancelled', 'shelved', 'mothballed'],
+        },
+    ],
 }

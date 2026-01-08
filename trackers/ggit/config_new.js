@@ -6,25 +6,6 @@ var config = {
     assetFullLabel: 'Gas Infrastructure projects',
     assetLabel: 'projects',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed.
-       Additionally a custom `label` can be defined (default is the field),
-       and `values-label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status-legend',
-            label: 'Status',
-            values: ['operating','proposed-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
-            values_labels: ['Operating','Proposed/Announced/Discovered', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved']
-
-        },
-        {
-            field: 'tracker-custom',
-            label: 'Infrastructure Type',
-            values: ['GGIT-import', 'GGIT-export', 'GGIT'],  // cannot have any spaces in the values!
-            values_labels: ['LNG Terminals (Import)', 'LNG Terminals (Export)', 'Gas Pipelines']
-        }
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
@@ -79,6 +60,22 @@ var config = {
             'announced': 'green',
         },
     },
+
+    filters: [
+        {
+            field: 'status-legend',
+            label: 'Status',
+            values: ['operating','proposed-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
+            values_labels: ['Operating','Proposed/Announced/Discovered', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved']
+
+        },
+        {
+            field: 'tracker-custom',
+            label: 'Infrastructure Type',
+            values: ['GGIT-import', 'GGIT-export', 'GGIT'],  // cannot have any spaces in the values!
+            values_labels: ['LNG Terminals (Import)', 'LNG Terminals (Export)', 'Gas Pipelines']
+        }
+    ],
 
     multiCountry: true,
 

@@ -7,24 +7,6 @@ var config = {
     assetLabel: 'phase',
     interpolate: ["cubic-bezier", 0, 0, 0, 1],
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed. 
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
-            values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
-            primary: true,
-        },
-        {
-            field: 'tech-type',
-            label: 'Technology Type',
-            values: ['Solar Thermal', 'PV', 'Assumed PV'],
-            values_labels: ['Solar Thermal', 'PV', 'Assumed PV'],
-        },
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -78,7 +60,21 @@ var config = {
         },
     },
 
-    minRadius: 0.8,
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
+            values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
+            primary: true,
+        },
+        {
+            field: 'tech-type',
+            label: 'Technology Type',
+            values: ['Solar Thermal', 'PV', 'Assumed PV'],
+            values_labels: ['Solar Thermal', 'PV', 'Assumed PV'],
+        },
+    ],
 
+    minRadius: 0.8,
     showMinCapacity: true,
 }

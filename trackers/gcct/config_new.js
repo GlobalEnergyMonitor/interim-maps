@@ -6,37 +6,6 @@ var config = {
     assetFullLabel: 'Projects',
     assetLabel: 'projects',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed.
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'status',
-            label: 'Status',
-            values: ['announced', 'construction', 'operating', 'operating-pre-retirement', 'cancelled', 'retired', 'mothballed', 'unknown'],
-            values_labels: ['Announced', 'Construction', 'Operating', 'Operating Pre-Retirement', 'Cancelled', 'Retired', 'Mothballed', 'Not Found'],
-            primary: true
-        },
-        {
-            field: 'plant-type',
-            label: 'Plant type',
-            values: ['clinker only', 'grinding', 'integrated', ''],
-            values_labels: ['Clinker only', 'Grinding', 'Integrated', 'Not found']
-        },
-        {
-            field: 'prod-type',
-            label: 'Clinker Production Method',
-            values: ['dry', 'mixed', 'semidry', 'wet', '', 'n/a'],
-            values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A (Grinding Plants)']
-        },
-        {
-            field: 'color',
-            label: 'Cement Color',
-            values: ['both', 'grey', 'white', ''],
-            values_labels: ['Grey & White', 'Grey', 'White', 'Not found']
-        }
-    ],
-    
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
@@ -100,6 +69,33 @@ var config = {
             'unknown': 'black',
         },
     },
+
+    filters: [
+        {
+            field: 'status',
+            values: ['announced', 'construction', 'operating', 'operating pre-retirement', 'cancelled', 'retired', 'mothballed', 'unknown'],
+            values_labels: ['Announced', 'Construction', 'Operating', 'Operating Pre-Retirement', 'Cancelled', 'Retired', 'Mothballed', 'Not Found'],
+            primary: true
+        },
+        {
+            field: 'plant-type',
+            label: 'Plant type',
+            values: ['clinker only', 'grinding', 'integrated', ''],
+            values_labels: ['Clinker only', 'Grinding', 'Integrated', 'Not found']
+        },
+        {
+            field: 'prod-type',
+            label: 'Clinker Production Method',
+            values: ['dry', 'mixed', 'semidry', 'wet', '', 'n/a'],
+            values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A (Grinding Plants)']
+        },
+        {
+            field: 'color',
+            label: 'Cement Color',
+            values: ['both', 'grey', 'white', ''],
+            values_labels: ['Grey & White', 'Grey', 'White', 'Not found']
+        }
+    ],
 
     multiCountry: true,
     // maxCapacityLabel: 'millions metric tonnes per annum',

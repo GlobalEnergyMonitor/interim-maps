@@ -8,33 +8,6 @@ var config = {
     assetFullLabel: 'Projects',
     assetLabel: 'projects',
 
-    /* define the column and values used for the filter UI. There can be multiple filters listed.
-       Additionally a custom `label` can be defined (default is the field),
-       and `values_label` (an array matching elements in `values`) */
-    filters: [
-        {
-            field: 'legend-filter',
-            label: 'Plume and Infrastructure Projects',
-            values: ['Oil-and-Gas-Extraction-Areas', 'Coal-Mines---Non-closed', 'lng-import', 'lng-export', 'Pipelines','plumes-attrib', 'plumes-unattrib'],
-            values_labels: [
-            'Oil and Gas Extraction Areas', 
-            'Coal Mines', 
-            'LNG Terminals Import', 
-            'LNG Terminals Export',
-            'Pipelines', 
-            'Reviewed Plumes (has attribution info)', //  info)
-            'Reviewed Plumes (no attribution info)'
-            ],
-            primary: true
-        },
-        {
-            field: 'status-legend',
-            label: 'Infrastructure Status',
-            values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'retired-plus', 'not-found'], // pre-construction-plus
-            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Construction/In development', 'Mothballed/Idle/Shut in/Abandoned', 'Retired/Closed/Decommissioned/Cancelled', 'Not applicable/UGS'], // 'Pre-construction / Pre-permit / Permitted / Exploration'
-        },
-    ],
-
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
@@ -129,6 +102,30 @@ var config = {
             'lng-export': 'green',
         },
     },
+
+    filters: [
+        {
+            field: 'legend-filter',
+            label: 'Plume and Infrastructure Projects',
+            values: ['Oil-and-Gas-Extraction-Areas', 'Coal-Mines---Non-closed', 'lng-import', 'lng-export', 'Pipelines','plumes-attrib', 'plumes-unattrib'],
+            values_labels: [
+                'Oil and Gas Extraction Areas',
+                'Coal Mines',
+                'LNG Terminals Import',
+                'LNG Terminals Export',
+                'Pipelines',
+                'Reviewed Plumes (has attribution info)', //  info)
+                'Reviewed Plumes (no attribution info)'
+            ],
+            primary: true
+        },
+        {
+            field: 'status-legend',
+            label: 'Infrastructure Status',
+            values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'retired-plus', 'not-found'], // pre-construction-plus
+            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Construction/In development', 'Mothballed/Idle/Shut in/Abandoned', 'Retired/Closed/Decommissioned/Cancelled', 'Not applicable/UGS'], // 'Pre-construction / Pre-permit / Permitted / Exploration'
+        },
+    ],
 
     capacityField: 'capacity-scaled',
     capacityLabel: '', // for gmet that has no capacity but only emissions data
