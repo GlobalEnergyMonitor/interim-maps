@@ -19,8 +19,8 @@ var config = {
     /* configure the search box; 
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Extraction Area': ['wiki-name'],
-        'Companies': ['owner', 'operator', 'parent'],
+        'Extraction Area': ['wiki-name', 'name-search'],
+        'Companies': ['owner', 'operator', 'parent', 'owner-search'],
         'Discovery Year': ['discovery-year'],
         'Production start year': ['production-start-year'],
     },
@@ -79,7 +79,7 @@ var config = {
     ],
 
     nameField: 'wiki-name',
-    countryFile: './countries.js',
+    countryFile: './countries.json',
     showMaxCapacity: false,
     // capacityLabel: 'million boe/y',
     capacityLabel: '',

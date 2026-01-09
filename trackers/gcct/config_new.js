@@ -21,7 +21,7 @@ var config = {
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
         'Project': ['name', 'name-noneng', 'name-other', 'name-other-noneng', 'name-search'],
-        'Companies': ['owner', 'parent', 'owner-noneng', 'owner-gem-id'],
+        'Companies': ['owner', 'parent', 'owner-noneng', 'owner-gem-id', 'owner-search'],
         'Type ': ['plant-type', 'prod-type', 'color'],
     },
 
