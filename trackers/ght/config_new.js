@@ -13,7 +13,6 @@ var config = {
         labels: ['Project name', 'Capacity (MW)', 'Technology type', 'Status', 'Start year', 'Owner', 'Operator', 'Country/Area 1', 'Country/Area 2'],
         clickColumns: ['name'],
         rightAlign: ['capacity', 'start-year'],
-        removeLastComma: ['areas'],  // TODO remove?
         toLocaleString: ['capacity'],
     },
 

@@ -14,7 +14,6 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['unit-name', 'capacity-display', 'start-year', 'retired-year'],
         toLocaleString: ['capacity-display'],
-        removeLastComma: ['areas'],  // TODO remove?
     },
 
     /* configure the search box; 

@@ -13,7 +13,6 @@ var config = {
         labels: ['Project', 'Owner', 'Status', 'Cement Capacity (mmtpa)', 'Start date', 'Plant type', 'Production type', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
-        removeLastComma: ['areas'],  // TODO remove?
         toLocaleString: ['capacity'],
     },
 

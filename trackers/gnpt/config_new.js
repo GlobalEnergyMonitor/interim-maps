@@ -15,7 +15,6 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['capacity'],
         toLocaleString: ['capacity'],
-        removeLastComma: ['areas'],  // TODO remove?
     },
 
     /* configure the search box; 

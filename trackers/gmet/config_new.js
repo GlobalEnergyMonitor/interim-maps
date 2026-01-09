@@ -15,7 +15,6 @@ var config = {
         labels: ['Project', 'Status', 'Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)', 'Methane emissions if fully operational', 'Emissions if Operational (tonnes/yr)', 'Potential Emissions for whole reserves (tonnes)', 'Coal Mine Methane Emissions Estimate (mt/yr)', 'Type of Infrastructure', 'Observation Date', 'Subnational', 'Country/Area(s)', 'Nearby Infrastructure Project Name', 'Infrastructure Wiki'],
         clickColumns: ['name'],
         rightAlign: ['plume-emissions', 'date'],
-        removeLastComma: ['areas'],  // TODO remove?
         toLocaleString: ['scaling_col'], // not displayed
     },
 

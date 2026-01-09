@@ -16,7 +16,6 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['capacity', 'total-reserves-proven-and-probable', 'total-resource-inferred'],
         toLocaleString: [''],
-        removeLastComma: ['areas'],
     },
 
     /* configure the search box; 

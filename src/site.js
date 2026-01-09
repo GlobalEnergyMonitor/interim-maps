@@ -908,9 +908,9 @@ function filterTiles() {
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
                 country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region // TODO verify if actually needed, at any stage in processing
-                countryExpression.push(['in', ['string', country], ['string', ['get', removeLastComma(config.countryField)]]]);
+                countryExpression.push(['in', ['string', country], ['string', ['get', config.countryField]]]);
             } else {
-                countryExpression.push(['==', ['string', country], ['string', ['get', removeLastComma(config.countryField)]]]);
+                countryExpression.push(['==', ['string', country], ['string', ['get', config.countryField]]]);
             }
         })
         config.filterExpression.push(countryExpression);
@@ -1126,9 +1126,6 @@ function geoJSON2Table() {  // TODO rework?
             if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
                 value += ' ' + config[config.tableHeaders.appendValue[header]].values[feature.properties[config[config.tableHeaders.appendValue[header]].field]];
             }
-            if ('removeLastComma' in config.tableHeaders && config.tableHeaders.removeLastComma.includes(header)) {
-                value = removeLastComma(value);
-            }
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
                 value = "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>';
             }
@@ -1318,10 +1315,7 @@ function displayDetails(features) {
             const value = features[0].properties[detail];
             const invalidValues = ["", undefined, 0, "nan", null, "Unknown [unknown %]", "unknown"];
             if (!invalidValues.includes(value)) {
-                if (config.multiCountry === true && config.detailView[detail] && config.detailView[detail]['label'] && config.detailView[detail]['label'].includes('Country')) {
-                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
-                }
-                else if (Object.keys(config.detailView[detail]).includes('label')) { 
+                if (Object.keys(config.detailView[detail]).includes('label')) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                 }
             }
@@ -1537,7 +1531,7 @@ function displayDetails(features) {
                 (config.selectModal !== '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
                 '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
 
-                '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
+                '<span class="detail-location">' + location_text + '</span><br/>' +
                 '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
                 (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
             '</div>' +
@@ -1840,13 +1834,6 @@ function getCoordinatesDump(gj) {
         },[]);
     }
     return coords;
-}
-
-function removeLastComma(str) {  // TODO this removes the last semicolon
-    if (str.charAt(str.length - 1) === ';') {
-        str = str.slice(0, -1);
-    }
-    return str;
 }
 
 function makeCase(str) {

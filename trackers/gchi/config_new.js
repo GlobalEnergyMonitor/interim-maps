@@ -13,7 +13,6 @@ var config = {
         labels: ['Project', 'Owner', 'Primary Product', 'Feedstock', 'Secondary Product', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
-        removeLastComma: ['areas'],  // TODO remove?
         toLocaleString: [],
     },
 

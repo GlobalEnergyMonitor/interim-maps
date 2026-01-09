@@ -14,7 +14,6 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['capacity'],
         toLocaleString: ['capacity'],
-        removeLastComma: ['areas'],  // TODO remove?
         makeCase: ['name', 'status', 'owner', 'areas'],
     },
 
