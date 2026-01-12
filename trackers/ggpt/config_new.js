@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggpt/Geothermal-map-file-2025-03-18.csv',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggpt_map_2026-01-12.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Units",
@@ -9,9 +9,9 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'areas'],
+        values: ['name', 'unit-name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1'],
         labels: ['Plant', 'Unit', 'Capacity (MW)', 'Technology', 'Status', 'Start year', 'Owner', 'Operator', 'Country/Area(s)'],
-        clickColumns: ['project-name'],
+        clickColumns: ['name'],
         rightAlign: ['capacity', 'start-year'],
         toLocaleString: ['capacity'],
     },
@@ -32,14 +32,14 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'project-name': {'display': 'heading'},
+        'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    capacityLabel: 'Capacity (MW)',
 }
