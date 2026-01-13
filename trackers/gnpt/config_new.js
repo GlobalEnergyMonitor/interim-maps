@@ -1,7 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    // geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gnpt/2025-08/gnpt_map_2025-08-28.geojson',
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/GNPT.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gnpt_map_2026-01-12.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Nuclear Power Plant Units",
@@ -10,7 +9,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'capacity', 'reactor-type', 'model', 'status', 'owner', 'operator', 'subnational', 'areas'],
+        values: ['name', 'unit-name', 'capacity', 'reactor-type', 'model', 'status', 'owner', 'operator', 'subnational', 'country-area1'],
         labels: ['Project name', 'Unit name', 'Capacity (MW)', 'Reactor', 'Model', 'Status', 'Owner', 'Operator', 'Subnational area', 'Country/Area(s)'],
         clickColumns: ['name'],
         rightAlign: ['capacity'],
@@ -33,15 +32,15 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'reactor-type': {'label': 'Reactor'},
         'model': {'label': 'Model'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    capacityLabel: 'Capacity (MW)',
 }

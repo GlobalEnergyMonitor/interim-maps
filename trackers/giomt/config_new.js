@@ -78,6 +78,6 @@ var config = {
     minRadius: 3,
     maxRadius: 15,
     capacityLabel: '',
-    showCapacityTable: false,
-    maxCapacityLabel: 'Design Capacity (TTPA)',  // TODO what is this?
+    // showCapacityTable: false, // TODO doesn't seem to do anything
+    minMaxCapacityFilterLabel: 'Design Capacity (TTPA)',
 }

@@ -1018,28 +1018,13 @@ function updateSummary() {
         }
     });
 
-    if (config.showMinCapacity & config.showMaxCapacity) {
-        if (config.maxCapacityLabel) {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html('Maximum ' + config.maxCapacityLabel);
-            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
-            $('#capacity_summary_min').html('Minimum ' + config.maxCapacityLabel);
-        } else {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html('Maximum ' + config.capacityLabel);
-            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
-            $('#capacity_summary_min').html('Minimum ' + config.capacityLabel);
-        }
+    if (config.showMaxCapacity) {
+        $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
+        $('#capacity_summary_max').html('Maximum ' + config.minMaxCapacityFilterLabel);
     }
-
-    else if (config.showMaxCapacity) {
-        if (config.maxCapacityLabel) {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html('Maximum ' + config.maxCapacityLabel);
-        } else {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
-            $('#capacity_summary').html('Maximum ' + config.capacityLabel);
-        }
+    if (config.showMinCapacity) {
+        $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
+        $('#capacity_summary_min').html('Minimum ' + config.minMaxCapacityFilterLabel);
     }
 }
 
@@ -1322,11 +1307,12 @@ function displayDetails(features) {
         }
     });
 
-    let assetLabel = typeof config.assetLabel === 'string'  // TODO what are these doing? remove? always a string?
+    // get the asset and capacity label
+    // if a dict and not a string (like in multi-tracker maps), get the specific labels for each tracker within
+    let assetLabel = typeof config.assetLabel === 'string'
         ? config.assetLabel 
         : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
-
-    let capacityLabel = typeof config.capacityLabel === 'string'  // TODO what are these doing? remove? always a string?
+    let capacityLabel = typeof config.capacityLabel === 'string'
         ? config.capacityLabel 
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 
@@ -1440,17 +1426,13 @@ function displayDetails(features) {
                     }
                 }
             });
-            // special for GGFT ... should change the variable name in the script to be status not finstatus I suppose.  // TODO
-            if (config.statusDisplayField === 'finstatus') {
-                config.statusDisplayField = 'Status'
-            }
             detail_text +=
                 '<div>' +
                     '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
                     '<div class="row" style="height: 2px"><hr/></div>' +
                     '<div class="row ">' +
-                        '<div class="col-5 text-capitalize">' + config.statusDisplayField + '</div>' +
-                        '<div class="col-4">' + capacityLabel + '</div>' +
+                        '<div class="col-5 text-capitalize">Status</div>' +
+                        '<div class="col-4">Capacity (' + capacityLabel + ')</div>' +
                         '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
                     '</div>' +
                     detail_capacity +
@@ -1464,7 +1446,7 @@ function displayDetails(features) {
                 // we do not want the capacity but we do want status since that is relevant for single unit ggft projects
                 // since we know for ggft the status is a color field we do not need the extra logic seen below with 'config.color_association.field != config.statusDisplayField'
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.statusDisplayField] ] + '"></span>' +
+                    '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.statusField] ] + '"></span>' +
                     '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             }
             else {
@@ -1477,30 +1459,21 @@ function displayDetails(features) {
                 } else {
                     capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel
                 }
-                // this handles capacity adjustment for solo projects where it looks redundant to have Capacity written out twice
                 // Remove 'Capacity' prefix and parentheses from capacityLabel // TODO look into a better way to handle, issue if capacity is nan or undefined like intentionally is for GOGET
-                // capacityLabel = capacityLabel.replace(/^Capacity\s*/i, '').replace(/[()]/g, '');
 
-                // and it allows status outside of the summary table to have the colored dot when status is the highest filter section
-                if (config.color_association.field !== config.statusDisplayField) {
-                    // for filter field in filter, if primary = True then take field name 'type' in intg and use it to find the color dictionary in the colors dict above
-                    // and then display the projects type field with the appropriate color based on the value and the dictionary
-                    detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                        '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
-                        '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
-                } else {
-                    detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                        '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
-                        '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
-                        '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
+                detail_text += '<span class="fw-bold text-capitalize">Status</span>: '
+                if (config.color_association.field == config.statusField) {  // add color dot if it is an expected status
+                    detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>'
                 }
+                detail_text += '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
+                    '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
             }
         }
     }
 
     // This is where you remove the colored circle primary = true
     // we use the primary tag in config to color code the type for integrated
-    else {
+    else {  // if the capacity label is empty string  // TODO what then?
     // do nothing if color not equal to status field AND there is no capacity label
         if (config.gistUnit === true) {
             detail_text += buildGistTable(all_details_gist);

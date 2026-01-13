@@ -147,7 +147,7 @@ table.dataTable td {
     width: fit-content;
     max-width: 90vw;
 }
-#summary, #capacity_summary, #capacity_summary_min {
+#summary, #capacity_summary_max, #capacity_summary_min {
     font-size: 9px;
 }
 

@@ -71,9 +71,9 @@ var site_config = {
     countryField: 'areas',
     statusField: 'status',
     statusDisplayField: 'status-display',
-    capacityField: 'capacity',
+    capacityField: 'capacity',  // typically overwritten by 'capacity-scaled', when applicable
     capacityDisplayField: 'capacity-display', // this is what gets used in the details summary unit feature where applicable
-    capacityLabel: '(MW)',
+    capacityLabel: 'MW',  // future todo: use input file "unit of m" field instead of hard-coded
     locationColumns:{
         lat: 'Latitude',
         long: 'Longitude'
@@ -83,7 +83,8 @@ var site_config = {
     showAllPhases: false,
     showMaxCapacity: true,
     showMinCapacity: false,
-    showCapacityTable: true,
+    minMaxCapacityFilterLabel: "Capacity (MW)",
+    // showCapacityTable: true,
 
     /* zoom level to set map when viewing all phases */
     phasesZoom: 10,
