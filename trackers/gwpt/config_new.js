@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gwpt/Wind-map-file-2025-02-04.csv',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gwpt_map_2026-01-13.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Wind farm phases",
@@ -9,7 +9,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'capacity', 'installation-type', 'status', 'start-year', 'owner', 'operator', 'subnational', 'areas'],
+        values: ['name', 'unit-name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'subnational', 'country-area1'],
         labels: ['Project', 'Phase', 'Capacity (MW)',' Installation Type', 'Status', 'Start year', 'Owner', 'Operator', 'State/Province', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: ['capacity', 'start-year'],
@@ -33,13 +33,14 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'name-noneng': {'label': 'Project in Local Language / Script'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
-        'installation-type': {'label': 'Technology Type'},
+        'tech-type': {'label': 'Installation Type'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -67,10 +68,9 @@ var config = {
             primary: true
         },
         {
-            field: 'installation-type',
+            field: 'tech-type',
             label: 'Installation Type',
             values: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
-            values_labels: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
         },
     ],
 }

@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gspt/Solar-map-file-2025-02-04.csv',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gspt_map_2026-01-13.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Solar photovoltaic farm phases",
@@ -10,11 +10,11 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'subnational', 'areas'],
+        values: ['name', 'unit-name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'subnational', 'country-area1'],
         labels: ['Project', 'Phase', 'Capacity (MW)', 'Technology Type', 'Status', 'Start year', 'Owner', 'Operator', 'Location Accuracy', 'State/Province', 'Country/Area'],
         clickColumns: ['name'],
-        toLocaleString: ['capacity'],
         rightAlign: ['capacity', 'start-year'],
+        toLocaleString: ['capacity'],
     },
 
     /* configure the search box; 
@@ -34,13 +34,14 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'name-noneng': {'label': 'Project in Local Language / Script'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
         'tech-type': {'label': 'Technology Type'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -70,7 +71,6 @@ var config = {
             field: 'tech-type',
             label: 'Technology Type',
             values: ['Solar Thermal', 'PV', 'Assumed PV'],
-            values_labels: ['Solar Thermal', 'PV', 'Assumed PV'],
         },
     ],
 
