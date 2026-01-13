@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GBPT/2025-09/bioenergy_map_2025-09-22.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gbpt_map_2026-01-13.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Bioenergy Power Units",
@@ -9,12 +9,11 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'capacity', 'status', 'owner', 'operator', 'areas', 'fuel'],
+        values: ['name', 'capacity', 'status', 'owner', 'operator', 'country-area1', 'fuel'],
         labels: ['Project name', 'Capacity (MW)', 'Status', 'Owner', 'Operator', 'Country/Area(s)', 'Fuel'],
         clickColumns: ['name'],
         rightAlign: ['capacity'],
         toLocaleString: ['capacity'],
-        makeCase: ['name', 'status', 'owner', 'areas'],
     },
 
     /* configure the search box; 
@@ -34,10 +33,11 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -55,6 +55,4 @@ var config = {
             'announced': 'green',
         },
     },
-
-    capacityLabel: 'Capacity (MW)',
 }

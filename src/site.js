@@ -43,11 +43,6 @@ const popup = new mapboxgl.Popup({
 });
 
 map.on('load', function () {
-    if (config.projection !== 'globe') {
-        // map.setFog({}); // Set the default atmosphere style
-        // $('#btn-spin-toggle').hide();
-        // TODO why empty?
-    }
     loadData();
 });
 
@@ -1069,7 +1064,7 @@ function createTable() {
     }
     config.table = $('#table').DataTable({
         data: geoJSON2Table().map(row => {
-            if ('toLocaleString' in config.tableHeaders) {
+            if ('toLocaleString' in config.tableHeaders) {  // TODO Possibly remove as string conversion can be handled in other scripts
                 config.tableHeaders.toLocaleString.forEach((col) => {
                     const colIndex = config.tableHeaders.values.indexOf(col);
                     if (colIndex !== -1 && row[colIndex] != null) {
@@ -1114,9 +1109,6 @@ function geoJSON2Table() {  // TODO rework?
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
                 value = "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>';
             }
-            if ('makeCase' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                value = makeCase(value);
-            }  
             return value;
         });
     });
@@ -1758,7 +1750,7 @@ function debounce(func, wait, immediate) {
         timeout = setTimeout(later, wait);
         if (callNow) func.apply(context, args);
     };
-};
+}
 
 /* from https://github.com/geosquare/geojson-bbox */
 function geoJSONBBox(gj) {
@@ -1777,7 +1769,7 @@ function geoJSONBBox(gj) {
             Math.max(coord[1], prev[3])
         ];
     }, bbox);
-};
+}
   
 function getCoordinatesDump(gj) {
     let coords;
@@ -1807,13 +1799,6 @@ function getCoordinatesDump(gj) {
         },[]);
     }
     return coords;
-}
-
-function makeCase(str) {
-    str = str.replace(/\w\S*/g, function(txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-    return str;
 }
 
 // TODO can be moved to site-config.js?

@@ -13,12 +13,12 @@ var site_config = {
 
     /* Define labels for sitewide colors, referenced in tracker config */
     site_colors: {
-        'red': '#c00',
+        'red': '#c74a48',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'grey': '#8f8f8e',
         'light blue': '#74add1',
-        'blue': '#4575b4',
-        'green': '#7dd47d',
         'light grey': '#ccc',
-        'grey': '#666',
         'orange': '#fd7e14',
         'yellow': '#f3ff00',
     },
