@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ghpt/ghpt_2025-04-23.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ght_map_2026-01-13.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Hydropowered Stations",
@@ -9,7 +9,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'areas', 'area2'],
+        values: ['name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1', 'country-area2'],
         labels: ['Project name', 'Capacity (MW)', 'Technology type', 'Status', 'Start year', 'Owner', 'Operator', 'Country/Area 1', 'Country/Area 2'],
         clickColumns: ['name'],
         rightAlign: ['capacity', 'start-year'],
@@ -33,17 +33,19 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
-        'areas' : {'label': 'Country/Area 1'},
         'binational': {'label': 'Binational'},
-        'area2' : {'label': 'Country/Area 2'},
+        'country-area1' : {'label': 'Country/Area 1'},
+        'country-area2' : {'label': 'Country/Area 2'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    multiCountry: true,
+    multiCountry: true,  // doesn't appear to do anything since not using tiles for GHT
+    countryField: 'all-countries',
 }

@@ -68,7 +68,7 @@ var site_config = {
     nameField: 'name',
     linkField: 'project-id',
     urlField: 'url',
-    countryField: 'areas',
+    countryField: 'country-area1',
     statusField: 'status',
     statusDisplayField: 'status-display',
     capacityField: 'capacity',  // typically overwritten by 'capacity-scaled', when applicable
