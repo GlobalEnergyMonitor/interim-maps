@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson:  'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gcct/2025-07/gcct_map_2025-07-15.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcct_map_2026-01-14.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -9,7 +9,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'owner', 'status', 'capacity', 'start-year', 'plant-type', 'prod-type', 'subnational', 'areas'],
+        values: ['name', 'owner', 'status', 'capacity', 'start-year', 'plant-type', 'prod-type', 'subnational', 'country-area1'],
         labels: ['Project', 'Owner', 'Status', 'Cement Capacity (mmtpa)', 'Start date', 'Plant type', 'Production type', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
@@ -19,7 +19,7 @@ var config = {
     /* configure the search box; 
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Project': ['name', 'name-noneng', 'name-other', 'name-other-noneng', 'name-search'],
+        'Project': ['name', 'name-noneng', 'name-other', 'name-search'],
         'Companies': ['owner', 'parent', 'owner-noneng', 'owner-gem-id', 'owner-search'],
         'Type ': ['plant-type', 'prod-type', 'color'],
     },
@@ -33,6 +33,8 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'plant-type': {'label': 'Plant Type'},
         'prod-type': {'label': 'Production Type'},
         'capacity': {'label': 'Cement Capacity (mmtpa)'},
@@ -42,7 +44,6 @@ var config = {
         'owner': {'label': 'Owner'},
         'start-year': {'label': 'Start date'},
         'location-accuracy': {'label': 'Coordinate Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -55,7 +56,7 @@ var config = {
         'black': '#000000',
     },
     color_association: {
-        field: 'status', // prod type
+        field: 'status',
         values: {
             'announced': 'orange',
             'construction': 'orange',
@@ -73,29 +74,29 @@ var config = {
             field: 'status',
             values: ['announced', 'construction', 'operating', 'operating pre-retirement', 'cancelled', 'retired', 'mothballed', 'unknown'],
             values_labels: ['Announced', 'Construction', 'Operating', 'Operating Pre-Retirement', 'Cancelled', 'Retired', 'Mothballed', 'Not Found'],
-            primary: true
+            primary: true,
         },
         {
             field: 'plant-type',
             label: 'Plant type',
             values: ['clinker only', 'grinding', 'integrated', ''],
-            values_labels: ['Clinker only', 'Grinding', 'Integrated', 'Not found']
+            values_labels: ['Clinker only', 'Grinding', 'Integrated', 'Not found'],
         },
         {
             field: 'prod-type',
             label: 'Clinker Production Method',
             values: ['dry', 'mixed', 'semidry', 'wet', '', 'n/a'],
-            values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A (Grinding Plants)']
+            values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A (Grinding Plants)'],
         },
         {
             field: 'color',
             label: 'Cement Color',
             values: ['both', 'grey', 'white', ''],
-            values_labels: ['Grey & White', 'Grey', 'White', 'Not found']
-        }
+            values_labels: ['Grey & White', 'Grey', 'White', 'Not found'],
+        },
     ],
 
-    multiCountry: true,
+    //multiCountry: true,
     // maxCapacityLabel: 'millions metric tonnes per annum',
     capacityLabel: '',
 }
