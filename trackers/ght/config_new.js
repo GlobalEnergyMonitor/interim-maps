@@ -9,7 +9,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1', 'country-area2'],
+        values: ['name', 'capacity-display', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1', 'country-area2'],
         labels: ['Project name', 'Capacity (MW)', 'Technology type', 'Status', 'Start year', 'Owner', 'Operator', 'Country/Area 1', 'Country/Area 2'],
         clickColumns: ['name'],
         rightAlign: ['capacity', 'start-year'],
@@ -46,6 +46,5 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    multiCountry: true,  // doesn't appear to do anything since not using tiles for GHT
     countryField: 'all-countries',
 }

@@ -73,8 +73,9 @@ var site_config = {
     countryField: 'country-area1',
     statusField: 'status',
     statusDisplayField: 'status-display',
-    capacityField: 'capacity',  // typically overwritten by 'capacity-scaled', when applicable
-    capacityDisplayField: 'capacity-display', // this is what gets used in the details summary unit feature where applicable
+    capacityField: 'capacity',  // the literal, reported, numerical capacity. If originally blank or non-numeric string, is 0 now. Used to calculate plant/project capacity total.
+    capacityScaledField: 'capacity-scaled',  // the capacity value used to scale the circle/dot on the map (often the same as capacity)
+    capacityDisplayField: 'capacity-display', // this is what gets used in the details summary unit feature & in the table view where applicable.
     capacityLabel: 'MW',  // future todo: use input file "unit of m" field instead of hard-coded
     locationColumns:{
         lat: 'Latitude',
@@ -86,6 +87,7 @@ var site_config = {
     showMaxCapacity: true,
     showMinCapacity: false,
     minMaxCapacityFilterLabel: "Capacity (MW)",
+    includeCapacityByStatusInDetailView: true,
     // showCapacityTable: true,
 
     /* zoom level to set map when viewing all phases */

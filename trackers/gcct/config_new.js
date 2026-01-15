@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcct_map_2026-01-14.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcct_map_2026-01-15.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -9,7 +9,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'owner', 'status', 'capacity', 'start-year', 'plant-type', 'prod-type', 'subnational', 'country-area1'],
+        values: ['name', 'owner', 'status', 'capacity-display', 'start-year', 'plant-type', 'prod-type', 'subnational', 'country-area1'],
         labels: ['Project', 'Owner', 'Status', 'Cement Capacity (mmtpa)', 'Start date', 'Plant type', 'Production type', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
@@ -37,12 +37,12 @@ var config = {
 
         'plant-type': {'label': 'Plant Type'},
         'prod-type': {'label': 'Production Type'},
-        'capacity': {'label': 'Cement Capacity (mmtpa)'},
+        'capacity-display': {'label': 'Cement Capacity (mmtpa)'},
         'clinker-capacity': {'label': 'Clinker Capacity (mmtpa)'},
         'cement-type': {'label': 'Cement Type'},
         'color': {'label': 'Cement Color'},
         'owner': {'label': 'Owner'},
-        'start-year': {'label': 'Start date'},
+        'start-year': {'label': 'Start Date'},
         'location-accuracy': {'label': 'Coordinate Accuracy'},
     },
 
@@ -61,7 +61,7 @@ var config = {
             'announced': 'orange',
             'construction': 'orange',
             'operating': 'green',
-            'operating-pre-retirement': 'green',
+            'operating pre-retirement': 'green',
             'cancelled': 'red',
             'retired': 'red',
             'mothballed': 'blue',
@@ -79,24 +79,24 @@ var config = {
         {
             field: 'plant-type',
             label: 'Plant type',
-            values: ['clinker only', 'grinding', 'integrated', ''],
+            values: ['clinker only', 'grinding', 'integrated', 'unknown'],
             values_labels: ['Clinker only', 'Grinding', 'Integrated', 'Not found'],
         },
         {
             field: 'prod-type',
             label: 'Clinker Production Method',
-            values: ['dry', 'mixed', 'semidry', 'wet', '', 'n/a'],
+            values: ['dry', 'mixed', 'semidry', 'wet', 'unknown', 'n/a'],
             values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A (Grinding Plants)'],
         },
         {
             field: 'color',
             label: 'Cement Color',
-            values: ['both', 'grey', 'white', ''],
+            values: ['both', 'grey', 'white', 'unknown'],
             values_labels: ['Grey & White', 'Grey', 'White', 'Not found'],
         },
     ],
 
-    //multiCountry: true,
-    // maxCapacityLabel: 'millions metric tonnes per annum',
-    capacityLabel: '',
+    minMaxCapacityFilterLabel: 'millions metric tonnes per annum',
+    capacityLabel: 'mmtpa',
+    includeCapacityByStatusInDetailView: false,
 }

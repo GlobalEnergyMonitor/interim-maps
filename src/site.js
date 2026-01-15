@@ -58,6 +58,7 @@ map.on('load', async () => {
     findLinkedAssets();
     addLayers();
     addEvents();
+    console.log('layers and events added');  // TODO DELETE
 
     // Enable UX as soon as the map is idle, but no later than 3 seconds from now
     setTimeout(enableUX, 3000);
@@ -74,6 +75,8 @@ map.on('moveend', () => {
 */
 /* Initial pull of the map input file using fetch - Single-use function */
 async function loadData() {
+    console.log('pulling input data');  // TODO DELETE
+
     let data;
 
     if ('tiles' in config) {
@@ -86,7 +89,9 @@ async function loadData() {
         if (!response.ok) {
             throw new Error('Failed to load geojson');
         }
+        console.log('awaiting data pull');  // TODO DELETE
         data = await response.json();
+        console.log('data pulled successfully');  // TODO DELETE
         addGeoJSON(data);
 
     } else if ('json' in config) {
@@ -175,6 +180,7 @@ function addGeoJSON(jsonData) {
 
 /* TODO Function Summary - Single-use function */
 function setMinMax() {
+    console.log('setting min/max line/point capacity');  // TODO DELETE
     config.maxPointCapacity = 0;
     config.minPointCapacity = 1000000;
     config.maxLineCapacity = 0;
@@ -194,11 +200,11 @@ function setMinMax() {
         // vice versa for min capacity
         // later this is used to size the assets along smoothly by interpolation across the width between min and maxPoint and LineWidth
         // this min and max Line and Point Capacity is crucial to the scaling, along with the unit's capacity
-        if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
-            config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
+        if (parseFloat(feature.properties[config.capacityScaledField]) > config[maxCapacityKey]) {
+            config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityScaledField]);
         }
-        if (parseFloat(feature.properties[config.capacityField]) < config[minCapacityKey]) {
-            config[minCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
+        if (parseFloat(feature.properties[config.capacityScaledField]) < config[minCapacityKey]) {
+            config[minCapacityKey] =  parseFloat(feature.properties[config.capacityScaledField]);
         }
     });
 }
@@ -398,19 +404,19 @@ function addPointLayer() {
             paint['circle-radius'] = [
                 'interpolate', ['exponential', .5], ['zoom'],
                 1,  ['interpolate', interpolateExpression,
-                    ['to-number',['get', config.capacityField]],
+                    ['to-number',['get', config.capacityScaledField]],
                     config.minPointCapacity, config.minRadius,
                     config.maxPointCapacity, config.maxRadius
                 ],
                 10, ['interpolate', interpolateExpression,
-                    ['to-number',['get', config.capacityField]],
+                    ['to-number',['get', config.capacityScaledField]],
                     config.minPointCapacity, config.highZoomMinRadius,
                     config.maxPointCapacity, config.highZoomMaxRadius
                 ]
             ];
         }
     } catch (e) {
-        console.error('Error setting circle-radius. config.capacityField:', config.capacityField);
+        console.error('Error setting circle-radius. config.capacityScaledField:', config.capacityScaledField);
         throw e;
     }
 
@@ -442,11 +448,11 @@ function addPointLayer() {
                 'icon-size': [
                     'interpolate', ['linear'], ['zoom'],
                     1,  ['interpolate', interpolateExpression,
-                        ['sqrt', ['to-number', ['get', config.capacityField]]],
+                        ['sqrt', ['to-number', ['get', config.capacityScaledField]]],
                         sqrtMin, config.minRadius * 2 / 64,
                         sqrtMax, config.maxRadius * 2 / 64],
                     10, ['interpolate', interpolateExpression,
-                        ['sqrt',['to-number', ['get', config.capacityField]]],
+                        ['sqrt',['to-number', ['get', config.capacityScaledField]]],
                         sqrtMin, config.highZoomMinRadius * 2 / 64,
                         sqrtMax, config.highZoomMaxRadius * 2 / 64]
                 ]
@@ -468,11 +474,11 @@ function addPointLayer() {
                 'icon-size': [
                     'interpolate', ['exponential', .5], ['zoom'],
                     1,  ['interpolate', interpolateExpression,
-                        ['to-number', ['get', config.capacityField]],
+                        ['to-number', ['get', config.capacityScaledField]],
                         config.minPointCapacity, config.minRadius * 2 / 64,
                         config.maxPointCapacity, config.maxRadius * 2 / 64],
                     10, ['interpolate', interpolateExpression,
-                        ['to-number', ['get', config.capacityField]],
+                        ['to-number', ['get', config.capacityScaledField]],
                         config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
                         config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
                 ]
@@ -540,12 +546,12 @@ function addLineLayer() {
         paint['line-width'] = [
             'interpolate', ['linear'], ['zoom'],
             1,  ['interpolate', interpolateExpression,
-                ['to-number', ['get', config.capacityField]],
+                ['to-number', ['get', config.capacityScaledField]],
                 config.minLineCapacity, config.minLineWidth,
                 config.maxLineCapacity, config.maxLineWidth
             ],
             10, ['interpolate', interpolateExpression,
-                ['to-number', ['get', config.capacityField]],
+                ['to-number', ['get', config.capacityScaledField]],
                 config.minLineCapacity, config.highZoomMinLineWidth,
                 config.maxLineCapacity, config.highZoomMaxLineWidth
             ]
@@ -586,6 +592,7 @@ function enableUX() {
     config.UXEnabled = true;
 
     // TODO what these functions do, collectively
+    console.log('enabling UX');  // TODO DELETE
     buildFilters();
     updateSummary();
     buildTable();
@@ -1213,7 +1220,7 @@ function setHighlightFilter(links) {
     });
 }
 
-// this function is responsible for creating the information in the modal that pops up after clicking an asset
+/* Creates the modal that pops up after clicking an asset */
 function displayDetails(features) {
     if (typeof features == 'string') {
         features = JSON.parse(features);
@@ -1337,7 +1344,7 @@ function displayDetails(features) {
     });
 
     // get the asset and capacity label
-    // if a dict and not a string (like in multi-tracker maps), get the specific labels for each tracker within
+    // if a dict and not a string (eg in multi-tracker maps), get the specific labels for each tracker within
     let assetLabel = typeof config.assetLabel === 'string'
         ? config.assetLabel
         : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
@@ -1345,11 +1352,9 @@ function displayDetails(features) {
         ? config.capacityLabel
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 
-    // This helps customize for trackers that do not need summary table in pop up because there are no units
-    // Build capacity summary by unit
-    // Make sure capacity and parenthese get removed if there is only one feature
-    if (capacityLabel !== '') {
-        if (features.length > 1) {
+    if (config.includeCapacityByStatusInDetailView) {
+        // TODO lots of room for optimization in this if-statement body
+        if (features.length > 1) {  // if there are multiple units per project
             let filterIndex = 0;
             for (const[index, filter] of config.filters.entries()) {
                 if (filter.field === config.statusField) {
@@ -1471,7 +1476,7 @@ function displayDetails(features) {
         else {
             // if ggft gas finance then we want to override this always since the project level financing info is already printed
             // and this else only executes if there is just one unit for the project so it'd be redundant and the word 'Capacity' is hardcoded in this feature and makes no sense for ggft
-            if (config.scale_by_capacity === false) {
+            if (!config.scale_by_capacity) {
                 // we do not want the capacity but we do want status since that is relevant for single unit ggft projects
                 // since we know for ggft the status is a color field we do not need the extra logic seen below with 'config.color_association.field != config.statusDisplayField'
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
@@ -1498,30 +1503,13 @@ function displayDetails(features) {
                     '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
             }
         }
-    }
-
-        // This is where you remove the colored circle primary = true
-    // we use the primary tag in config to color code the type for integrated
-    else {  // if the capacity label is empty string  // TODO what then?
-        // do nothing if color not equal to status field AND there is no capacity label
-        if (config.gistUnit === true) {
+    } else {  // only put project-wide status in detail view
+        if (config.color_association.field !== 'status') {  // only GIST doesn't color by status
             detail_text += buildGistTable(all_details_gist);
-        }
-        if (config.color_association.field !== config.statusDisplayField) {
-            detail_text += '';
-        } else {  // assign color if equal to status field BUT ignore the capacity part when no capacity label
-            // handle for statuses that have needless hyphens when / if not handled in preprocessing with statusDisplay column
-            if (features[0].properties[config.statusDisplayField] === 'operating-pre-retirement') {
-                let statusEdited = features[0].properties[config.statusDisplayField].replace('operating-pre-retirement', 'Operating Pre-Retirement')
-                detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
-                    '<span class="text-lowercase">' + statusEdited + '</span><br/>';
-            } else {
-                // add status part not capacity part
-                detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
-                    '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-            }
+        } else {
+            detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+                '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
+                '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
         }
     }
 
@@ -1550,10 +1538,7 @@ function enableModal() {
     })
 }
 
-
-
-// TODO Move the table creation logic into a helper function
-// TODO possibly make redundant by prepping geojson files properly
+/* Creates the detail-view table for GIST projects */
 function buildGistTable(all_details_gist) {
     // Only build the table if there is data
     if (!all_details_gist || Object.keys(all_details_gist).length === 0) return '';
