@@ -6,6 +6,8 @@ var site_config = {
     mapStyle: 'mapbox://styles/gemteam1/cls98k6sf02li01p2fqtu67lc',
     center: [0, 0],
     projection: 'naturalEarth',
+    baseMap: 'Streets',
+    icons: [],
 
     /* Zoom level that asset detail cards open at; this is a good one to override in tracker config,
        depending on scale of facilities */

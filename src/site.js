@@ -1,17 +1,18 @@
 processConfig();
 
+/* Merge site-config.js and config.js - Single-use function */
 function processConfig() {
-    // Merge site-config.js and config.js
     config = Object.assign(site_config, config);
-    config.baseMap = 'Streets';
-    config.icons = [];
 
     Object.keys(config.color_association.values).forEach((color_key) => {
         config.color_association.values[color_key] = config.site_colors[config.color_association.values[color_key]];
     });
 }
 
-// TODO move these to site-config.js?
+
+/*
+    Global variable declaration
+*/
 let userInteracting = false;
 const diacriticMap = {
     a: ['a', 'á', 'à', 'â', 'ã', 'ä', 'å'],
@@ -23,9 +24,18 @@ const diacriticMap = {
     n: ['n', 'ñ'],
 };
 
+// The following values can be changed to control rotation speed:
+// At low zooms, complete a revolution every ~two minutes.
+const secondsPerRevolution = 150;
+// Above zoom level 5, do not rotate.
+const maxSpinZoom = 5;
+// Rotate at intermediate speeds between zoom levels 3 and 5.
+const slowSpinZoom = 3;
+let spinEnabled = true;
+
 
 /*
-  Set up mapboxgljs instance, and trigger data load
+    Set up mapboxgljs instance, and trigger data load
 */ 
 mapboxgl.accessToken = config.accessToken;
 const map = new mapboxgl.Map({
@@ -42,60 +52,86 @@ const popup = new mapboxgl.Popup({
     closeOnClick: false
 });
 
-map.on('load', function () {
-    loadData();
+map.on('load', async () => {
+    await loadData();
+    setMinMax();
+    findLinkedAssets();
+    addLayers();
+    addEvents();
+
+    // Enable UX as soon as the map is idle, but no later than 3 seconds from now
+    setTimeout(enableUX, 3000);
+    map.on('idle', enableUX); // enableUX starts to render data
 });
 
-function determineZoom() {
-    let modifier = 650;
-    if (window.innerWidth < 1000) { modifier = 500; }
-    else if (window.innerWidth < 1500) { modifier = 575; }
-    return config.zoomFactor * (window.innerWidth - modifier) / modifier;
-}
+map.on('moveend', () => {
+    spinGlobe();
+});
 
 
 /*
   Load data in from various formats, and prepare for use in application
 */
-function loadData() {
+/* Initial pull of the map input file using fetch - Single-use function */
+async function loadData() {
+    let data;
+
     if ('tiles' in config) {
         addTiles();
-        Papa.parse(config.csv, {
-            download: true,
-            header: true,
-            error: function(error, file) {
-                console.log(error);
-                console.log(file);
-            },
-            complete: function(results) {
-                addGeoJSON(results.data);   
-            }
-        });
+        data = await parseCsv(config.csv);
+        addGeoJSON(data);
+
     } else if ('geojson' in config) {
-        $.ajax({
-            type: 'GET',
-            url: config.geojson,
-            dataType: 'json',
-            success: function(jsonData) { addGeoJSON(jsonData); }
-        });
+        const response = await fetch(config.geojson);
+        if (!response.ok) {
+            throw new Error('Failed to load geojson');
+        }
+        data = await response.json();
+        addGeoJSON(data);
+
     } else if ('json' in config) {
-        $.ajax({
-            type: 'GET',
-            url: config.json,
-            dataType: 'json',
-            success: function(jsonData) {addGeoJSON(jsonData);}
-        });
+        const response = await fetch(config.json);
+        if (!response.ok) {
+            throw new Error('Failed to load json');
+        }
+        data = await response.json();
+        addGeoJSON(data);
+
     } else {
-        Papa.parse(config.csv, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                addGeoJSON(results.data);   
-            }  
-        });
+        data = await parseCsv(config.csv);
+        addGeoJSON(data);
     }
+
+    return data;
 }
 
+/* Helper function to pull and parse csv input data - Single-use function: called once in loadData(), one of 2 ways */
+function parseCsv(url) {
+    return new Promise((resolve, reject) => {
+        Papa.parse(url, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                resolve(results.data);
+            },
+            error: function(error) {
+                reject(error);
+            }
+        });
+    });
+}
+
+/* Adds the tiles as a source to the map - Single-use function */
+function addTiles() {
+    map.addSource('assets-source', {
+        'type': 'vector',
+        'tiles': config.tiles,
+        'minzoom': 1,
+        'maxzoom': 10
+    });
+}
+
+/* TODO Function Summary - Single-use function: called once in loadData(), one of 4 ways */
 function addGeoJSON(jsonData) {
     // converts all to geojson 
     if ('type' in jsonData && jsonData['type'] === 'FeatureCollection') {
@@ -128,44 +164,57 @@ function addGeoJSON(jsonData) {
         });
     }
 
-    // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
-    config.processedGeoJSON = config.geojson; // copy  // TODO verify if copy and if so, if deep
-
-    setMinMax();
-    findLinkedAssets();
-
-    // part to optimize csv only maps 
+    // part to optimize csv only maps
     if (!config.tiles) {
         map.addSource('assets-source', {
             'type': 'geojson',
-            'data': config.processedGeoJSON
+            'data': config.geojson
         });
     }
-
-    addLayers();
-    setTimeout(enableUX, 3000);
-    map.on('idle', enableUX); // enableUX starts to render data
 }
 
-function addTiles() {
-    map.addSource('assets-source', {
-        'type': 'vector',
-        'tiles': config.tiles,
-        'minzoom': 1,
-        'maxzoom': 10 
+/* TODO Function Summary - Single-use function */
+function setMinMax() {
+    config.maxPointCapacity = 0;
+    config.minPointCapacity = 1000000;
+    config.maxLineCapacity = 0;
+    config.minLineCapacity = 1000000;
+    let maxCapacityKey;
+    let minCapacityKey;
+    config.geojson.features.forEach((feature) => {
+        if (feature.geometry.type === 'LineString') {
+            minCapacityKey = 'minLineCapacity';
+            maxCapacityKey = 'maxLineCapacity';
+        } else {
+            minCapacityKey = 'minPointCapacity';
+            maxCapacityKey = 'maxPointCapacity';
+        }
+
+        // if the capacity is more than the max capacity so far then it should be used
+        // vice versa for min capacity
+        // later this is used to size the assets along smoothly by interpolation across the width between min and maxPoint and LineWidth
+        // this min and max Line and Point Capacity is crucial to the scaling, along with the unit's capacity
+        if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
+            config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
+        }
+        if (parseFloat(feature.properties[config.capacityField]) < config[minCapacityKey]) {
+            config[minCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
+        }
     });
 }
 
+/* TODO Function Summary - Single-use function */
 // Builds lookup of linked assets by the link column
 // and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
+// TODO !!! import file such that this processing doesn't need to be done at runtime !!!
 function findLinkedAssets() {
     map.off('idle', findLinkedAssets);
-    config.preLinkedGeoJSON = config.processedGeoJSON;
+    config.preLinkedGeoJSON = config.geojson;
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
     config.linked = {};
-    config.processedGeoJSON.features.forEach((feature) => {
+    config.geojson.features.forEach((feature) => {
         if (! (feature.properties[config.linkField] in config.linked)) {
             config.linked[feature.properties[config.linkField]] = [];
         } 
@@ -174,7 +223,7 @@ function findLinkedAssets() {
 
     // Next find linked assets that share location. 
     let grouped = {};
-    config.processedGeoJSON.features.forEach((feature) => {
+    config.geojson.features.forEach((feature) => {
         if ('geometry' in feature && feature.geometry != null) {
             if ('coordinates' in feature.geometry) {
                 let key = feature.properties[config.linkField] + ',' + feature.geometry.coordinates[0] + ',' + feature.geometry.coordinates[1];
@@ -188,7 +237,7 @@ function findLinkedAssets() {
     });
 
     // Rebuild GeoJSON with summed capacity, and custom icon for single point display of the grouped assets
-    config.processedGeoJSON = {
+    config.geojson = {
         'type': 'FeatureCollection',
         'features': []
     };
@@ -236,10 +285,11 @@ function findLinkedAssets() {
         features[0].properties['summary_count'] = JSON.stringify(summary_count);
         config.totalCount += features.length;
 
-        config.processedGeoJSON.features.push(features[0]);
+        config.geojson.features.push(features[0]);
     });
 }
 
+/* TODO Function Summary - Single-use function: called once in findLinkedAssets() in a forEach loop */
 function generateIcon(icon) {
     let label = JSON.stringify(icon);
     if (map.hasImage(label)) return;
@@ -282,58 +332,11 @@ function generateIcon(icon) {
     });
 }
 
-function setMinMax() {
-    config.maxPointCapacity = 0;
-    config.minPointCapacity = 1000000;
-    config.maxLineCapacity = 0;
-    config.minLineCapacity = 1000000;
-    let maxCapacityKey;
-    let minCapacityKey;
-    config.processedGeoJSON.features.forEach((feature) => {
-        if (feature.geometry.type === 'LineString') {
-            minCapacityKey = 'minLineCapacity';
-            maxCapacityKey = 'maxLineCapacity';
-        } else {
-            minCapacityKey = 'minPointCapacity';
-            maxCapacityKey = 'maxPointCapacity';
-        }
-
-        // if the capacity is more than the max capacity so far then it should be used
-        // vice versa for min capacity
-        // later this is used to size the assets along smoothly by interpolation across the width between min and maxPoint and LineWidth
-        // this min and max Line and Point Capacity is crucial to the scaling, along with the unit's capacity
-        if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
-            config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
-        }
-        if (parseFloat(feature.properties[config.capacityField]) < config[minCapacityKey]) {
-            config[minCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
-        }       
-    });
-}
-
-
 /*
   Render Data
 */
-function enableUX() {
-    map.off('idle', enableUX);
-    if (config.UXEnabled) {
-        return
-    }
-    config.UXEnabled = true;
 
-    buildFilters();
-    updateSummary();
-    buildTable();
-    enableModal();
-    enableNavFilters();
-    $('#spinner-container').addClass('d-none')
-    $('#spinner-container').removeClass('d-flex')
-    if (config.projection === 'globe') {
-        spinGlobe();
-    }
-}
-
+/* Adds line layer, point layer - Single-use function */
 function addLayers() {
     config.layers = [];
     if (config.geometries.includes('LineString')) addLineLayer();
@@ -366,10 +369,9 @@ function addLayers() {
         },
         config.layers[0]
     );
-
-    addEvents();
 }
 
+/* TODO Function Summary - Single-use function */
 function addPointLayer() {
     // First build circle layer
     //  build style json for circle-color based on config.color_association
@@ -513,6 +515,7 @@ function addPointLayer() {
     });
 }
 
+/* TODO Function Summary - Single-use function */
 function addLineLayer() {
     let paint = config.linePaint;
 
@@ -573,11 +576,39 @@ function addLineLayer() {
     });
 }
 
+/* TODO Function Summary - Single-use function */
+function enableUX() {
+    // handle race condition
+    map.off('idle', enableUX);
+    if (config.UXEnabled) {
+        return
+    }
+    config.UXEnabled = true;
+
+    // TODO what these functions do, collectively
+    buildFilters();
+    updateSummary();
+    buildTable();
+    enableModal();
+    enableNavFilters();
+    $('#spinner-container').addClass('d-none')
+    $('#spinner-container').removeClass('d-flex')
+    if (config.projection === 'globe') {
+        spinGlobe();
+    }
+}
+
+
+/*
+  Event Handling
+*/
+
+/* Adds events and sets some event handling - Single-use function */
 function addEvents() {
     map.on('click', (e) => {
         userInteracting = true;
         spinGlobe();
-        const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
+        const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea] ];
         const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
         if (selectedFeatures.length === 0) return;
@@ -664,22 +695,64 @@ function addEvents() {
         $('#collapse-sidebar').show();
         $('#expand-sidebar').hide();
     });
+
+    $('#projection-toggle').on('click', function() {
+        if (config.projection === 'globe') {
+            config.projection = 'naturalEarth';
+            map.setProjection('naturalEarth');
+            map.setCenter(config.center);
+            map.setZoom(determineZoom());
+        } else {
+            config.projection = 'globe';
+            map.setProjection('globe');
+            map.setCenter(config.center);
+            spinGlobe();
+            map.setZoom(determineZoom());
+        }
+    })
 }
 
-$('#projection-toggle').on('click', function() {
+/* Spins the globe */
+function spinGlobe() {
+    const zoom = map.getZoom();
     if (config.projection === 'globe') {
-        config.projection = 'naturalEarth';
-        map.setProjection('naturalEarth');
-        map.setCenter(config.center);
-        map.setZoom(determineZoom());
-    } else {
-        config.projection = 'globe';
-        map.setProjection('globe');
-        map.setCenter(config.center);
-        spinGlobe();
-        map.setZoom(determineZoom());
+        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+            let distancePerSecond = 360 / secondsPerRevolution;
+            if (zoom > slowSpinZoom) {
+                // Slow spinning at higher zooms
+                const zoomDif =
+                    (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+                distancePerSecond *= zoomDif;
+            }
+            const center = map.getCenter();
+            center.lng -= distancePerSecond;
+            // Smoothly animate the map over one second.
+            // When this animation is complete, it calls a 'moveend' event.
+            map.easeTo({ center, duration: 1000, easing: (n) => n });
+        }
     }
-})
+}
+// adds option to pause spin with space - important for smaller screens
+// TODO bug with needing to press space 3x to get it to spin again?
+document.addEventListener('keydown', (e) => {
+    spinEnabled = !spinEnabled;
+    if (e.code === 'Space') {
+        if (spinEnabled) {
+            userInteracting = !userInteracting;
+            spinGlobe();
+        } else {
+            map.stop(); // Immediately end ongoing animation
+            spinGlobe();
+        }
+    }
+});
+
+function determineZoom() {
+    let modifier = 650;
+    if (window.innerWidth < 1000) { modifier = 500; }
+    else if (window.innerWidth < 1500) { modifier = 575; }
+    return config.zoomFactor * (window.innerWidth - modifier) / modifier;
+}
 
 
 /*
@@ -835,7 +908,7 @@ function countFilteredFeatures() {
     config.maxFilteredCapacity = 0;
     config.minFilteredCapacity = 1000000;
 
-    let ref = 'config.processedGeoJSON.features';
+    let ref = 'config.geojson.features';
 
     eval(ref).forEach(feature => {
         if ('summary_count' in feature.properties) {
@@ -988,7 +1061,7 @@ function filterGeoJSON() {
             filteredGeoJSON.features.push(feature);
         }
     });
-    config.processedGeoJSON = filteredGeoJSON; // Mikel had used JSON stringify to make a deep copy but David found that's only slowing it down so removed 
+    config.geojson = filteredGeoJSON; // Mikel had used JSON stringify to make a deep copy but David found that's only slowing it down so removed 
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
@@ -996,7 +1069,7 @@ function filterGeoJSON() {
 
     // TODO perhaps remove this qualifier for gipt/tiles
     if (!config.tiles) {  // maybe just use map filter for points and lines, no matter if tiles of geojson
-        map.getSource('assets-source').setData(config.processedGeoJSON);
+        map.getSource('assets-source').setData(config.geojson);
     }
 }
 
@@ -1118,13 +1191,6 @@ function geoJSON2Table() {  // TODO rework?
 /*
   Modals
 */
-function enableModal() {
-    config.modal = new bootstrap.Modal($('#modal'));
-    $('#modal').on('hidden.bs.modal', function (event) {
-        setHighlightFilter('');
-    })
-}
-
 function setHighlightFilter(links) {
     if (! Array.isArray(links)) links = [links];
     let filter;
@@ -1145,35 +1211,6 @@ function setHighlightFilter(links) {
         ]);
         map.setFilter(layer + '-highlighted', filter);
     });
-}
-
-// TODO Move the table creation logic into a helper function
-function buildGistTable(all_details_gist) {
-    // Only build the table if there is data
-    if (!all_details_gist || Object.keys(all_details_gist).length === 0) return '';
-    let tableHtml = '<br/>';
-    tableHtml += '<table class="table table-sm table-bordered" style="font-size: 0.75rem;"><thead><tr>' +
-        '<th style="text-transform: none; font-size: 0.7rem;">Unit Status</th>' +
-        '<th style="text-transform: none; font-size: 0.7rem;">Main Production Equipment</th>' +
-        '<th style="text-transform: none; font-size: 0.7rem;">Capacity (ttpa)</th>' +
-        '</tr></thead><tbody>';
-    Object.entries(all_details_gist).forEach(([status, tuples]) => {
-        tuples.forEach(tupleLike => {
-            // extract production method and capacity from tupleLike string
-            // Assume format: 'prod method 'capacity (ttpa)' capacity'
-            let prodMethod = tupleLike;
-            let capacity = '';
-            // prod method is all before 'capacity (ttpa)' minus steel and capacity is all after
-            let match = tupleLike.match(/(.+?)\s*capacity\s*\(ttpa\)\s*(.*)/i);
-            if (match) {
-                prodMethod = match[1].trim().replace('steel', '');
-                capacity = match[2].replace(/,/g, '');
-            }
-            tableHtml += `<tr><td>${status}</td><td>${prodMethod}</td><td>${Number(capacity).toLocaleString()}</td></tr>`;
-        });
-    });
-    tableHtml += '</tbody></table>';
-    return tableHtml;
 }
 
 // this function is responsible for creating the information in the modal that pops up after clicking an asset
@@ -1232,7 +1269,7 @@ function displayDetails(features) {
                     if (least === greatest) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][0] + '</span>: ' + least.toString() + '<br/>';
                     } else {
-                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ' + least.toString() + ' - ' + greatest.toString() + '<br/>';          
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ' + least.toString() + ' - ' + greatest.toString() + '<br/>';
                     }
                 }
             } else if (config.detailView[detail]['display'] === 'hyperlink') {
@@ -1245,15 +1282,15 @@ function displayDetails(features) {
                     location_text += features[0].properties[detail];
                 }
             } else if (config.detailView[detail]['display'] === 'colorcoded') {
-                // to create the circle dot we have for most status 
-                // if it has this colorcoded label then it goes to the color dictionary 
+                // to create the circle dot we have for most status
+                // if it has this colorcoded label then it goes to the color dictionary
                 // matches up the field name, uses fieldLabel to display label and then also uses color
                 let colorLabel = features.map((feature) => feature.properties[detail]);
                 detail_text += '<span class="fw-bold">' + config.color_association.fieldLabel + '</span>: ' +
                     '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.color_association.field] ] + '"></span>' +
                     '<span class="text-capitalize">' + features[0].properties[config.color_association.field] + '</span><br/>';
             } else if (config.detailView[detail]['display'] === 'gist-unit-level') {
-                // cycle through all of them to only group them if there is value there 
+                // cycle through all of them to only group them if there is value there
                 if (features[0].properties[detail] === 0 && features[0].properties[detail] === 0.0) {
                     // skip to next iteration in a Object.keys(config.detailView).forEach((detail) => {
                     return;
@@ -1302,13 +1339,13 @@ function displayDetails(features) {
     // get the asset and capacity label
     // if a dict and not a string (like in multi-tracker maps), get the specific labels for each tracker within
     let assetLabel = typeof config.assetLabel === 'string'
-        ? config.assetLabel 
+        ? config.assetLabel
         : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
     let capacityLabel = typeof config.capacityLabel === 'string'
-        ? config.capacityLabel 
+        ? config.capacityLabel
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 
-    // This helps customize for trackers that do not need summary table in pop up because there are no units 
+    // This helps customize for trackers that do not need summary table in pop up because there are no units
     // Build capacity summary by unit
     // Make sure capacity and parenthese get removed if there is only one feature
     if (capacityLabel !== '') {
@@ -1374,21 +1411,21 @@ function displayDetails(features) {
                             // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
                             detail_capacity +=
                                 '<div class="row">' +
-                                    '<div class="col-5">' +
-                                        '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
-                                        display_k +
-                                    '</div>' +
-                                    '<div class="col-4">' + 'Not found or N/A' + '</div>' +
-                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '<div class="col-5">' +
+                                '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
+                                display_k +
+                                '</div>' +
+                                '<div class="col-4">' + 'Not found or N/A' + '</div>' +
+                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
                                 '</div>';
                         }
                     } else {
                         if (count[k] !== 0) {
                             detail_capacity +=
                                 '<div class="row">' +
-                                    '<div class="col-5">' + display_k + '</div>' +
-                                    '<div class="col-4">' + 'Not found or N/A' + '</div>' +
-                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '<div class="col-5">' + display_k + '</div>' +
+                                '<div class="col-4">' + 'Not found or N/A' + '</div>' +
+                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
                                 '</div>';
                         }
                     }
@@ -1398,21 +1435,21 @@ function displayDetails(features) {
                             // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
                             detail_capacity +=
                                 '<div class="row">' +
-                                    '<div class="col-5">' +
-                                        '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
-                                        display_k +
-                                    '</div>' +
-                                    '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
-                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '<div class="col-5">' +
+                                '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
+                                display_k +
+                                '</div>' +
+                                '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
+                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
                                 '</div>';
                         }
                     } else {
                         if (count[k] !== 0) {
                             detail_capacity +=
                                 '<div class="row">' +
-                                    '<div class="col-5">' + display_k + '</div>' +
-                                    '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
-                                    '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
+                                '<div class="col-5">' + display_k + '</div>' +
+                                '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
+                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
                                 '</div>';
                         }
                     }
@@ -1420,19 +1457,19 @@ function displayDetails(features) {
             });
             detail_text +=
                 '<div>' +
-                    '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
-                    '<div class="row" style="height: 2px"><hr/></div>' +
-                    '<div class="row ">' +
-                        '<div class="col-5 text-capitalize">Status</div>' +
-                        '<div class="col-4">Capacity (' + capacityLabel + ')</div>' +
-                        '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
-                    '</div>' +
-                    detail_capacity +
+                '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+                '<div class="row" style="height: 2px"><hr/></div>' +
+                '<div class="row ">' +
+                '<div class="col-5 text-capitalize">Status</div>' +
+                '<div class="col-4">Capacity (' + capacityLabel + ')</div>' +
+                '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
+                '</div>' +
+                detail_capacity +
                 '</div>';
         }
         // else when there is only one feature or one unit per project in the popup modal
         else {
-            // if ggft gas finance then we want to override this always since the project level financing info is already printed 
+            // if ggft gas finance then we want to override this always since the project level financing info is already printed
             // and this else only executes if there is just one unit for the project so it'd be redundant and the word 'Capacity' is hardcoded in this feature and makes no sense for ggft
             if (config.scale_by_capacity === false) {
                 // we do not want the capacity but we do want status since that is relevant for single unit ggft projects
@@ -1463,10 +1500,10 @@ function displayDetails(features) {
         }
     }
 
-    // This is where you remove the colored circle primary = true
+        // This is where you remove the colored circle primary = true
     // we use the primary tag in config to color code the type for integrated
     else {  // if the capacity label is empty string  // TODO what then?
-    // do nothing if color not equal to status field AND there is no capacity label
+        // do nothing if color not equal to status field AND there is no capacity label
         if (config.gistUnit === true) {
             detail_text += buildGistTable(all_details_gist);
         }
@@ -1480,7 +1517,7 @@ function displayDetails(features) {
                     '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
                     '<span class="text-lowercase">' + statusEdited + '</span><br/>';
             } else {
-                // add status part not capacity part 
+                // add status part not capacity part
                 detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
                     '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
                     '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
@@ -1492,18 +1529,57 @@ function displayDetails(features) {
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html(
         '<div class="row m-0">' +
-            '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
-                (config.selectModal !== '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
-                '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
+        '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
+        (config.selectModal !== '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
+        '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
 
-                '<span class="detail-location">' + location_text + '</span><br/>' +
-                '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
-                (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
-            '</div>' +
-            '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
+        '<span class="detail-location">' + location_text + '</span><br/>' +
+        '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
+        (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
+        '</div>' +
+        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
         '</div>');
 
     setHighlightFilter(features[0].properties[config.linkField]);
+}
+
+function enableModal() {
+    config.modal = new bootstrap.Modal($('#modal'));
+    $('#modal').on('hidden.bs.modal', function (event) {
+        setHighlightFilter('');
+    })
+}
+
+
+
+// TODO Move the table creation logic into a helper function
+// TODO possibly make redundant by prepping geojson files properly
+function buildGistTable(all_details_gist) {
+    // Only build the table if there is data
+    if (!all_details_gist || Object.keys(all_details_gist).length === 0) return '';
+    let tableHtml = '<br/>';
+    tableHtml += '<table class="table table-sm table-bordered" style="font-size: 0.75rem;"><thead><tr>' +
+        '<th style="text-transform: none; font-size: 0.7rem;">Unit Status</th>' +
+        '<th style="text-transform: none; font-size: 0.7rem;">Main Production Equipment</th>' +
+        '<th style="text-transform: none; font-size: 0.7rem;">Capacity (ttpa)</th>' +
+        '</tr></thead><tbody>';
+    Object.entries(all_details_gist).forEach(([status, tuples]) => {
+        tuples.forEach(tupleLike => {
+            // extract production method and capacity from tupleLike string
+            // Assume format: 'prod method 'capacity (ttpa)' capacity'
+            let prodMethod = tupleLike;
+            let capacity = '';
+            // prod method is all before 'capacity (ttpa)' minus steel and capacity is all after
+            let match = tupleLike.match(/(.+?)\s*capacity\s*\(ttpa\)\s*(.*)/i);
+            if (match) {
+                prodMethod = match[1].trim().replace('steel', '');
+                capacity = match[2].replace(/,/g, '');
+            }
+            tableHtml += `<tr><td>${status}</td><td>${prodMethod}</td><td>${Number(capacity).toLocaleString()}</td></tr>`;
+        });
+    });
+    tableHtml += '</tbody></table>';
+    return tableHtml;
 }
 
 function buildSatImage(features) {
@@ -1800,53 +1876,3 @@ function getCoordinatesDump(gj) {
     }
     return coords;
 }
-
-// TODO can be moved to site-config.js?
-// The following values can be changed to control rotation speed:
-// At low zooms, complete a revolution every two minutes.
-const secondsPerRevolution = 150;
-// Above zoom level 5, do not rotate.
-const maxSpinZoom = 5;
-// Rotate at intermediate speeds between zoom levels 3 and 5.
-const slowSpinZoom = 3;
-
-let spinEnabled = true;
-
-// the function in charge of spinning the globe projection of the map
-function spinGlobe() {
-    const zoom = map.getZoom();
-    if (config.projection === 'globe') {
-        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-            let distancePerSecond = 360 / secondsPerRevolution;
-            if (zoom > slowSpinZoom) {
-                // Slow spinning at higher zooms
-                const zoomDif =
-                    (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-                distancePerSecond *= zoomDif;
-            }
-            const center = map.getCenter();
-            center.lng -= distancePerSecond;
-            // Smoothly animate the map over one second.
-            // When this animation is complete, it calls a 'moveend' event.
-            map.easeTo({ center, duration: 1000, easing: (n) => n });
-        }
-    }
-}
-
-map.on('moveend', () => {
-    spinGlobe();
-});
-
-// adding option to pause spin with space important for smaller screens
-document.addEventListener('keydown', (e) => {
-    spinEnabled = !spinEnabled;
-    if (e.code === 'Space') {
-        if (spinEnabled) {
-            userInteracting = !userInteracting;
-            spinGlobe();
-        } else {
-            map.stop(); // Immediately end ongoing animation
-            spinGlobe();
-        }
-    }
-});
