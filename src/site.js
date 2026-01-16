@@ -4,6 +4,7 @@ processConfig();
 function processConfig() {
     config = Object.assign(site_config, config);
 
+    // map the color name to the hexcode
     Object.keys(config.color_association.values).forEach((color_key) => {
         config.color_association.values[color_key] = config.site_colors[config.color_association.values[color_key]];
     });
@@ -55,7 +56,7 @@ const popup = new mapboxgl.Popup({
 map.on('load', async () => {
     await loadData();
     setMinMax();
-    findLinkedAssets();
+    linkAssets();
     addLayers();
     addEvents();
     console.log('layers and events added');  // TODO DELETE
@@ -209,18 +210,22 @@ function setMinMax() {
     });
 }
 
-/* TODO Function Summary - Single-use function */
+/* TODO Function Summary - Frequent-use function; used every time data is filtered */
 // Builds lookup of linked assets by the link column
 // and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 // TODO !!! import file such that this processing doesn't need to be done at runtime !!!
-function findLinkedAssets() {
-    map.off('idle', findLinkedAssets);
-    config.preLinkedGeoJSON = config.geojson;
+function linkAssets() {
+    console.log('linking assets');  // TODO DELETE
+    map.off('idle', linkAssets);
+    if (!('geojson_filtered' in config)) {  // if the filtered geojson hasn't been initialized
+        config.geojson_filtered = config.geojson;
+    }
+
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
     config.linked = {};
-    config.geojson.features.forEach((feature) => {
+    config.geojson_filtered.features.forEach((feature) => {
         if (! (feature.properties[config.linkField] in config.linked)) {
             config.linked[feature.properties[config.linkField]] = [];
         } 
@@ -229,7 +234,7 @@ function findLinkedAssets() {
 
     // Next find linked assets that share location. 
     let grouped = {};
-    config.geojson.features.forEach((feature) => {
+    config.geojson_filtered.features.forEach((feature) => {
         if ('geometry' in feature && feature.geometry != null) {
             if ('coordinates' in feature.geometry) {
                 let key = feature.properties[config.linkField] + ',' + feature.geometry.coordinates[0] + ',' + feature.geometry.coordinates[1];
@@ -243,7 +248,7 @@ function findLinkedAssets() {
     });
 
     // Rebuild GeoJSON with summed capacity, and custom icon for single point display of the grouped assets
-    config.geojson = {
+    config.geojson_linked = {
         'type': 'FeatureCollection',
         'features': []
     };
@@ -291,11 +296,11 @@ function findLinkedAssets() {
         features[0].properties['summary_count'] = JSON.stringify(summary_count);
         config.totalCount += features.length;
 
-        config.geojson.features.push(features[0]);
+        config.geojson_linked.features.push(features[0]);
     });
 }
 
-/* TODO Function Summary - Single-use function: called once in findLinkedAssets() in a forEach loop */
+/* TODO Function Summary - Single-use function: called once in linkAssets() in a forEach loop */
 function generateIcon(icon) {
     let label = JSON.stringify(icon);
     if (map.hasImage(label)) return;
@@ -432,7 +437,7 @@ function addPointLayer() {
     config.layers.push('assets-points');
 
     // Add layer with proportional icons
-    if (config.sqrt === true) {
+    if (config.sqrt) {
         const sqrtMin = Math.sqrt(config.minPointCapacity);
         const sqrtMax = Math.sqrt(config.maxPointCapacity);
 
@@ -915,7 +920,7 @@ function countFilteredFeatures() {
     config.maxFilteredCapacity = 0;
     config.minFilteredCapacity = 1000000;
 
-    let ref = 'config.geojson.features';
+    let ref = 'config.geojson_linked.features';
 
     eval(ref).forEach(feature => {
         if ('summary_count' in feature.properties) {
@@ -1034,7 +1039,7 @@ function filterGeoJSON() {
         'type': 'FeatureCollection',
         'features': []
     };
-    config.geojson.features.forEach(feature => {
+    config.geojson.features.forEach(feature => {  // for each unit in the original geojson
         let include = true;
         for (let field in filterStatus) {
             if (!filterStatus[field].includes(feature.properties[field])) include = false;
@@ -1068,15 +1073,15 @@ function filterGeoJSON() {
             filteredGeoJSON.features.push(feature);
         }
     });
-    config.geojson = filteredGeoJSON; // Mikel had used JSON stringify to make a deep copy but David found that's only slowing it down so removed 
-    findLinkedAssets();
+    config.geojson_filtered = filteredGeoJSON;
+    linkAssets();
     config.tableDirty = true;
     updateTable();
     updateSummary();
 
     // TODO perhaps remove this qualifier for gipt/tiles
     if (!config.tiles) {  // maybe just use map filter for points and lines, no matter if tiles of geojson
-        map.getSource('assets-source').setData(config.geojson);
+        map.getSource('assets-source').setData(config.geojson_filtered);
     }
 }
 
