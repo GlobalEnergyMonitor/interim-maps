@@ -385,7 +385,7 @@ function addLayers() {
     );
 }
 
-/* TODO Function Summary - Single-use function */
+/* Adds point layer to map obj - Single-use function */
 function addPointLayer() {
     // First build circle layer
     //  build style json for circle-color based on config.color_association
@@ -530,7 +530,7 @@ function addPointLayer() {
     });
 }
 
-/* TODO Function Summary - Single-use function */
+/* Adds line layer to map obj - Single-use function */
 function addLineLayer() {
     let paint = config.linePaint;
 
