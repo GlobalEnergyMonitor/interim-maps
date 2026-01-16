@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GOGPT/2025-08-05/gogpt_map_2025-08-05.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gogpt_map_2026-01-16.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Gas Units",
@@ -9,11 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-display', 'status', 'region', 'areas', 'subnational', 'start-year'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-display', 'status', 'region', 'country-area1', 'subnational', 'start-year'],
         labels: ['Plant', 'Unit', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Region', 'Country/Area(s)', 'Subnational unit (province/state)', 'Start year'],
         clickColumns: ['name'],
         rightAlign: ['unit-name', 'capacity-display', 'start-year'],
-        toLocaleString: ['capacity'],
     },
 
     /* configure the search box;
@@ -33,12 +32,13 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'owner': {'label': 'Owner(s)'},
         'parent': {'label': 'Parent(s)'},
         'tech-type': {'label': 'Turbine/Engine Technology'},
         'fuel': {'label': 'Fuel'},
         'start-year': {'label': 'Start year'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
