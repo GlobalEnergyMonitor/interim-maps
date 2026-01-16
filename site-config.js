@@ -115,4 +115,5 @@ var site_config = {
     geometries: ['Point'],
 
     scale_by_capacity: true, // for gas finance where we used the unit capacity status functionality but 'Capacity' is hardcoded in for single unit projects and the value is not capacity but finance info here. displayDetails() in stie.js is where this is going to be used.
+    showToolTip: false,  // set true in Europe map
 };

@@ -212,8 +212,7 @@ function setMinMax() {
 
 /* TODO Function Summary - Frequent-use function; used every time data is filtered */
 // Builds lookup of linked assets by the link column
-// and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
-// TODO !!! import file such that this processing doesn't need to be done at runtime !!!
+// and when linked assets share location, rebuilds geojson_linked with summed capacity and custom icon
 function linkAssets() {
     console.log('linking assets');  // TODO DELETE
     map.off('idle', linkAssets);
@@ -224,25 +223,25 @@ function linkAssets() {
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
-    config.linked = {};
+    config.linked_assets = {};
     config.geojson_filtered.features.forEach((feature) => {
-        if (! (feature.properties[config.linkField] in config.linked)) {
-            config.linked[feature.properties[config.linkField]] = [];
+        if (! (feature.properties[config.linkField] in config.linked_assets)) {
+            config.linked_assets[feature.properties[config.linkField]] = [];
         } 
-        config.linked[feature.properties[config.linkField]].push(feature);
+        config.linked_assets[feature.properties[config.linkField]].push(feature);
     });
 
     // Next find linked assets that share location. 
-    let grouped = {};
+    let grouped_assets = {};
     config.geojson_filtered.features.forEach((feature) => {
         if ('geometry' in feature && feature.geometry != null) {
             if ('coordinates' in feature.geometry) {
-                let key = feature.properties[config.linkField] + ',' + feature.geometry.coordinates[0] + ',' + feature.geometry.coordinates[1];
-                if (! (key in grouped)) {
-                    grouped[key] = [];
+                let key = feature.properties[config.linkField] + ':' + feature.geometry.coordinates[0] + ',' + feature.geometry.coordinates[1];
+                if (! (key in grouped_assets)) {
+                    grouped_assets[key] = [];
                 }
-                // adds feature to dictonary grouped if shares a linkField id and coords, not done for lines
-                grouped[key].push(feature);
+                // adds feature to dictonary grouped_assets if shares a linkField id and coords, not done for lines
+                grouped_assets[key].push(feature);
             }
         }
     });
@@ -253,23 +252,22 @@ function linkAssets() {
         'features': []
     };
 
-    Object.keys(grouped).forEach((key) => {
-        let features = JSON.parse(JSON.stringify(grouped[key])); //deep copy
+    Object.keys(grouped_assets).forEach((key) => {
+        let features_in_current_group = grouped_assets[key]; //deep copy
+        let group_feature = JSON.parse(JSON.stringify(features_in_current_group[0]))  // make a group (total) feature, deep-copied from the first feature in the group
 
         // Sum capacity across all linked assets
-        let capacity = features.reduce((previous, current) => {
-            return previous + Number(current.properties[config.capacityField]);
+        group_feature.properties[config.capacityScaledField] = features_in_current_group.reduce((previous, current) => {
+            return previous + Number(current.properties[config.capacityScaledField]);
         }, 0);
 
-        features[0].properties[config.capacityField] = capacity;
-
         // Build summary count of capacity across all linked assets and generate icon based on that label if more than one status
-        if (features[0].geometry.type === 'Point') {
+        if (group_feature.geometry.type === 'Point') {
             let icon = Object.assign(...Object.keys(config.color_association.values).map(k => ({ [config.color_association.values[k]]: 0 })));
-            features.forEach((feature) => {  
+            features_in_current_group.forEach((feature) => {
                 icon[config.color_association.values[feature.properties[config.color_association.field]]] += Number(feature.properties[config.capacityField]);
             });
-            if (Object.values(icon).filter(v => v != 0).length > 1) {
+            if (Object.values(icon).filter(v => v != 0).length > 1) {  // if the icon will contain more than one color
                 // normalize values to 10
                 let current = 0;
                 let total = Object.values(icon).reduce((previous, current) => {
@@ -277,7 +275,7 @@ function linkAssets() {
                 }, 0);
                 icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
                 let string_icon = JSON.stringify(icon)
-                features[0].properties['icon'] = string_icon;
+                group_feature.properties['icon'] = string_icon;
                 if (! config.icons.includes(string_icon)) {
                     generateIcon(icon);
                     config.icons.push(string_icon);
@@ -289,21 +287,23 @@ function linkAssets() {
         let summary_count = {};
         config.filters.forEach((filter) => {
             summary_count[filter.field] = Object.assign(...filter.values.map(f => ({[f]: 0})));
-            features.forEach((feature) => {
+            features_in_current_group.forEach((feature) => {
                 summary_count[filter.field][feature.properties[filter.field]]++;
             });
         });
-        features[0].properties['summary_count'] = JSON.stringify(summary_count);
-        config.totalCount += features.length;
+        group_feature.properties['summary_count'] = JSON.stringify(summary_count);
+        config.totalCount += features_in_current_group.length;
 
-        config.geojson_linked.features.push(features[0]);
+        config.geojson_linked.features.push(group_feature);
     });
 }
 
-/* TODO Function Summary - Single-use function: called once in linkAssets() in a forEach loop */
+/* Generates icon image circles for each unique asset combination - Frequent-use function: called once in linkAssets() in a forEach loop */
 function generateIcon(icon) {
     let label = JSON.stringify(icon);
-    if (map.hasImage(label)) return;
+    if (map.hasImage(label)) return;  // if the map has already created an icon (image) with the given label, return
+    // ideally, should return more often for the longer time the user spend filtering
+    // on initial load, this function will run for every unique icon (image)
 
     let canvas = document.createElement('canvas');
     canvas.width = 64; // set the size of the canvas
@@ -333,7 +333,7 @@ function generateIcon(icon) {
         current = next;
     });
 
-    // create a data URI for the canvas image
+    // create a data URL for the canvas image
     let dataURL = canvas.toDataURL();
 
     // add the image to the map as a custom icon
@@ -633,14 +633,14 @@ function addEvents() {
 
         if (selectedFeatures.length === 1) {
             config.selectModal = '';
-            displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+            displayDetails(config.linked_assets[selectedFeatures[0].properties[config.linkField]]);
         } else {
             var modalText = '<h6 class="p-3">There are multiple ' + config.assetFullLabel + ' near this location. Select one for more details</h6>';
 
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
                 var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + '</li>');
-                link.attr('data-feature', JSON.stringify(config.linked[feature.properties[config.linkField]]));
+                link.attr('data-feature', JSON.stringify(config.linked_assets[feature.properties[config.linkField]]));
                 link.attr('onClick', 'displayDetails(this.dataset.feature)');
                 ul.append(link);
             });
@@ -774,7 +774,7 @@ function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
         // go through each filter in config 
-        if (config.showToolTip) {
+        if (config.showToolTip) {  // used by Europe map
             // create more space for europe legend  // TODO ?
             if (filter.primary && filter.field_hover_text) {
             $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
@@ -802,7 +802,7 @@ function buildFilters() {
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
         }
 
-        for (let i=0; i<filter.values.length; i++) {
+        for (let i = 0; i < filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
             check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
@@ -922,7 +922,7 @@ function countFilteredFeatures() {
 
     let ref = 'config.geojson_linked.features';
 
-    eval(ref).forEach(feature => {
+    eval(ref).forEach(feature => {  // TODO why eval()?
         if ('summary_count' in feature.properties) {
             let summary_count = JSON.parse(feature.properties.summary_count);
             Object.keys(summary_count).forEach((filter) => {
@@ -1182,7 +1182,7 @@ function updateTable(force) {
 }
 
 function geoJSON2Table() {  // TODO rework?
-    return config.preLinkedGeoJSON.features.map(feature => {
+    return config.geojson_filtered.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
             let value = feature.properties[header];
             if ('displayValue' in config.tableHeaders && Object.keys(config.tableHeaders.displayValue).includes(header)) {
@@ -1588,7 +1588,7 @@ function buildSatImage(features) {
 function showAllPhases(link) {
     config.modal.hide();
     setHighlightFilter(link);
-    var bbox = geoJSONBBox({'type': 'FeatureCollection', features: config.linked[link] });
+    var bbox = geoJSONBBox({'type': 'FeatureCollection', features: config.linked_assets[link] });
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
 
