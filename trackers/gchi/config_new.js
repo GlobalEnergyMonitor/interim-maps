@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GChI/2025-11/gchi_map_2025-11-10.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gchi_map_2026-01-16.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -9,11 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'owner', 'product-primary', 'feedstock', 'product-secondary', 'subnational', 'areas'],
+        values: ['name', 'owner', 'product-primary', 'feedstock', 'product-secondary', 'subnational', 'country-area1'],
         labels: ['Project', 'Owner', 'Primary Product', 'Feedstock', 'Secondary Product', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
-        toLocaleString: [],
     },
 
     /* configure the search box; 
@@ -34,12 +33,13 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'owner': {'label': 'Owner'},
         'product-primary': {'label': 'Primary Products'},
         'product-secondary': {'label': 'Secondary Products'},
         'feedstock': {'label': 'Feedstock'},
         'feedstock-accuracy': {'label': 'Feedstock Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -55,5 +55,5 @@ var config = {
     highZoomMinRadius: 6,
 
     showMaxCapacity: false,
-    capacityLabel: '',
+    includeCapacityByStatusInDetailView: false,
 }
