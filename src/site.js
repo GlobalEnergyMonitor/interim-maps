@@ -273,7 +273,7 @@ function linkAssets() {
                 let total = Object.values(icon).reduce((previous, current) => {
                     return previous + Number(current);
                 }, 0);
-                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
+                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(11 * (icon[k] / total)) })));  // use 11 and ceil to get 12 pieces on the circle
                 let string_icon = JSON.stringify(icon)
                 group_feature.properties['icon'] = string_icon;
                 if (! config.icons.includes(string_icon)) {
@@ -314,7 +314,6 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
-    context.globalAlpha = config.pointPaint['circle-opacity'];
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
@@ -326,6 +325,7 @@ function generateIcon(icon) {
     }, 0);
 
     Object.keys(icon).forEach((k) => {
+        if (icon[k] <= 0) return;  // don't attempt to draw a slice that is of a color not on this specific circle
         let next = current + (icon[k] / slices);
         context.fillStyle = k;
         context.beginPath();
@@ -435,7 +435,8 @@ function addPointLayer() {
         'filter': ['==', ['geometry-type'], 'Point'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {},
-        'paint': paint
+        'paint': paint,
+        "icon-opacity": config.pointPaint["circle-opacity"]
     });
     config.layers.push('assets-points');
 
