@@ -170,7 +170,7 @@ function addGeoJSON(jsonData) {
         });
     }
 
-    // part to optimize csv only maps
+    // part to optimize csv/geojson maps
     if (!config.tiles) {
         map.addSource('assets-source', {
             'type': 'geojson',
@@ -296,6 +296,9 @@ function linkAssets() {
 
         config.geojson_linked.features.push(group_feature);
     });
+
+    // set the map to use the linked assets as input data
+    map.getSource('assets-source').setData(config.geojson_linked);
 }
 
 /* Generates icon image circles for each unique asset combination - Frequent-use function: called once in linkAssets() in a forEach loop */
@@ -1078,11 +1081,6 @@ function filterGeoJSON() {
     config.tableDirty = true;
     updateTable();
     updateSummary();
-
-    // TODO perhaps remove this qualifier for gipt/tiles
-    if (!config.tiles) {  // maybe just use map filter for points and lines, no matter if tiles of geojson
-        map.getSource('assets-source').setData(config.geojson_filtered);
-    }
 }
 
 function updateSummary() {
