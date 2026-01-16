@@ -12,8 +12,7 @@ var config = {
         values: ['name', 'capacity-display', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1', 'country-area2'],
         labels: ['Project name', 'Capacity (MW)', 'Technology type', 'Status', 'Start year', 'Owner', 'Operator', 'Country/Area 1', 'Country/Area 2'],
         clickColumns: ['name'],
-        rightAlign: ['capacity', 'start-year'],
-        toLocaleString: ['capacity'],
+        rightAlign: ['capacity-display', 'start-year'],
     },
 
     /* configure the search box; 

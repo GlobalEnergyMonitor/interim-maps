@@ -12,8 +12,7 @@ var config = {
         values: ['name', 'owner', 'status', 'capacity-display', 'start-year', 'plant-type', 'prod-type', 'subnational', 'country-area1'],
         labels: ['Project', 'Owner', 'Status', 'Cement Capacity (mmtpa)', 'Start date', 'Plant type', 'Production type', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
-        rightAlign: [],
-        toLocaleString: ['capacity'],
+        rightAlign: ['capacity-display', 'start-year'],
     },
 
     /* configure the search box; 

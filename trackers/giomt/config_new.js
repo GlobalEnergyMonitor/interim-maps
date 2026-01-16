@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/giomt/2025-10/giomt_map_2025-10-17.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/giomt_map_2026-01-16.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Iron Ore assets',
@@ -11,11 +11,10 @@ var config = {
     // TODO make it so all string showing capacity type value is to locale string with commas currently Total reserves for giomt is string but no commas
     // maybe change it in site.js file
     tableHeaders: {
-        values: ['name', 'name-noneng', 'capacity', 'total-reserves-proven-and-probable', 'total-resource-inferred', 'status', 'owner', 'parent', 'areas'],
+        values: ['name', 'name-noneng', 'capacity-display', 'reserves', 'resource', 'status', 'owner', 'parent', 'country-area1'],
         labels: ['Asset name', 'Asset Name (other language)', 'Design Capacity (ttpa)', 'Reserve (thousand tonnes)', 'Resource (thousand tonnes)', 'Status', 'Owner', 'Parent', 'Country/Area(s)'],
         clickColumns: ['name'],
-        rightAlign: ['capacity', 'total-reserves-proven-and-probable', 'total-resource-inferred'],
-        toLocaleString: [''],
+        rightAlign: ['capacity-display', 'reserves', 'resource'],
     },
 
     /* configure the search box; 
@@ -34,13 +33,14 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'capacity-display': {'label': 'Design Capacity (ttpa)'},
-        'total-reserves-proven-and-probable': {'label': 'Reserves (thousand tonnes)'},
-        'total-resource-inferred': {'label': 'Resources (thousand tonnes)'},
+        'reserves': {'label': 'Reserves (thousand tonnes)'},
+        'resource': {'label': 'Resources (thousand tonnes)'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -69,15 +69,13 @@ var config = {
     filters: [
         {
             field: 'status',
-            label: 'Operating Status',
             values: ['operating', 'proposed', 'mothballed', 'retired', 'cancelled', 'shelved', 'unknown'],
-            values_labels: ['Operating', 'Proposed', 'Mothballed', 'Retired', 'Cancelled', 'Shelved', 'Unknown'],
         },
     ],
 
     minRadius: 3,
     maxRadius: 15,
-    capacityLabel: '',
-    // showCapacityTable: false, // TODO doesn't seem to do anything
     minMaxCapacityFilterLabel: 'Design Capacity (TTPA)',
+    capacityLabel: 'TTPA',
+    includeCapacityByStatusInDetailView: false,
 }

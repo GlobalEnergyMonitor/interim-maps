@@ -12,8 +12,7 @@ var config = {
         values: ['name', 'capacity-display', 'status', 'owner', 'operator', 'country-area1', 'fuel'],
         labels: ['Project name', 'Capacity (MW)', 'Status', 'Owner', 'Operator', 'Country/Area(s)', 'Fuel'],
         clickColumns: ['name'],
-        rightAlign: ['capacity'],
-        toLocaleString: ['capacity'],
+        rightAlign: ['capacity-display'],
     },
 
     /* configure the search box; 

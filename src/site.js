@@ -1147,17 +1147,7 @@ function createTable() {
         });        
     }
     config.table = $('#table').DataTable({
-        data: geoJSON2Table().map(row => {
-            if ('toLocaleString' in config.tableHeaders) {  // TODO Possibly remove as string conversion can be handled in other scripts
-                config.tableHeaders.toLocaleString.forEach((col) => {
-                    const colIndex = config.tableHeaders.values.indexOf(col);
-                    if (colIndex !== -1 && row[colIndex] != null) {
-                        row[colIndex] = Number(row[colIndex]).toLocaleString();
-                    }
-                });
-            }
-            return row;
-        }),
+        data: geoJSON2Table(),
         searching: false,
         pageLength: 100,
         fixedHeader: true,
