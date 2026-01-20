@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/goget/Oil%20&%20Gas%20Extraction-map-file-2025-02-26.csv',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/goget_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Oil & Gas Extraction Areas',
@@ -9,20 +9,19 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['wiki-name', 'operator', 'status-display', 'areas', 'subnational', 'prod-oil', 'prod-gas', 'prod-year-oil', 'prod-year-gas', 'prod-start-year',],
-        labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)', 'Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year'],
-        clickColumns: ['wiki-name'],
-        rightAlign: ['wiki-name', 'discovery-year', 'fid-year', 'prod-start-year', 'prod-oil', 'prod-gas', 'prod-year-oil', 'prod-year-gas'],
-        toLocaleString: ['prod-oil', 'prod-gas'],
+        values: ['name', 'operator', 'status-display', 'country-area1', 'subnational', 'prod-oil', 'prod-gas', 'prod-year-oil', 'prod-year-gas', 'start-year'],
+        labels: ['Extraction Area', 'Operator', 'Status', 'Country/Area(s)', 'Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year'],
+        clickColumns: ['name'],
+        rightAlign: ['prod-oil', 'prod-gas', 'prod-year-oil', 'prod-year-gas', 'start-year'],
     },
 
     /* configure the search box; 
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Extraction Area': ['wiki-name', 'name-search'],
+        'Extraction Area': ['name', 'name-search'],
         'Companies': ['owner', 'operator', 'parent', 'owner-search'],
         'Discovery Year': ['discovery-year'],
-        'Production start year': ['production-start-year'],
+        'Production start year': ['start-year'],
     },
 
     /* define fields and how they are displayed. 
@@ -33,17 +32,18 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'wiki-name': {'display': 'heading'},
+        'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'location-accuracy': {'label': 'Location Accuracy'},
         'operator': {'label': 'Operator'},
         'discovery-year': {'label': 'Discovery Year'},
         'fid-year': {'label': 'FID Year'},
-        'prod-start-year': {'label': 'Production Start Year'},
+        'start-year': {'label': 'Production Start Year'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
-        'prod-year-gas': {'label': 'Production Year - Gas'},
         'prod-oil': {'label': 'Production - Oil (Million bbl/y)'},
+        'prod-year-gas': {'label': 'Production Year - Gas'},
         'prod-gas': {'label': 'Production - Gas (Million m³/y)'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -59,13 +59,13 @@ var config = {
         field: 'status',
         values: {
             'operating': 'red',
-            'in-development': 'blue',
+            'in development': 'blue',
             'discovered': 'blue',
-            'shut-in': 'green',
+            'shut in': 'green',
             'decommissioned': 'green',
             'cancelled': 'green',
             'abandoned': 'grey',
-            'UGS': 'grey',
+            'ugs': 'grey',
             'not found': 'black'
         }
     },
@@ -73,14 +73,13 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating', 'in-development', 'discovered', 'shut-in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ''],
+            values: ['operating', 'in development', 'discovered', 'shut in', 'decommissioned', 'cancelled', 'abandoned', 'ugs', 'not found'],
             values_labels: ['Operating', 'In development', 'Discovered', 'Shut in', 'Decommissioned', 'Cancelled', 'Abandoned', 'UGS', 'Not found'],
         },
     ],
 
-    nameField: 'wiki-name',
-    countryFile: './countries.json',
+    countryFile: '../../trackers/goget/countries.json',
     showMaxCapacity: false,
-    // capacityLabel: 'million boe/y',
-    capacityLabel: '',
+    capacityLabel: 'million boe/y',
+    includeCapacityByStatusInDetailView: false,
 }
