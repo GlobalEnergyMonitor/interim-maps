@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gctt/Coal%20Terminals-map-file-2025-01-15.csv',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gctt_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Coal Terminals",
@@ -9,10 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link. Remember there are append value and display value options*/
     tableHeaders: {
-        values: ['name', 'name-other', 'owner', 'parent-port', 'capacity_display', 'status', 'start-year', 'end-year', 'region', 'areas', 'subnational'],
+        values: ['name', 'name-other', 'owner', 'port', 'capacity-display', 'status', 'start-year', 'end-year', 'region', 'country-area1', 'subnational'],
         labels: ['Coal terminal name', 'Coal terminal name (detail or other)', 'Owner', 'Parent port', 'Capacity (Mt)', 'Status', 'Start year', 'Retired year', 'Region', 'Country/Area', 'Subnational unit (province, state)'],
         clickColumns: ['name'],
-        rightAlign: ['capacity_display', 'start-year', 'end-year'],
+        rightAlign: ['capacity-display', 'start-year', 'end-year'],
         toLocaleString: ['capacity'],
     },
 
@@ -33,12 +33,13 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'name-other': {'label': 'Coal Terminal Name (detail or other)'},
         'owner': {'label': 'Owner'},
-        'parent-port': {'label': 'Parent Port'},
+        'port': {'label': 'Parent Port'},
         'start-year': {'label': 'Start Year'},
         'end-year': {'label': 'Retired Year'},
-        'location-display': {'display': 'location'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -51,8 +52,8 @@ var config = {
             'proposed': 'green',
             'retired': 'grey',
             'cancelled': 'grey',
-            'mothballed': 'grey',
             'shelved': 'grey',
+            'mothballed': 'grey',
         },
     },
 
@@ -63,5 +64,6 @@ var config = {
         },
     ],
 
-    capacityLabel: '(Mt)',
+    minMaxCapacityFilterLabel: 'Capacity (Mt)',
+    capacityLabel: 'Mt',
 }

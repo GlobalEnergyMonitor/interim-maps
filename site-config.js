@@ -86,7 +86,7 @@ var site_config = {
     showAllPhases: false,
     showMaxCapacity: true,
     showMinCapacity: false,
-    minMaxCapacityFilterLabel: "Capacity (MW)",
+    minMaxCapacityFilterLabel: 'Capacity (MW)',
     includeCapacityByStatusInDetailView: true,
     // showCapacityTable: true,
 
