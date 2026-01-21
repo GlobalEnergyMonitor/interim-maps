@@ -9,10 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link. Remember there are append value and display value options*/
     tableHeaders: {
-        values: ['name', 'name-other', 'owner', 'port', 'capacity-display', 'status', 'start-year', 'end-year', 'region', 'country-area1', 'subnational'],
+        values: ['name', 'name-other', 'owner', 'port', 'capacity-table', 'status', 'start-year', 'end-year', 'region', 'country-area1', 'subnational'],
         labels: ['Coal terminal name', 'Coal terminal name (detail or other)', 'Owner', 'Parent port', 'Capacity (Mt)', 'Status', 'Start year', 'Retired year', 'Region', 'Country/Area', 'Subnational unit (province, state)'],
         clickColumns: ['name'],
-        rightAlign: ['capacity-display', 'start-year', 'end-year'],
+        rightAlign: ['capacity-table', 'start-year', 'end-year'],
         toLocaleString: ['capacity'],
     },
 

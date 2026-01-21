@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcpt_map_2026-01-16.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcpt_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Coal-fired Units",
@@ -9,10 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'name-noneng', 'owner', 'parent', 'capacity-display', 'status', 'start-year', 'end-year', 'region', 'country-area1', 'subnational'],
+        values: ['name', 'unit-name', 'name-noneng', 'owner', 'parent', 'capacity-table', 'status', 'start-year', 'end-year', 'region', 'country-area1', 'subnational'],
         labels: ['Plant', 'Unit', 'Plant name (local)', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Start year', 'Retired year', 'Region', 'Country/Area', 'Subnational unit (province, state)'],
         clickColumns: ['name'],
-        rightAlign: ['unit-name', 'capacity-display', 'start-year', 'end-year'],
+        rightAlign: ['unit-name', 'capacity-table', 'start-year', 'end-year'],
     },
 
     /* configure the search box; 

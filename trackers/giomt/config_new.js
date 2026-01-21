@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/giomt_map_2026-01-16.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/giomt_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Iron Ore assets',
@@ -8,13 +8,11 @@ var config = {
 
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
-    // TODO make it so all string showing capacity type value is to locale string with commas currently Total reserves for giomt is string but no commas
-    // maybe change it in site.js file
     tableHeaders: {
-        values: ['name', 'name-noneng', 'capacity-display', 'reserves', 'resource', 'status', 'owner', 'parent', 'country-area1'],
+        values: ['name', 'name-noneng', 'capacity-table', 'reserves', 'resource', 'status', 'owner', 'parent', 'country-area1'],
         labels: ['Asset name', 'Asset Name (other language)', 'Design Capacity (ttpa)', 'Reserve (thousand tonnes)', 'Resource (thousand tonnes)', 'Status', 'Owner', 'Parent', 'Country/Area(s)'],
         clickColumns: ['name'],
-        rightAlign: ['capacity-display', 'reserves', 'resource'],
+        rightAlign: ['capacity-table', 'reserves', 'resource'],
     },
 
     /* configure the search box; 

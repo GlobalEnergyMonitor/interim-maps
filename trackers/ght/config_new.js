@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ght_map_2026-01-16.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ght_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Hydropowered Stations",
@@ -9,10 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'capacity-display', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1', 'country-area2'],
+        values: ['name', 'capacity-table', 'tech-type', 'status', 'start-year', 'owner', 'operator', 'country-area1', 'country-area2'],
         labels: ['Project name', 'Capacity (MW)', 'Technology type', 'Status', 'Start year', 'Owner', 'Operator', 'Country/Area 1', 'Country/Area 2'],
         clickColumns: ['name'],
-        rightAlign: ['capacity-display', 'start-year'],
+        rightAlign: ['capacity-table', 'start-year'],
     },
 
     /* configure the search box; 

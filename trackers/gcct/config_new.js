@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcct_map_2026-01-16.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gcct_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -9,10 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'owner', 'status', 'capacity-display', 'start-year', 'plant-type', 'prod-type', 'subnational', 'country-area1'],
+        values: ['name', 'owner', 'status', 'capacity-table', 'start-year', 'plant-type', 'prod-type', 'subnational', 'country-area1'],
         labels: ['Project', 'Owner', 'Status', 'Cement Capacity (mmtpa)', 'Start date', 'Plant type', 'Production type', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
-        rightAlign: ['capacity-display', 'start-year'],
+        rightAlign: ['capacity-table', 'start-year'],
     },
 
     /* configure the search box; 

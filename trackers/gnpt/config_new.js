@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gnpt_map_2026-01-16.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gnpt_map_2026-01-20.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Nuclear Power Plant Units",
@@ -9,10 +9,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'capacity-display', 'reactor-type', 'model', 'status', 'owner', 'operator', 'subnational', 'country-area1'],
+        values: ['name', 'unit-name', 'capacity-table', 'reactor-type', 'model', 'status', 'owner', 'operator', 'subnational', 'country-area1'],
         labels: ['Project name', 'Unit name', 'Capacity (MW)', 'Reactor', 'Model', 'Status', 'Owner', 'Operator', 'Subnational area', 'Country/Area(s)'],
         clickColumns: ['name'],
-        rightAlign: ['capacity-display'],
+        rightAlign: ['capacity-table'],
     },
 
     /* configure the search box; 
