@@ -16,13 +16,14 @@ var site_config = {
     /* Define labels for sitewide colors, referenced in tracker config */
     site_colors: {
         'red': '#c74a48',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'grey': '#8f8f8e',
-        'light blue': '#74add1',
-        'light grey': '#ccc',
         'orange': '#fd7e14',
         'yellow': '#f3ff00',
+        'green': '#4c9d4f',
+        'blue': '#5c62cf',
+        'light blue': '#74add1',
+        'grey': '#8f8f8e',
+        'light grey': '#ccc',
+        'dark grey': '#4B4B4B',
     },
 
     /* define the column and associated values for color application */
@@ -114,6 +115,6 @@ var site_config = {
     sqrt: true, // need this to trigger the square root interpolation circle asset sizing logic
     geometries: ['Point'],
 
-    scale_by_capacity: true, // for gas finance where we used the unit capacity status functionality but 'Capacity' is hardcoded in for single unit projects and the value is not capacity but finance info here. displayDetails() in stie.js is where this is going to be used.
+    useDefaultCapacityInDetailView: true, // for gas finance where we used the unit capacity status functionality but 'Capacity' is hardcoded in for single unit projects and the value is not capacity but finance info here. displayDetails() in stie.js is where this is going to be used.
     showToolTip: false,  // set true in Europe map
 };

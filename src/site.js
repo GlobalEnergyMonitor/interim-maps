@@ -1229,6 +1229,7 @@ function displayDetails(features) {
         if (invalidValues.includes(value) || Number.isNaN(value)) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
+            // TODO remove unused options from this if-statement
             if (config.detailView[detail]['display'] === 'heading') {
                 detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
             } else if (config.detailView[detail]['display'] === 'simple_markup') {
@@ -1332,7 +1333,11 @@ function displayDetails(features) {
             const invalidValues = ["", undefined, 0, "nan", null, "Unknown [unknown %]", "unknown"];
             if (!invalidValues.includes(value)) {
                 if (Object.keys(config.detailView[detail]).includes('label')) {
-                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
+                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];
+                    if (Object.keys(config.detailView[detail]).includes('trailing-label')) {  // if the value has a trailing label (eg unit of measurement)
+                        detail_text += ' ' + config.detailView[detail]['trailing-label'];
+                    }
+                    detail_text += '<br/>';
                 }
             }
         }
@@ -1349,7 +1354,7 @@ function displayDetails(features) {
 
     if (config.includeCapacityByStatusInDetailView) {
         // TODO lots of room for optimization in this if-statement body
-        if (features.length > 1) {  // if there are multiple units per project
+        if (features.length > 1) {  // if there are multiple units in this project
             let filterIndex = 0;
             for (const[index, filter] of config.filters.entries()) {
                 if (filter.field === config.statusField) {
@@ -1469,34 +1474,28 @@ function displayDetails(features) {
         }
         // else when there is only one feature or one unit per project in the popup modal
         else {
-            // if ggft gas finance then we want to override this always since the project level financing info is already printed
-            // and this else only executes if there is just one unit for the project so it'd be redundant and the word 'Capacity' is hardcoded in this feature and makes no sense for ggft
-            if (!config.scale_by_capacity) {
-                // we do not want the capacity but we do want status since that is relevant for single unit ggft projects
-                // since we know for ggft the status is a color field we do not need the extra logic seen below with 'config.color_association.field != config.statusDisplayField'
-                detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.statusField] ] + '"></span>' +
-                    '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-            }
-            else {
-                let capacityFloat = Number(features[0].properties[config.capacityDisplayField])
+            // add default capacity to detail view popup
+            if (config.useDefaultCapacityInDetailView) {
                 let capacityFloatandLabel;
+                let capacity = features[0].properties[config.capacityDisplayField];
 
-                // if capacity is a string and when you convert with Number it is 0 then we can say it is NA or Not found
-                if (features[0].properties[config.capacityDisplayField] === '') {
-                    capacityFloatandLabel = 'Not found or N/A'
-                } else {
-                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel
+                if (capacity === '') {  // if capacity is an empty string
+                    capacityFloatandLabel = 'Not found or N/A';
+                } else if (!isNaN(Number(capacity))) {  // if capacity is a number
+                    let capacityFloat = Number(capacity);
+                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel;
+                } else {  // if capacity is any other string
+                    capacityFloatandLabel = capacity;
                 }
-                // Remove 'Capacity' prefix and parentheses from capacityLabel // TODO look into a better way to handle, issue if capacity is nan or undefined like intentionally is for GOGET
-
-                detail_text += '<span class="fw-bold text-capitalize">Status</span>: '
-                if (config.color_association.field == config.statusField) {  // add color dot if it is an expected status
-                    detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>'
-                }
-                detail_text += '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>' +
-                    '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel;
+                detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + capacityFloatandLabel + '<br/>';
             }
+
+            // add status to detail view popup
+            detail_text += '<span class="fw-bold text-capitalize">Status</span>: '
+            if (config.color_association.field == config.statusField) {  // add color dot if it is an expected status
+                detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>'
+            }
+            detail_text += '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
         }
     } else {  // only put project-wide status in detail view
         if (config.color_association.field !== 'status') {  // only GIST doesn't color by status
