@@ -24,6 +24,7 @@ var site_config = {
         'grey': '#8f8f8e',
         'light grey': '#ccc',
         'dark grey': '#4B4B4B',
+        'black': '#000000',
     },
 
     /* define the column and associated values for color application */

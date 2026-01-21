@@ -43,14 +43,6 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
-    site_colors: {  // TODO could these be standardized and added to site-config.js?
-        'red': '#c74a48',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'grey': '#8f8f8e',
-        'orange': '#fd7e14',
-        'black': '#000000'
-    },
     color_association: {
         field: 'status',
         values: {
