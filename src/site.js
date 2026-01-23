@@ -777,7 +777,7 @@ function determineZoom() {
 function makeDomSafe(value) {
     return String(value)
         .trim()
-        .replace(/\s+/g, '_')
+        .replace(/\s+/g, '-')
         .replace(/[^\w\-]/g, '');
 }
 
@@ -786,13 +786,13 @@ function buildFilters() {
     config.filters.forEach(filter => {
         // go through each filter in config 
         if (config.showToolTip) {  // used by Europe map and GIST
-            // create more space for europe legend  // TODO ?
+            // create more space for europe legend
             if (filter.primary && filter.field_hover_text) {
             $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
             '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + 
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
-            // add eventlistener for infobox and tooltip to show on hover  // TODO ?
+            // add eventlistener for infobox and tooltip to show on hover
             }
             else if (filter.field_hover_text) {
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text +
@@ -800,7 +800,7 @@ function buildFilters() {
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
             }
             else {
-            // do same as below but append infobox  // TODO ?
+            // do same as below but append infobox
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
             '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
             filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
@@ -814,13 +814,13 @@ function buildFilters() {
         }
 
         for (let i = 0; i < filter.values.length; i++) {
-            let check_id =  filter.field + '_' + filter.values[i];
+            let check_id =  filter.field + '_' + makeDomSafe(filter.values[i]);
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
             check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color_association.field === filter.field ? '<span class="legend-dot" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
-            check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
-            check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            check += `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : makeDomSafe(filter.values[i]).replaceAll("_", " ")) + '</span></div>';
+            check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][makeDomSafe(filter.values[i])] + '</div></div>';
             $('#filter-form').append(check);
         }
 
@@ -924,7 +924,7 @@ function countFilteredFeatures() {
     config.filters.forEach(filter => {
         config.filterCount[filter.field] = {};
         filter.values.forEach(val => {
-            config.filterCount[filter.field][val] = 0;
+            config.filterCount[filter.field][makeDomSafe(val)] = 0;
         });
     });
 
@@ -935,15 +935,15 @@ function countFilteredFeatures() {
         if ('summary_count' in feature.properties) {
             let summary_count = JSON.parse(feature.properties.summary_count);
             Object.keys(summary_count).forEach((filter) => {
-                Object.keys(summary_count[filter]).forEach((value) => {
-                    config.filterCount[filter][value] += summary_count[filter][value];
+                Object.keys(summary_count[filter]).forEach((val) => {
+                    config.filterCount[filter][makeDomSafe(val)] += summary_count[filter][val];
                 });
             });
         } else {
             config.filters.forEach(filter => {
                 filter.values.forEach(val => {
-                    if (feature.properties[filter.field] === val) {
-                        config.filterCount[filter.field][val]++;
+                    if (feature.properties[filter.field] === makeDomSafe(val)) {
+                        config.filterCount[filter.field][makeDomSafe(val)]++;
                     }
                 });
             });
@@ -1050,8 +1050,8 @@ function filterGeoJSON() {
     };
     config.geojson.features.forEach(feature => {  // for each unit in the original geojson
         let include = true;
-        for (let field in filterStatus) {
-            if (!filterStatus[field].includes(feature.properties[field])) include = false;
+        for (let field in filterStatus) {  // for pre-defined filters (left side)
+            if (!filterStatus[field].includes(makeDomSafe(feature.properties[field]))) include = false;
         }
         // filter by text search bar
         if (config.searchText.length >= 3) {
@@ -1097,12 +1097,8 @@ function updateSummary() {
     countFilteredFeatures();
     config.filters.forEach((filter) => {
         for (let i = 0; i < filter.values.length; i++) {
-            const safeValue = makeDomSafe(filter.values[i]);
-            const count_id = filter.field + "_" + safeValue + "-count";
-
-            $("#" + CSS.escape(count_id)).text(
-                config.filterCount[filter.field][filter.values[i]]
-            );
+            const count_id = filter.field + "_" + makeDomSafe(filter.values[i]) + "-count";
+            $('#' + count_id).text(config.filterCount[filter.field][makeDomSafe(filter.values[i])]);
         }
     });
 
