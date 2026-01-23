@@ -1241,7 +1241,6 @@ function displayDetails(features) {
             if (config.detailView[detail]['display'] === 'heading') {
                 detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
             } else if (config.detailView[detail]['display'] === 'simple_markup') {
-                // check Jan 20 commit on main
                 let value = features[0].properties[detail];
                 if (value && value !== '') {
                     // Extract URL if present
@@ -1249,7 +1248,7 @@ function displayDetails(features) {
                     if (urlMatch) {
                         const url = urlMatch[1];
                         const textWithoutUrl = value.replace(url, '').trim();
-                        detail_text += '<br/><div>' + textWithoutUrl + ' <a href="' + url + '" target="_blank">' + url + '</a></div>';
+                        detail_text += '<br/><div>' + textWithoutUrl + ' <a href="' + url + '" target="_blank"> here </a></div>';
                     } else {
                         detail_text += '<br/><div>' + value + '</div><br/>';
                     }
