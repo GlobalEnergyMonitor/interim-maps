@@ -774,11 +774,18 @@ function determineZoom() {
 /*
   Legend Filters
 */
+function makeDomSafe(value) {
+    return String(value)
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/[^\w\-]/g, '');
+}
+
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
         // go through each filter in config 
-        if (config.showToolTip) {  // used by Europe map
+        if (config.showToolTip) {  // used by Europe map and GIST
             // create more space for europe legend  // TODO ?
             if (filter.primary && filter.field_hover_text) {
             $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
@@ -924,9 +931,7 @@ function countFilteredFeatures() {
     config.maxFilteredCapacity = 0;
     config.minFilteredCapacity = 1000000;
 
-    let ref = 'config.geojson_linked.features';
-
-    eval(ref).forEach(feature => {  // TODO why eval()?
+    config.geojson_linked.features.forEach(feature => {
         if ('summary_count' in feature.properties) {
             let summary_count = JSON.parse(feature.properties.summary_count);
             Object.keys(summary_count).forEach((filter) => {
@@ -1091,9 +1096,13 @@ function updateSummary() {
     $('#summary').html('Total ' + config.assetFullLabel + ' selected');
     countFilteredFeatures();
     config.filters.forEach((filter) => {
-        for (let i=0; i<filter.values.length; i++) {
-            let count_id =  (filter.field + '_' + filter.values[i] + '-count').replace('/','\\/');
-            $('#' + count_id).text(config.filterCount[filter.field][filter.values[i]]);
+        for (let i = 0; i < filter.values.length; i++) {
+            const safeValue = makeDomSafe(filter.values[i]);
+            const count_id = filter.field + "_" + safeValue + "-count";
+
+            $("#" + CSS.escape(count_id)).text(
+                config.filterCount[filter.field][filter.values[i]]
+            );
         }
     });
 
@@ -1221,11 +1230,10 @@ function displayDetails(features) {
     }
     var detail_text = '';
     var location_text = '';
-    let all_details_gist = [];
 
     Object.keys(config.detailView).forEach((detail) => {
         const value = features[0].properties[detail];
-        const invalidValues = ['', 'unknown', 'undefined', 'nan', null, 0];
+        const invalidValues = ['', 'unknown', 'undefined', 'nan', null, 0, []];
         if (invalidValues.includes(value) || Number.isNaN(value)) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
@@ -1246,26 +1254,26 @@ function displayDetails(features) {
                         detail_text += '<br/><div>' + value + '</div><br/>';
                     }
                 }
-            } else if (config.detailView[detail]['display'] === 'join') {
+            } else if (config.detailView[detail]['display'] === 'join') {  // TODO To delete, likely
                 let join_array = features.map((feature) => feature.properties[detail]);
                 join_array = join_array.filter((value, index, array) => array.indexOf(value) === index);
                 if (join_array.length > 1) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ';
                     }
-                    detail_text += '<span class="text-capitalize">' + join_array.join(',').replaceAll('_',' ') + '</span><br/>';
+                    detail_text += '<span class="text-capitalize">' + join_array.join(',').replaceAll('_', ' ') + '</span><br/>';
                 } else {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
-                        detail_text += '<span class="fw-bold">' +config.detailView[detail]['label'][0] + '</span>: ';
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][0] + '</span>: ';
                     }
-                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';
+                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_', ' ') + '</span><br/>';
                 }
-            } else if (config.detailView[detail]['display'] === 'range') {
+            } else if (config.detailView[detail]['display'] === 'range') {  // TODO To delete, likely
                 let greatest = features.reduce((accumulator, feature) => {
-                    return (feature.properties[detail] !== '' && feature.properties[detail] > accumulator ?  feature.properties[detail] : accumulator);
+                    return (feature.properties[detail] !== '' && feature.properties[detail] > accumulator ? feature.properties[detail] : accumulator);
                 }, 0);
                 let least = features.reduce((accumulator, feature) => {
-                    return (feature.properties[detail] !== '' && feature.properties[detail] < accumulator ?  feature.properties[detail] : accumulator);
+                    return (feature.properties[detail] !== '' && feature.properties[detail] < accumulator ? feature.properties[detail] : accumulator);
                 }, 5000);
 
                 if (least !== 5000) {
@@ -1275,7 +1283,7 @@ function displayDetails(features) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ' + least.toString() + ' - ' + greatest.toString() + '<br/>';
                     }
                 }
-            } else if (config.detailView[detail]['display'] === 'hyperlink') {
+            } else if (config.detailView[detail]['display'] === 'hyperlink') {  // TODO To delete, likely
                 detail_text += '<br/><a href="' + features[0].properties[detail] + '" target="_blank">More Info on the related infrastructure project here</a><br/>';
             } else if (config.detailView[detail]['display'] === 'location') {
                 if (Object.keys(features[0].properties).includes(detail)) {
@@ -1284,50 +1292,69 @@ function displayDetails(features) {
                     }
                     location_text += features[0].properties[detail];
                 }
-            } else if (config.detailView[detail]['display'] === 'colorcoded') {
+            } else if (config.detailView[detail]['display'] === 'colorcoded') {  // TODO To delete, likely
                 // to create the circle dot we have for most status
                 // if it has this colorcoded label then it goes to the color dictionary
                 // matches up the field name, uses fieldLabel to display label and then also uses color
                 let colorLabel = features.map((feature) => feature.properties[detail]);
                 detail_text += '<span class="fw-bold">' + config.color_association.fieldLabel + '</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color_association.values[ features[0].properties[config.color_association.field] ] + '"></span>' +
+                    '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.color_association.field]] + '"></span>' +
                     '<span class="text-capitalize">' + features[0].properties[config.color_association.field] + '</span><br/>';
-            } else if (config.detailView[detail]['display'] === 'gist-unit-level') {
-                // cycle through all of them to only group them if there is value there
-                if (features[0].properties[detail] === 0 && features[0].properties[detail] === 0.0) {
-                    // skip to next iteration in a Object.keys(config.detailView).forEach((detail) => {
-                    return;
-                } else {
-                    // Define the status types you want to check
-                    const statusTypes = [
-                        'Operating',
-                        'Operating pre-retirement',
-                        'Announced',
-                        'Construction',
-                        'Retired',
-                        'Cancelled',
-                        'Mothballed'
-                    ];
-
-                    statusTypes.forEach(status => {
-                        if (status === 'Operating' && config.detailView[detail]['label'].includes('Operating pre-retirement')) {
-                            // Skip to avoid false 'Operating' match
-                            return;
-                        }
-                        else if (config.detailView[detail]['label'].includes(status)) {
-                            // Remove the status from the label to get the 'newLabel'
-                            let newLabel = config.detailView[detail]['label'].replace(status, '').trim();
-                            // Compose the tupleLike value
-                            let tupleLike = newLabel + features[0].properties[detail];
-                            // Add to the all_gist_details object under the status key
-                            if (!all_details_gist[status]) {
-                                all_details_gist[status] = [];
-                            }
-                            all_details_gist[status].push(tupleLike);
-                        }
-                    });
-                }
             }
+        } else if (Object.keys(config.detailView[detail]).includes('table')) {  // make small table in detail view popup
+            const tableConfig = config.detailView[detail];
+            const tableTitle = tableConfig.table;
+            const headerMap = tableConfig.tableHeaders;
+            const table_data_as_array = features[0].properties[detail];
+            if (!Array.isArray(table_data_as_array) || table_data_as_array.length === 0) { return; }
+
+            let tableHtml = '<br/>';
+            if (tableTitle) {
+                tableHtml += `<div style='font-size: 0.75rem; font-weight: 600; margin-bottom: 5px;'>${tableTitle}</div>`;
+            }
+
+            tableHtml += `
+                <table class='table table-sm table-bordered' style='font-size: 0.75rem;'>
+                    <thead>
+                        <tr>`;
+
+            // populate header row of the table
+            const keys = Object.keys(headerMap);
+            keys.forEach(key => {
+                tableHtml += `
+                    <th style='text-transform: none; font-size: 0.7rem;'>
+                        ${headerMap[key]}
+                    </th>`;
+            });
+
+            tableHtml += `</tr>
+                    </thead>
+                    <tbody>`;
+
+            // populate each row of the table
+            table_data_as_array.forEach(row => {
+                tableHtml += '<tr>';
+                keys.forEach(key => {
+                    let value = row[key];
+                    if (value === undefined || value === null) {
+                        value = '';
+                    }
+
+                    // Numeric formatting if applicable
+                    const num = Number(value);
+                    const displayValue = Number.isFinite(num)
+                        ? num.toLocaleString()
+                        : value;
+
+                    tableHtml += `<td>${displayValue}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+
+            tableHtml += `</tbody>
+                </table>`;
+
+            detail_text += tableHtml;
         } else {
             const value = features[0].properties[detail];
             const invalidValues = ["", undefined, 0, "nan", null, "Unknown [unknown %]", "unknown"];
@@ -1498,9 +1525,7 @@ function displayDetails(features) {
             detail_text += '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
         }
     } else {  // only put project-wide status in detail view
-        if (config.color_association.field !== 'status') {  // only GIST doesn't color by status
-            detail_text += buildGistTable(all_details_gist);
-        } else {
+        if (config.color_association.field === 'status') {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
                 '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
                 '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
@@ -1530,35 +1555,6 @@ function enableModal() {
     $('#modal').on('hidden.bs.modal', function (event) {
         setHighlightFilter('');
     })
-}
-
-/* Creates the detail-view table for GIST projects */
-function buildGistTable(all_details_gist) {
-    // Only build the table if there is data
-    if (!all_details_gist || Object.keys(all_details_gist).length === 0) return '';
-    let tableHtml = '<br/>';
-    tableHtml += '<table class="table table-sm table-bordered" style="font-size: 0.75rem;"><thead><tr>' +
-        '<th style="text-transform: none; font-size: 0.7rem;">Unit Status</th>' +
-        '<th style="text-transform: none; font-size: 0.7rem;">Main Production Equipment</th>' +
-        '<th style="text-transform: none; font-size: 0.7rem;">Capacity (ttpa)</th>' +
-        '</tr></thead><tbody>';
-    Object.entries(all_details_gist).forEach(([status, tuples]) => {
-        tuples.forEach(tupleLike => {
-            // extract production method and capacity from tupleLike string
-            // Assume format: 'prod method 'capacity (ttpa)' capacity'
-            let prodMethod = tupleLike;
-            let capacity = '';
-            // prod method is all before 'capacity (ttpa)' minus steel and capacity is all after
-            let match = tupleLike.match(/(.+?)\s*capacity\s*\(ttpa\)\s*(.*)/i);
-            if (match) {
-                prodMethod = match[1].trim().replace('steel', '');
-                capacity = match[2].replace(/,/g, '');
-            }
-            tableHtml += `<tr><td>${status}</td><td>${prodMethod}</td><td>${Number(capacity).toLocaleString()}</td></tr>`;
-        });
-    });
-    tableHtml += '</tbody></table>';
-    return tableHtml;
 }
 
 function buildSatImage(features) {
