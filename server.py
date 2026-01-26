@@ -7,7 +7,7 @@ class FrontController(SimpleHTTPRequestHandler):  # Written by ChatGPT
         # Only rewrite if the path is a directory or doesn't exist
         file_path = self.path.lstrip("/")
         if self.path.startswith("/trackers/") and not os.path.isfile(file_path):
-            self.path = "/index.html"
+            self.path = "/src/index.html"
         return super().do_GET()
 
 
