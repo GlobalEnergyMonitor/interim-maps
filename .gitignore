@@ -27,6 +27,7 @@ npm-debug.log
 *.csv
 *.geojson
 *client_secret.json
+_dist/
 
 
 # Byte-compiled / optimized / DLL files
