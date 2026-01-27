@@ -3,13 +3,8 @@ import path from "node:path";
 
 const DIST = path.resolve("_dist");
 
-async function ensureDir(p) {
-    await fs.mkdir(p, { recursive: true });
-}
-
-async function copyFile(src, dst) {
-    await ensureDir(path.dirname(dst));
-    await fs.copyFile(src, dst);
+async function ensureDir(dir) {
+    await fs.mkdir(dir, { recursive: true });
 }
 
 async function exists(p) {
@@ -21,49 +16,91 @@ async function exists(p) {
     }
 }
 
+async function copyFile(src, dst) {
+    await ensureDir(path.dirname(dst));
+    await fs.copyFile(src, dst);
+}
+
+async function copyDir(srcDir, dstDir) {
+    await ensureDir(dstDir);
+    const entries = await fs.readdir(srcDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const srcPath = path.join(srcDir, entry.name);
+        const dstPath = path.join(dstDir, entry.name);
+
+        if (entry.isDirectory()) {
+            await copyDir(srcPath, dstPath);
+        } else if (entry.isFile()) {
+            await fs.copyFile(srcPath, dstPath);
+        }
+    }
+}
+
 async function main() {
-    const srcIndex = path.resolve("src/index.html");
-    const srcCss = path.resolve("src/site.css");
-    const srcJs = path.resolve("src/site.js");
-    const siteConfig = path.resolve("site-config.js");
-    const trackersDir = path.resolve("trackers");
+    const SRC_DIR = path.resolve("src");
+    const TRACKERS_DIR = path.resolve("trackers");
+    const SITE_CONFIG = path.resolve("site-config.js");
 
-    if (!(await exists(srcIndex))) throw new Error("Missing src/index.html");
-    if (!(await exists(trackersDir))) throw new Error("Missing trackers/");
+    const SRC_INDEX = path.join(SRC_DIR, "index.html");
 
-    // Clean dist
+    if (!(await exists(SRC_INDEX))) {
+        throw new Error("Missing src/index.html");
+    }
+
+    if (!(await exists(TRACKERS_DIR))) {
+        throw new Error("Missing trackers/ directory");
+    }
+
+    // Clean _dist
     await fs.rm(DIST, { recursive: true, force: true });
     await ensureDir(DIST);
 
-    // Copy shared assets to site root (adjust if your HTML expects different paths)
-    if (await exists(srcCss)) await copyFile(srcCss, path.join(DIST, "site.css"));
-    if (await exists(srcJs)) await copyFile(srcJs, path.join(DIST, "site.js"));
-    if (await exists(siteConfig)) await copyFile(siteConfig, path.join(DIST, "site-config.js"));
+    console.log("Building Pages output...");
 
-    // Optional: also publish a root index.html (handy for /interim-maps/)
-    await copyFile(srcIndex, path.join(DIST, "index.html"));
+    // 1. Copy entire src/ directory unchanged
+    console.log("Copying src/ → _dist/src/");
+    await copyDir(SRC_DIR, path.join(DIST, "src"));
 
-    // For each trackers/<name>/config.js, create trackers/<name>/index.html and copy config.js
-    const trackerNames = await fs.readdir(trackersDir, { withFileTypes: true });
-
-    for (const entry of trackerNames) {
-        if (!entry.isDirectory()) continue;
-
-        const name = entry.name;
-        const configPath = path.join(trackersDir, name, "config.js");
-        if (!(await exists(configPath))) continue; // skip folders without config.js
-
-        const outTrackerDir = path.join(DIST, "trackers", name);
-        await ensureDir(outTrackerDir);
-
-        await copyFile(srcIndex, path.join(outTrackerDir, "index.html"));
-        await copyFile(configPath, path.join(outTrackerDir, "config.js"));
+    // 2. Copy site-config.js if present
+    if (await exists(SITE_CONFIG)) {
+        console.log("Copying site-config.js");
+        await copyFile(SITE_CONFIG, path.join(DIST, "site-config.js"));
     }
 
-    console.log("Built Pages output in", DIST);
+    // 3. Optional: publish a root index.html (same as src/index.html)
+    console.log("Publishing root index.html");
+    await copyFile(SRC_INDEX, path.join(DIST, "index.html"));
+
+    // 4. Build tracker pages
+    const trackerFolders = await fs.readdir(TRACKERS_DIR, { withFileTypes: true });
+
+    for (const entry of trackerFolders) {
+        if (!entry.isDirectory()) continue;
+
+        const trackerName = entry.name;
+        const trackerConfig = path.join(TRACKERS_DIR, trackerName, "config.js");
+
+        // Skip folders without config.js
+        if (!(await exists(trackerConfig))) continue;
+
+        const outTrackerDir = path.join(DIST, "trackers", trackerName);
+        await ensureDir(outTrackerDir);
+
+        console.log(`Generating tracker page: ${trackerName}`);
+
+        // Copy canonical index.html into tracker folder
+        await copyFile(SRC_INDEX, path.join(outTrackerDir, "index.html"));
+
+        // Copy tracker config
+        await copyFile(trackerConfig, path.join(outTrackerDir, "config.js"));
+    }
+
+    console.log("Build complete → _dist/");
 }
 
 main().catch((err) => {
+    console.error("Build failed:");
     console.error(err);
     process.exit(1);
 });
