@@ -41,6 +41,7 @@ async function main() {
     const SRC_DIR = path.resolve("src");
     const TRACKERS_DIR = path.resolve("trackers");
     const SITE_CONFIG = path.resolve("site-config.js");
+    const PACKAGES_DIR = path.resolve("packages");
 
     const SRC_INDEX = path.join(SRC_DIR, "index.html");
 
@@ -61,6 +62,12 @@ async function main() {
     // 1. Copy entire src/ directory unchanged
     console.log("Copying src/ → _dist/src/");
     await copyDir(SRC_DIR, path.join(DIST, "src"));
+
+    // 1b. Copy entire packages/ directory unchanged (if present)
+    if (await exists(PACKAGES_DIR)) {
+        console.log("Copying packages/ → _dist/packages/");
+        await copyDir(PACKAGES_DIR, path.join(DIST, "packages"));
+    }
 
     // 2. Copy site-config.js if present
     if (await exists(SITE_CONFIG)) {
