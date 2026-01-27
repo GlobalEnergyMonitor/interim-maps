@@ -1,16 +1,3 @@
-const path = window.location.pathname;
-const trackerName = path.split("/trackers/")[1]?.split("/")[0];
-
-if (!trackerName) {
-    throw new Error("Tracker not found in URL");
-}
-
-const script = document.createElement("script");
-script.src = `../../trackers/${trackerName}/config.js`;
-script.onload = initSite;
-document.head.appendChild(script);
-
-
 processConfig();
 
 /* Merge site-config.js and config.js - Single-use function */
