@@ -2,7 +2,7 @@
 
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/gmet/2025-12/gmet_map_2025-12-05.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gmet_map_2026-01-30.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -15,7 +15,6 @@ var config = {
         labels: ['Project', 'Status', 'Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)', 'Methane emissions if fully operational', 'Emissions if Operational (tonnes/yr)', 'Potential Emissions for whole reserves (tonnes)', 'Coal Mine Methane Emissions Estimate (mt/yr)', 'Type of Infrastructure', 'Observation Date', 'Subnational', 'Country/Area(s)', 'Nearby Infrastructure Project Name', 'Infrastructure Wiki'],
         clickColumns: ['name'],
         rightAlign: ['plume-emissions', 'date'],
-        toLocaleString: ['scaling_col'], // not displayed
     },
 
     /* configure the search box; 
@@ -38,32 +37,33 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
-        // 'tracker': {'label': 'Tracker Type'},
+        'location-display': {'display': 'location'},
+
         'satdataprovider': {'label': 'Satellite Data Provider'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         // EMISSIONS PLUMES WORKING
-        'plume-emissions': {'label': 'Emissions (kg/hr)'},
+        'plume-emissions': {'label': 'Emissions', 'trailing-label': 'kg/hr'},
 
-        'emission-uncertainty': {'label': 'Emissions Uncertainity (kg/hr)'},
+        'emission-uncertainty': {'label': 'Emissions Uncertainty', 'trailing-label': 'kg/hr'},
         'typeinfra': {'label': 'Type of Infrastructure'},
         'infra-name': { 'label': 'Nearby Infrastructure Project Name'},
 
         // EMISSIONS COAL MINE WORKING
-        'mtyr-gcmt-emissions': {'label': 'Coal Mine Methane Emissions Estimate (mt/yr)'},
+        'mtyr-gcmt-emissions': {'label': 'Coal Mine Methane Emissions Estimate', 'trailing-label': 'mt/yr'},
 
-        'capacity-output': {'label': 'Coal Output (Annual, Mst)'},
-        'capacity-prod': {'label': 'Production (Mtpa)'},
+        'capacity-output': {'label': 'Coal Output', 'trailing-label': '(Annual, Mst)'},
+        'capacity-prod': {'label': 'Production', 'trailing-label': 'Mtpa'},
 
         // EMISSIONS PIPELINEtonnesyr-pipes_emissions
-        'tonnesyr-pipes_emissions': {'label': 'Emissions if Operational (tonnes/yr)'}, //check correct
+        'tonnesyr-pipes_emissions': {'label': 'Emissions if Operational', 'trailing-label': 'tonnes/yr'},
 
-        'pipe-length': {'label': 'Length (km)'},
-        'capacitybcm/y': {'label': 'Capacity (bcm/y)'},
-        'capacityinmtpa': {'label': 'Capacity (MTPA)'},
+        'pipe-length': {'label': 'Length', 'trailing-label': 'km'},
+        'capacitybcm/y': {'label': 'Capacity', 'trailing-label': 'bcm/y'},
+        'capacityinmtpa': {'label': 'Capacity', 'trailing-label': 'MTPA'},
 
         // EMISSIONS GOGET WORKING
-        'tonnes-goget-reserves-emissions': {'label': 'Potential Emissions for whole reserves (tonnes)'},
+        'tonnes-goget-reserves-emissions': {'label': 'Potential Emissions for whole reserves', 'trailing-label': 'tonnes'},
         
         // EMISSIONS LNG TERM
         'emissions-terminals': {'label': 'Methane emissions if fully operational'},//'Annual methane emissions estimate if operational (mt/year)'},
@@ -72,67 +72,47 @@ var config = {
         'date': {'label': 'Observation Date'},
         'status': {'label': 'Status'},
         'instrument': {'label': 'Instrument'},
-        'areas': {'label': 'Country/Area(s)'},
-        // 'geminfrawiki': {'label': 'Infrastructure Wiki'}, // or display md to just display as text md
+        'all-countries': {'label': 'Country/Area(s)'},
 
-        'location-display': {'display': 'location'},
         'infra-wiki-md': {'display': 'simple_markup'},
         'carbon-mapper-md': {'display': 'simple_markup'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
-
-    site_colors: {  // TODO could these be standardized and added to site-config.js?
-        'red': '#c74a48',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'orange': '#FF8C00',
-        'yellow': '#d4af00'
-    },
     color_association: {
-        field: 'legend-filter',
+        field: 'tracker-display',
         label: 'Plume and Infrastructure Projects',
         values: {
-            'plumes-attrib': 'red',
-            'plumes-unattrib': 'orange',
-            'Oil-and-Gas-Extraction-Areas': 'blue',
-            'Pipelines': 'green',
-            'Coal-Mines---Non-closed': 'yellow',
-            'lng-import': 'green',
-            'lng-export': 'green',
+            'Reviewed plumes (has attribution data)': 'red',
+            'Reviewed plumes (no attribution data)': 'orange',
+            'Oil & gas extraction areas': 'blue',
+            'Gas pipelines': 'green',
+            'Coal mines': 'yellow',
+            'LNG import terminal': 'green',
+            'LNG export terminal': 'green',
         },
     },
 
     filters: [
         {
-            field: 'legend-filter',
+            field: 'tracker-display',
             label: 'Plume and Infrastructure Projects',
-            values: ['Oil-and-Gas-Extraction-Areas', 'Coal-Mines---Non-closed', 'lng-import', 'lng-export', 'Pipelines','plumes-attrib', 'plumes-unattrib'],
-            values_labels: [
-                'Oil and Gas Extraction Areas',
-                'Coal Mines',
-                'LNG Terminals Import',
-                'LNG Terminals Export',
-                'Pipelines',
-                'Reviewed Plumes (has attribution info)', //  info)
-                'Reviewed Plumes (no attribution info)'
-            ],
+            values: ['Oil & gas extraction areas', 'Coal mines', 'LNG import terminal', 'LNG export terminal', 'Gas pipelines','Reviewed plumes (has attribution data)', 'Reviewed plumes (no attribution data)'],
             primary: true
         },
         {
-            field: 'status-legend',
+            field: 'status-group',
             label: 'Infrastructure Status',
-            values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'retired-plus', 'not-found'], // pre-construction-plus
-            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Construction/In development', 'Mothballed/Idle/Shut in/Abandoned', 'Retired/Closed/Decommissioned/Cancelled', 'Not applicable/UGS'], // 'Pre-construction / Pre-permit / Permitted / Exploration'
+            values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'retired-plus', 'other'],
+            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Construction/In development', 'Mothballed/Idle/Shut in/Abandoned', 'Retired/Closed/Decommissioned/Cancelled', 'Not applicable/UGS'],
         },
     ],
 
-    capacityField: 'capacity-scaled',
     capacityLabel: '', // for gmet that has no capacity but only emissions data
 
     multiCountry: true,
+    countryField: 'all-countries',
     showAllPhases: true,
-    showMaxCapacity: false,
 
     minRadius: 2,
     minLineWidth: 1,
@@ -141,4 +121,7 @@ var config = {
     highZoomMaxLineWidth: 32,
 
     geometries: ['Point', 'LineString'],
+
+    showMaxCapacity: false,
+    includeCapacityByStatusInDetailView: false
 }
