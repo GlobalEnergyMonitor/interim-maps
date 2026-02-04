@@ -1,14 +1,12 @@
-# Written by ChatGPT
-
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import os
 import urllib.parse
 
 PORT = 8080
 
-# Set to "/interim-maps" if your HTML uses absolute paths like "/interim-maps/src/site.js".
+# Set to "/maps" if your HTML uses absolute paths like "/maps/src/site.js".
 # Set to "" if your HTML uses relative paths like "src/site.js".
-BASE_PATH = "/interim-maps"
+BASE_PATH = "/maps"
 
 REPO_ROOT = os.path.abspath(".")
 SRC_INDEX = os.path.join(REPO_ROOT, "src", "index.html")
@@ -26,7 +24,7 @@ class FrontController(SimpleHTTPRequestHandler):
             if not req_path.startswith(BASE_PATH + "/"):
                 # Outside expected base -> map to a non-existent file so we 404.
                 return os.path.join(REPO_ROOT, "__not_found__")
-            req_path = req_path[len(BASE_PATH):]  # strip "/interim-maps"
+            req_path = req_path[len(BASE_PATH):]  # strip "/maps"
 
         # Map URL path -> filesystem path under repo root
         rel = req_path.lstrip("/")
@@ -90,5 +88,5 @@ if __name__ == "__main__":
     server = HTTPServer(("localhost", PORT), FrontController)
     base = BASE_PATH if BASE_PATH else ""
     print(f"Serving repo root at http://localhost:{PORT}{base}/")
-    print(f"Example tracker: http://localhost:{PORT}{base}/trackers/bioenergy/")
+    print(f"Example tracker: http://localhost:{PORT}{base}/trackers/gbpt/")
     server.serve_forever()
