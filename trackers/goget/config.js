@@ -72,6 +72,7 @@ var config = {
     ],
 
     countryFile: '../../trackers/goget/countries.json',
+    countryField: 'all-countries',
     showMaxCapacity: false,
     capacityLabel: 'million boe/y',
     includeCapacityByStatusInDetailView: false,

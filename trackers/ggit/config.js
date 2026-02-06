@@ -69,12 +69,13 @@ var config = {
         {
             field: 'tracker-custom',
             label: 'Infrastructure Type',
-            values: ['GGIT-import', 'GGIT-export', 'GGIT'],  // cannot have any spaces in the values!
+            values: ['GGIT-import', 'GGIT-export', 'GGIT'],
             values_labels: ['LNG Terminals (Import)', 'LNG Terminals (Export)', 'Gas Pipelines']
         }
     ],
 
     multiCountry: true,
+    countryField: 'all-countries',
 
     minLineWidth: 1,
     maxLineWidth: 4,
