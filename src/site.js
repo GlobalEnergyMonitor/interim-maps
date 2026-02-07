@@ -1239,15 +1239,7 @@ function displayDetails(features) {
             } else if (config.detailView[detail]['display'] === 'simple_markup') {
                 let value = features[0].properties[detail];
                 if (value && value !== '') {
-                    // Extract URL if present
-                    const urlMatch = value.match(/(https?:\/\/[^\s]+)/);
-                    if (urlMatch) {
-                        const url = urlMatch[1];
-                        const textWithoutUrl = value.replace(url, '').trim();
-                        detail_text += '<br/><div>' + textWithoutUrl + ' <a href="' + url + '" target="_blank"> here </a></div>';
-                    } else {
-                        detail_text += '<br/><div>' + value + '</div><br/>';
-                    }
+                    detail_text += '<br/><div>' + value + '</div><br/>';
                 }
             } else if (config.detailView[detail]['display'] === 'join') {  // TODO To delete, likely
                 let join_array = features.map((feature) => feature.properties[detail]);
@@ -1357,7 +1349,11 @@ function displayDetails(features) {
                 if (Object.keys(config.detailView[detail]).includes('label')) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];
                     if (Object.keys(config.detailView[detail]).includes('trailing-label')) {  // if the value has a trailing label (eg unit of measurement)
-                        detail_text += ' ' + config.detailView[detail]['trailing-label'];
+                        if (config.detailView[detail]['trailing-label'] === 'units-of-m') {
+                            detail_text += ' ' + features[0].properties['units-of-m'];  // dynamically use the units of measurement from input file
+                        } else {
+                            detail_text += ' ' + config.detailView[detail]['trailing-label'];
+                        }
                     }
                     detail_text += '<br/>';
                 }
@@ -1372,7 +1368,7 @@ function displayDetails(features) {
         : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
     let capacityLabel = typeof config.capacityLabel === 'string'
         ? config.capacityLabel
-        : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
+        : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];  // TODO Use units-of-m
 
     if (config.includeCapacityByStatusInDetailView) {
         // TODO lots of room for optimization in this if-statement body
@@ -1514,7 +1510,7 @@ function displayDetails(features) {
 
             // add status to detail view popup
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: '
-            if (config.color_association.field == config.statusField) {  // add color dot if it is an expected status
+            if (config.color_association.field === config.statusField) {  // add color dot if it is an expected status
                 detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>'
             }
             detail_text += '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';

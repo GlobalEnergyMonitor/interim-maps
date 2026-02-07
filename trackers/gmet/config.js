@@ -1,8 +1,6 @@
-// TODO heavy lift needed
-
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gmet_map_2026-01-30.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gmet_map_2026-02-06.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -11,21 +9,20 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'status', 'plume-emissions', 'emission-uncertainty', 'emissions-terminals', 'tonnesyr-pipes-emissions', 'tonnes-goget-reserves-emissions', 'mtyr-gcmt-emissions', 'typeinfra', 'date', 'subnat', 'areas', 'infra-name', 'geminfrawiki'],
-        labels: ['Project', 'Status', 'Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)', 'Methane emissions if fully operational', 'Emissions if Operational (tonnes/yr)', 'Potential Emissions for whole reserves (tonnes)', 'Coal Mine Methane Emissions Estimate (mt/yr)', 'Type of Infrastructure', 'Observation Date', 'Subnational', 'Country/Area(s)', 'Nearby Infrastructure Project Name', 'Infrastructure Wiki'],
+        values: ['name', 'status-display', 'emissions-plume', 'emissions-uncertainty', 'emissions', 'emissions-potential', 'infrastructure-type', 'observation-date', 'subnational', 'all-countries', 'associated-asset', 'associated-asset-url'],
+        labels: ['Project', 'Status', 'Plume Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)', 'Methane Emissions (Tonnes/yr)', 'Potential Emissions for Whole Reserves (Tonnes)', 'Type of Infrastructure', 'Observation Date', 'Subnational', 'Country/Area(s)', 'Nearby Infrastructure', 'Infrastructure Wiki'],
         clickColumns: ['name'],
-        rightAlign: ['plume-emissions', 'date'],
+        rightAlign: ['emissions-plume', 'emissions', 'observation-date'],
     },
 
     /* configure the search box; 
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Country/Area(s)': ['areas'],
-        'Project Type': ['legend-filter'],
-        'Project': ['name', 'name-search', 'infra-name', 'geminfrawiki'], 
+        'Country/Area(s)': ['all-countries'],
+        'Project Type': ['tracker-display'],
+        'Project': ['name', 'name-search', 'associated-asset'],
         'Companies': ['operator'],
-        'Type of Infrastructure': ['typeInfra'],
-        'Coordinates': ['geometry', 'lat', 'lng'],
+        'Type of Infrastructure': ['infrastructure-type'],
     },
 
     /* define fields and how they are displayed. 
@@ -39,43 +36,39 @@ var config = {
         'name': {'display': 'heading'},
         'location-display': {'display': 'location'},
 
-        'satdataprovider': {'label': 'Satellite Data Provider'},
+        'data-provider': {'label': 'Satellite Data Provider'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
-        // EMISSIONS PLUMES WORKING
-        'plume-emissions': {'label': 'Emissions', 'trailing-label': 'kg/hr'},
-
-        'emission-uncertainty': {'label': 'Emissions Uncertainty', 'trailing-label': 'kg/hr'},
-        'typeinfra': {'label': 'Type of Infrastructure'},
-        'infra-name': { 'label': 'Nearby Infrastructure Project Name'},
-
-        // EMISSIONS COAL MINE WORKING
-        'mtyr-gcmt-emissions': {'label': 'Coal Mine Methane Emissions Estimate', 'trailing-label': 'mt/yr'},
-
-        'capacity-output': {'label': 'Coal Output', 'trailing-label': '(Annual, Mst)'},
-        'capacity-prod': {'label': 'Production', 'trailing-label': 'Mtpa'},
-
-        // EMISSIONS PIPELINEtonnesyr-pipes_emissions
-        'tonnesyr-pipes_emissions': {'label': 'Emissions if Operational', 'trailing-label': 'tonnes/yr'},
-
-        'pipe-length': {'label': 'Length', 'trailing-label': 'km'},
-        'capacitybcm/y': {'label': 'Capacity', 'trailing-label': 'bcm/y'},
-        'capacityinmtpa': {'label': 'Capacity', 'trailing-label': 'MTPA'},
-
-        // EMISSIONS GOGET WORKING
-        'tonnes-goget-reserves-emissions': {'label': 'Potential Emissions for whole reserves', 'trailing-label': 'tonnes'},
-        
-        // EMISSIONS LNG TERM
-        'emissions-terminals': {'label': 'Methane emissions if fully operational'},//'Annual methane emissions estimate if operational (mt/year)'},
-        
-        'inportexport': {'label': 'Terminal Facility Type'},
-        'date': {'label': 'Observation Date'},
-        'status': {'label': 'Status'},
-        'instrument': {'label': 'Instrument'},
         'all-countries': {'label': 'Country/Area(s)'},
 
-        'infra-wiki-md': {'display': 'simple_markup'},
-        'carbon-mapper-md': {'display': 'simple_markup'},
+        // PLUMES
+        'emissions-plume': {'label': 'Emissions', 'trailing-label': 'kg/hr'},
+        'emissions-uncertainty': {'label': 'Emissions Uncertainty', 'trailing-label': 'kg/hr'},
+        'infrastructure-type': {'label': 'Type of Infrastructure'},
+        'associated-asset': { 'label': 'Nearby Infrastructure Project Name'},
+        'observation-date': {'label': 'Observation Date'},
+        'status-display': {'label': 'Status'},
+        'instrument': {'label': 'Instrument'},
+
+        // GCMT, GOIT, LNG
+        'emissions': {'label': 'Methane Emissions Estimate', 'trailing-label': 'mt/yr'},
+        'capacity-display': {'label': 'Capacity', 'trailing-label': 'units-of-m'},  // dynamic units of measurement from input file
+
+        // GCMT
+        'prod-coal': {'label': 'Production', 'trailing-label': 'Mtpa'},
+
+        // GOIT
+        'pipeline-length': {'label': 'Length', 'trailing-label': 'km'},
+
+        // GOGET
+        'emissions-potential': {'label': 'Potential Emissions for whole reserves', 'trailing-label': 'tonnes'},
+
+        // LNG
+        'facility-type': {'label': 'Terminal Facility Type'},
+
+        // Blurbs
+        'detail-view-blurb': {'display': 'simple_markup'},
+        'attribution': {'display': 'simple_markup'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -97,7 +90,7 @@ var config = {
         {
             field: 'tracker-display',
             label: 'Plume and Infrastructure Projects',
-            values: ['Oil & gas extraction areas', 'Coal mines', 'LNG import terminal', 'LNG export terminal', 'Gas pipelines','Reviewed plumes (has attribution data)', 'Reviewed plumes (no attribution data)'],
+            values: ['Oil & gas extraction areas', 'Coal mines', 'LNG import terminal', 'LNG export terminal', 'Gas pipelines', 'Reviewed plumes (has attribution data)', 'Reviewed plumes (no attribution data)'],
             primary: true
         },
         {
@@ -108,7 +101,7 @@ var config = {
         },
     ],
 
-    capacityLabel: '', // for gmet that has no capacity but only emissions data
+    capacityLabel: '',
 
     multiCountry: true,
     countryField: 'all-countries',
