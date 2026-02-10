@@ -183,7 +183,7 @@ function addGeoJSON(jsonData) {
 function setMinMax() {
     console.log('setting min/max line/point capacity');  // TODO DELETE
     config.maxPointCapacity = 0;
-    config.minPointCapacity = 1000000;
+    config.minPointCapacity = 1000000;  // FIXME to not use arbitrarily high number
     config.maxLineCapacity = 0;
     config.minLineCapacity = 1000000;
     let maxCapacityKey;
@@ -387,8 +387,7 @@ function addLayers() {
 
 /* Adds point layer to map obj - Single-use function */
 function addPointLayer() {
-    // First build circle layer
-    //  build style json for circle-color based on config.color_association
+    // Build circle colors from config.color_association
     let paint = config.pointPaint;
     if ('color_association' in config) {
         paint['circle-color'] = [
@@ -398,19 +397,41 @@ function addPointLayer() {
             '#000000'
         ];
     }
-    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ['linear'];
 
+    // Set variables based on type of interpolation
+    let interpolateExpression;
+    let minVal;
+    let maxVal;
+    let getScaled;
+    if ('interpolate' in config ) {
+        interpolateExpression = config.interpolate;
+    } else if (config.sqrt) {
+        interpolateExpression = ['linear'];
+    } else {
+        interpolateExpression = ['exponential', .5];
+    }
+    if (config.sqrt) {
+        minVal = Math.sqrt(config.minPointCapacity);
+        maxVal = Math.sqrt(config.maxPointCapacity);
+        getScaled = ['sqrt', ['to-number', ['get', config.capacityScaledField]]];
+    } else {
+        minVal = config.minPointCapacity;
+        maxVal = config.maxPointCapacity;
+        getScaled = ['to-number', ['get', config.capacityScaledField]];
+    }
+
+    // Set circle radius
     try {
         // Handle case where all capacity values are the same
         if (config.minPointCapacity === config.maxPointCapacity) {
             paint['circle-radius'] = [
-                'interpolate', ['exponential', .5], ['zoom'],
+                'interpolate', interpolateExpression, ['zoom'],
                 1, config.minRadius,
                 10, config.highZoomMinRadius
             ];
         } else {
             paint['circle-radius'] = [
-                'interpolate', ['exponential', .5], ['zoom'],
+                'interpolate', interpolateExpression, ['zoom'],
                 1,  ['interpolate', interpolateExpression,
                     ['to-number',['get', config.capacityScaledField]],
                     config.minPointCapacity, config.minRadius,
@@ -428,6 +449,7 @@ function addPointLayer() {
         throw e;
     }
 
+    // Add layer of points per asset -- so points can be clicked on
     map.addLayer({
         'id': 'assets-points',
         'type': 'circle',
@@ -441,62 +463,31 @@ function addPointLayer() {
     config.layers.push('assets-points');
 
     // Add layer with proportional icons
-    if (config.sqrt) {
-        const sqrtMin = Math.sqrt(config.minPointCapacity);
-        const sqrtMax = Math.sqrt(config.maxPointCapacity);
-
-        map.addLayer({
-            'id': 'assets-symbol', 
-            'type': 'symbol',
-            'source': 'assets-source',
-            'filter': ['==', ['geometry-type'], 'Point'],
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'layout': {
-                'icon-image': ['get', 'icon'],
-                'icon-allow-overlap': true,
-                'icon-size': [
-                    'interpolate', ['linear'], ['zoom'],
-                    1,  ['interpolate', interpolateExpression,
-                        ['sqrt', ['to-number', ['get', config.capacityScaledField]]],
-                        sqrtMin, config.minRadius * 2 / 64,
-                        sqrtMax, config.maxRadius * 2 / 64],
-                    10, ['interpolate', interpolateExpression,
-                        ['sqrt',['to-number', ['get', config.capacityScaledField]]],
-                        sqrtMin, config.highZoomMinRadius * 2 / 64,
-                        sqrtMax, config.highZoomMaxRadius * 2 / 64]
-                ]
-            }
-        });
-    }
-
-    else {
-        // Add layer with proportional icons
-        map.addLayer({
-            'id': 'assets-symbol', 
-            'type': 'symbol',
-            'source': 'assets-source',
-            'filter': ['==', ['geometry-type'], 'Point'],
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'layout': {
-                'icon-image': ['get', 'icon'],
-                'icon-allow-overlap': true,
-                'icon-size': [
-                    'interpolate', ['exponential', .5], ['zoom'],
-                    1,  ['interpolate', interpolateExpression,
-                        ['to-number', ['get', config.capacityScaledField]],
-                        config.minPointCapacity, config.minRadius * 2 / 64,
-                        config.maxPointCapacity, config.maxRadius * 2 / 64],
-                    10, ['interpolate', interpolateExpression,
-                        ['to-number', ['get', config.capacityScaledField]],
-                        config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
-                        config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
-                ]
-            }
-        });
-    }
+    map.addLayer({
+        'id': 'assets-symbol',
+        'type': 'symbol',
+        'source': 'assets-source',
+        'filter': ['==', ['geometry-type'], 'Point'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': {
+            'icon-image': ['get', 'icon'],
+            'icon-allow-overlap': true,
+            'icon-size': [
+                'interpolate', interpolateExpression, ['zoom'],
+                1,  ['interpolate', interpolateExpression,
+                    getScaled,
+                    minVal, config.minRadius * 2 / 64,
+                    maxVal, config.maxRadius * 2 / 64],
+                10, ['interpolate', interpolateExpression,
+                    getScaled,
+                    minVal, config.highZoomMinRadius * 2 / 64,
+                    maxVal, config.highZoomMaxRadius * 2 / 64]
+            ]
+        }
+    });
 
     // Add highlight layer
-    paint = config.pointPaint;
+    paint = config.pointPaint;  // reset paint obj
     paint['circle-color'] = '#FFEA00';
     map.addLayer({
         'id': 'assets-points-highlighted',
@@ -508,6 +499,8 @@ function addPointLayer() {
         'paint': paint,
         'filter': ['in', (config.linkField), '']  // TODO resolve duplicate key
     });
+
+    // Add label layer
     map.addLayer({
         'id': 'assets-labels',
         'type': 'symbol',
