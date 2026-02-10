@@ -354,7 +354,7 @@ function generateIcon(icon) {
 function addLayers() {
     config.layers = [];
     if (config.geometries.includes('LineString')) addLineLayer();
-    if (config.geometries.includes('Point')) addPointLayer();
+    if (config.geometries.includes('Point')) addPointLayers();
 
     map.addLayer({
         id: 'satellite',
@@ -385,8 +385,8 @@ function addLayers() {
     );
 }
 
-/* Adds point layer to map obj - Single-use function */
-function addPointLayer() {
+/* Adds point layers to map obj - Single-use function */
+function addPointLayers() {
     // Build circle colors from config.color_association
     let paint = config.pointPaint;
     if ('color_association' in config) {
@@ -812,7 +812,7 @@ function buildFilters() {
             check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color_association.field === filter.field ? '<span class="legend-dot" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
-            check += `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : makeDomSafe(filter.values[i]).replaceAll("_", " ")) + '</span></div>';
+            check += `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][makeDomSafe(filter.values[i])] + '</div></div>';
             $('#filter-form').append(check);
         }
@@ -1222,7 +1222,7 @@ function displayDetails(features) {
 
     Object.keys(config.detailView).forEach((detail) => {
         const value = features[0].properties[detail];
-        const invalidValues = ['', 'unknown', 'undefined', 'nan', null, 0, []];
+        const invalidValues = ['', 'unknown', 'unknown [unknown %]', 'undefined', 'nan', null, 0, []];
         if (invalidValues.includes(value) || Number.isNaN(value)) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
@@ -1335,22 +1335,16 @@ function displayDetails(features) {
                 </table>`;
 
             detail_text += tableHtml;
-        } else {
-            const value = features[0].properties[detail];
-            const invalidValues = ["", undefined, 0, "nan", null, "Unknown [unknown %]", "unknown"];
-            if (!invalidValues.includes(value)) {
-                if (Object.keys(config.detailView[detail]).includes('label')) {
-                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];
-                    if (Object.keys(config.detailView[detail]).includes('trailing-label')) {  // if the value has a trailing label (eg unit of measurement)
-                        if (config.detailView[detail]['trailing-label'] === 'units-of-m') {
-                            detail_text += ' ' + features[0].properties['units-of-m'];  // dynamically use the units of measurement from input file
-                        } else {
-                            detail_text += ' ' + config.detailView[detail]['trailing-label'];
-                        }
-                    }
-                    detail_text += '<br/>';
+        } else if (Object.keys(config.detailView[detail]).includes('label')) {
+            detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];
+            if (Object.keys(config.detailView[detail]).includes('trailing-label')) {  // if the value has a trailing label (eg unit of measurement)
+                if (config.detailView[detail]['trailing-label'] === 'units-of-m') {
+                    detail_text += ' ' + features[0].properties['units-of-m'];  // dynamically use the units of measurement from input file
+                } else {
+                    detail_text += ' ' + config.detailView[detail]['trailing-label'];
                 }
             }
+            detail_text += '<br/>';
         }
     });
 
