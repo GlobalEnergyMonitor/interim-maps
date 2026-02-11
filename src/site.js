@@ -571,6 +571,7 @@ function addLineLayer() {
     }); 
     config.layers.push('assets-lines');
 
+    // Add highlight layer
     paint['line-color'] = '#FFEA00';
     map.addLayer({
         'id': 'assets-lines-highlighted',
