@@ -56,6 +56,14 @@ var site_config = {
         'line-cap': 'round', 
         'line-join': 'round'
     },
+    polygonPaint: {
+        'fill-opacity': 0.35
+    },
+    polygonOutlinePaint: {
+        'line-opacity': 0.85,
+        'line-width': 2
+    },
+    polygonLayout: {},
 
     /* radius associated with minimum/maximum value on map */
     /* Defined by pixels and be 1- infinity, 0 is invisible */

@@ -353,7 +353,8 @@ function generateIcon(icon) {
 /* Adds line layer, point layer - Single-use function */
 function addLayers() {
     config.layers = [];
-    if (config.geometries.includes('LineString')) addLineLayer();
+    if (config.geometries.includes('Polygon')) addPolygonLayers();
+    if (config.geometries.includes('LineString')) addLineLayers();
     if (config.geometries.includes('Point')) addPointLayers();
 
     map.addLayer({
@@ -385,8 +386,147 @@ function addLayers() {
     );
 }
 
+/* Adds polygon layer to map obj - Single-use function */
+function addPolygonLayers() {
+    console.log('Adding Polygon layers');  // TODO DELETE
+    let paint = { ...config.polygonPaint };
+    const outlinePaint = { ...config.polygonOutlinePaint };
+
+    if ('color_association' in config) {
+        paint['fill-color'] = [
+            'match',
+            ['get', config.color_association.field],
+            ...Object.keys(config.color_association.values).flatMap(key => [key, config.color_association.values[key]]),
+            '#000000'
+        ];
+        outlinePaint['line-color'] = [
+            'match',
+            ['get', config.color_association.field],
+            ...Object.keys(config.color_association.values).flatMap(key => [key, config.color_association.values[key]]),
+            '#000000'
+        ];
+    }
+
+    // Add filled polygon layer
+    map.addLayer({
+        'id': 'assets-polygons',
+        'type': 'fill',
+        'source': 'assets-source',
+        'filter': ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': { ...(config.polygonLayout || {}) },
+        'paint': paint
+    });
+    config.layers.push('assets-polygons');
+
+    // Add polygon outline layer
+    map.addLayer({
+        'id': 'assets-polygons-outline',
+        'type': 'line',
+        'source': 'assets-source',
+        'filter': ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': { ...(config.lineLayout || {}) },
+        'paint': outlinePaint
+    });
+    config.layers.push('assets-polygons-outline');
+
+    // Add 2 highlight layers
+    map.addLayer({
+        'id': 'assets-polygons-highlighted',
+        'type': 'fill',
+        'source': 'assets-source',
+        'filter': ['all',
+            ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+            ['in', ['get', config.linkField], '']
+        ],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': { ...(config.polygonLayout || {}) },
+        'paint': { ...paint, 'fill-color': '#FFEA00' },
+    });
+    map.addLayer({
+        'id': 'assets-polygons-outline-highlighted',
+        'type': 'line',
+        'source': 'assets-source',
+        'filter': ['all',
+            ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+            ['in', ['get', config.linkField], '']
+        ],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': { ...(config.lineLayout || {}) },
+        'paint': { ...outlinePaint, 'line-color': '#FFEA00' },
+    });
+}
+
+/* Adds line layer to map obj - Single-use function */
+function addLineLayers() {
+    console.log('Adding Line layers');  // TODO DELETE
+    let paint = { ...config.linePaint };
+
+    if ('color_association' in config) {
+        paint['line-color'] = [
+            'match',
+            ['get', config.color_association.field],
+            ...Object.keys(config.color_association.values).flatMap(key => [key, config.color_association.values[key]]),
+            '#000000'
+        ];
+    }
+
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ['linear'];
+    // Handle case where all capacity values are the same
+    if (config.minLineCapacity === config.maxLineCapacity) {
+        paint['line-width'] = [
+            'interpolate', ['linear'], ['zoom'],
+            1, config.minLineWidth,
+            10, config.highZoomMinLineWidth
+        ];
+    } else {
+        paint['line-width'] = [
+            'interpolate', ['linear'], ['zoom'],
+            1,  ['interpolate', interpolateExpression,
+                ['to-number', ['get', config.capacityScaledField]],
+                config.minLineCapacity, config.minLineWidth,
+                config.maxLineCapacity, config.maxLineWidth
+            ],
+            10, ['interpolate', interpolateExpression,
+                ['to-number', ['get', config.capacityScaledField]],
+                config.minLineCapacity, config.highZoomMinLineWidth,
+                config.maxLineCapacity, config.highZoomMaxLineWidth
+            ]
+        ];
+    }
+
+    // Add main line layer
+    map.addLayer({
+        'id': 'assets-lines',
+        'type': 'line',
+        'source': 'assets-source',
+        'filter': ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': config.lineLayout,
+        'paint': paint
+    });
+    config.layers.push('assets-lines');
+
+    // Add highlight layer
+    let highlightPaint = { ...paint, 'line-color': '#FFEA00' };
+    map.addLayer({
+        'id': 'assets-lines-highlighted',
+        'type': 'line',
+        'source': 'assets-source',
+        'filter': ['all',
+            ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
+            ['in', ['get', config.linkField], '']
+        ],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': config.lineLayout,
+        'paint': highlightPaint,
+    });
+}
+
 /* Adds point layers to map obj - Single-use function */
 function addPointLayers() {
+    console.log('Adding Point layers');  // TODO DELETE
     // Build circle colors from config.color_association
     let paint = config.pointPaint;
     if ('color_association' in config) {
@@ -458,7 +598,7 @@ function addPointLayers() {
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {},
         'paint': paint,
-        "icon-opacity": config.pointPaint["circle-opacity"]
+        'icon-opacity': config.pointPaint['circle-opacity']
     });
     config.layers.push('assets-points');
 
@@ -520,68 +660,6 @@ function addPointLayers() {
             'text-halo-color': 'hsla(220, 8%, 100%, 0.75)',
             'text-halo-width': 1
         }
-    });
-}
-
-/* Adds line layer to map obj - Single-use function */
-function addLineLayer() {
-    let paint = config.linePaint;
-
-    if ('color_association' in config) {
-        paint['line-color'] = [
-            'match',
-            ['get', config.color_association.field],
-            ...Object.keys(config.color_association.values).flatMap(key => [key, config.color_association.values[key]]),
-            '#000000'
-        ];
-    }
-
-    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ['linear'];
-    // Handle case where all capacity values are the same
-    if (config.minLineCapacity === config.maxLineCapacity) {
-        paint['line-width'] = [
-            'interpolate', ['linear'], ['zoom'],
-            1, config.minLineWidth,
-            10, config.highZoomMinLineWidth
-        ];
-    } else {
-        paint['line-width'] = [
-            'interpolate', ['linear'], ['zoom'],
-            1,  ['interpolate', interpolateExpression,
-                ['to-number', ['get', config.capacityScaledField]],
-                config.minLineCapacity, config.minLineWidth,
-                config.maxLineCapacity, config.maxLineWidth
-            ],
-            10, ['interpolate', interpolateExpression,
-                ['to-number', ['get', config.capacityScaledField]],
-                config.minLineCapacity, config.highZoomMinLineWidth,
-                config.maxLineCapacity, config.highZoomMaxLineWidth
-            ]
-        ];
-    }
-
-    map.addLayer({
-        'id': 'assets-lines', 
-        'type': 'line',
-        'source': 'assets-source',
-        'filter': ['==', ['geometry-type'], 'LineString'],
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': config.lineLayout,
-        'paint': paint
-    }); 
-    config.layers.push('assets-lines');
-
-    // Add highlight layer
-    paint['line-color'] = '#FFEA00';
-    map.addLayer({
-        'id': 'assets-lines-highlighted',
-        'type': 'line',
-        'source': 'assets-source',
-        'filter': ['==', ['geometry-type'], 'LineString'],
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': config.lineLayout,
-        'paint': paint,
-        'filter': ['in', (config.linkField), '']  // TODO resolve duplicate key
     });
 }
 
@@ -650,17 +728,22 @@ function addEvents() {
         config.modal.show();
     });
 
-    config.layers.forEach(layer => {
-        map.on('mouseenter', layer, (e) => {
+    const hoverLayers = [
+        'assets-points',
+        'assets-lines',
+        'assets-polygons',
+        'assets-symbol'
+    ];
+    hoverLayers.forEach(layerID => {
+        map.on('mouseenter', layerID, (e) => {
             map.getCanvas().style.cursor = 'pointer';
-            const coordinates = (map.getLayer(layer).type === 'line' ? e.lngLat : e.features[0].geometry.coordinates.slice());
-            const description = e.features[0].properties[config.nameField];
-            popup.setLngLat(coordinates).setHTML(description).addTo(map);
+            const feature = e.features && e.features[0];
+            if (!feature) return;
+            const description = feature.properties?.[config.nameField] ?? "";
+            popup.setLngLat(e.lngLat).setHTML(description).addTo(map);
         });
-    });
 
-    config.layers.forEach(layer => {
-        map.on('mouseleave', layer, () => {
+        map.on('mouseleave', layerID, () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
         }); 

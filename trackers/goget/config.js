@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/goget_map_2026-01-20.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/goget_map_2026-02-13.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Oil & Gas Extraction Areas',
@@ -52,13 +52,12 @@ var config = {
         field: 'status',
         values: {
             'operating': 'red',
-            'in development': 'blue',
+            'in-development': 'blue',
             'discovered': 'blue',
-            'shut in': 'green',
-            'decommissioned': 'green',
+            'decommissioning': 'green',
             'cancelled': 'green',
+            'mothballed': 'green',
             'abandoned': 'grey',
-            'ugs': 'grey',
             'not found': 'black'
         }
     },
@@ -66,8 +65,7 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating', 'in development', 'discovered', 'shut in', 'decommissioned', 'cancelled', 'abandoned', 'ugs', 'not found'],
-            values_labels: ['Operating', 'In development', 'Discovered', 'Shut in', 'Decommissioned', 'Cancelled', 'Abandoned', 'UGS', 'Not found'],
+            values: ['operating', 'in-development', 'discovered', 'decommissioning', 'cancelled', 'mothballed', 'abandoned', 'not found'],
         },
     ],
 
@@ -76,4 +74,6 @@ var config = {
     showMaxCapacity: false,
     capacityLabel: 'million boe/y',
     includeCapacityByStatusInDetailView: false,
+
+    geometries: ['Point', 'Polygon'],
 }
