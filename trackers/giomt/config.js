@@ -33,9 +33,9 @@ var config = {
         'name': {'display': 'heading'},
         'location-display': {'display': 'location'},
 
-        'capacity-display': {'label': 'Design Capacity (ttpa)'},
-        'reserves': {'label': 'Reserves (thousand tonnes)'},
-        'resource': {'label': 'Resources (thousand tonnes)'},
+        'capacity-display': {'label': 'Design Capacity', 'trailing-label': 'ttpa'},
+        'reserves': {'label': 'Reserves', 'trailing-label': 'thousand tonnes'},
+        'resource': {'label': 'Resources', 'trailing-label': 'thousand tonnes'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'location-accuracy': {'label': 'Location Accuracy'},

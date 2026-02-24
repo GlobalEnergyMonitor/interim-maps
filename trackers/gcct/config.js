@@ -36,8 +36,8 @@ var config = {
 
         'plant-type': {'label': 'Plant Type'},
         'prod-type': {'label': 'Production Type'},
-        'capacity-display': {'label': 'Cement Capacity (mmtpa)'},
-        'clinker-capacity': {'label': 'Clinker Capacity (mmtpa)'},
+        'capacity-display': {'label': 'Cement Capacity', 'trailing-label': 'mmtpa'},
+        'clinker-capacity': {'label': 'Clinker Capacity', 'trailing-label': 'mmtpa'},
         'cement-type': {'label': 'Cement Type'},
         'color': {'label': 'Cement Color'},
         'owner': {'label': 'Owner'},

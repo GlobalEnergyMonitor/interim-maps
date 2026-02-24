@@ -18,7 +18,7 @@ var site_config = {
         'red': '#c74a48',
             'light red': '#f28b82',
         'orange': '#fd7e14',
-        'yellow': '#d4af00',
+        'yellow': '#fdda0d',
         'green': '#4c9d4f',
             'light green': '#66c26e',
         'blue': '#5c62cf',

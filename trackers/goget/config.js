@@ -41,9 +41,9 @@ var config = {
         'fid-year': {'label': 'FID Year'},
         'start-year': {'label': 'Production Start Year'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
-        'prod-oil': {'label': 'Production - Oil (Million bbl/y)'},
+        'prod-oil': {'label': 'Production - Oil', 'trailing-label': 'Million bbl/y'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
-        'prod-gas': {'label': 'Production - Gas (Million m³/y)'},
+        'prod-gas': {'label': 'Production - Gas', 'trailing-label': 'Million m³/y'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
