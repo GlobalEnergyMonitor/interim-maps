@@ -625,6 +625,8 @@ function addPointLayers() {
             ]
         }
     });
+    // config.layers.push('assets-symbol');// fixme create assets-symbol highlighted layer
+    // is the assets-points layer necessary if using symbol layer?
 
     // Add highlight layer
     paint = config.pointPaint;  // reset paint obj
