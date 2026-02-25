@@ -1444,123 +1444,74 @@ function displayDetails(features) {
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];  // TODO Use units-of-m
 
     if (config.includeCapacityByStatusInDetailView) {
-        // TODO lots of room for optimization in this if-statement body
-        if (features.length > 1) {  // if there are multiple units in this project
-            let filterIndex = 0;
-            for (const[index, filter] of config.filters.entries()) {
-                if (filter.field === config.statusField) {
-                    filterIndex = index;
+        // if there are multiple units in this project
+        if (features.length > 1) {
+            // Find the status filter
+            const statusFilter = config.filters.find(f => f.field === config.statusField);
+            const statuses = statusFilter?.values ?? [];
+
+            // Initialize accumulators
+            const capacity = Object.fromEntries(statuses.map(s => [s, 0]));
+            const count = Object.fromEntries(statuses.map(s => [s, 0]));
+
+            // Aggregate
+            for (const feature of features) {
+                const properties = feature?.properties ?? {};
+                const status = properties[config.statusField];
+
+                // Skip features with no status
+                if (status == null) continue;
+
+                // Coerce capacity to a number, treat non-numeric as 0
+                const rawCap = properties[config.capacityField];
+                const cap = Number(rawCap);
+                const capSafe = Number.isFinite(cap) ? cap : 0;
+
+                if (capacity[status] === undefined) capacity[status] = 0;
+                if (count[status] === undefined) count[status] = 0;
+
+                capacity[status] += capSafe;
+                count[status] += 1;
+            }
+
+            // Render helpers
+            const showDot = config.color_association.field === config.statusField;
+            const dotHtml = (status) =>
+                showDot && config.color_association.values?.[status]
+                    ? `<span class="legend-dot" style="background-color:${config.color_association.values[status]}"></span>`
+                    : '';
+
+            const formatCapacity = (value) =>
+                value === 0 ? 'Not found or N/A' : Number(value).toLocaleString();
+
+            const rowHtml = (status) => {
+                return (
+                    `<div class="row">` +
+                        `<div class="col-5">` + `${dotHtml(status)}${status}` + `</div>` +
+                        `<div class="col-4">${formatCapacity(capacity[status] ?? 0)}</div>` +
+                        `<div class="col-3">${count[status]} of ${features.length}</div>` +
+                    `</div>`
+                );
+            };
+
+            // Build detail_capacity
+            let detail_capacity = '';
+            for (const status of Object.keys(count)) {
+                if (count[status] !== 0) {
+                    detail_capacity += rowHtml(status);
                 }
             }
 
-            // Initialize capacity and count objects using reduce to avoid summary build bug
-            // first builds an array of filter values then with reduce makes it an object
-            // then initializes the start point with 0
-            let capacity = Object.fromEntries(
-                config.filters[filterIndex].values.map(f => [f, 0])
-            );
-
-            let count = Object.fromEntries(
-                config.filters[filterIndex].values.map(f => [f, 0])
-            );
-
-            features.forEach((feature) => {
-                let capacityFloat = feature.properties[config.capacityDisplayField]
-
-                if (typeof feature.properties[config.capacityDisplayField] === 'string') {
-                    capacityFloat = Number(capacityFloat);
-
-                } else {
-                    capacityFloat = parseFloat(capacityFloat);
-                }
-
-                if (typeof capacity[feature.properties[config.statusField]] === 'undefined') {
-                    capacity[feature.properties[config.statusField]] = 0;
-                }
-                capacity[feature.properties[config.statusField]] += capacityFloat;
-
-                if (typeof count[feature.properties[config.statusField]] === 'undefined') {
-                    count[feature.properties[config.statusField]] = 0;
-                }
-
-                count[feature.properties[config.statusField]]++;
-            });
-
-            let detail_capacity = '';
-            Object.keys(count).forEach((k) => {
-                // status legend mapping
-                if (k === 'proposed-plus') {
-                    display_k = 'proposed/announced/<br>discovered';
-                } else if (k === 'mothballed-plus') {
-                    display_k = 'mothballed/idle/shut in';
-                } else if (k === 'construction-plus') {
-                    display_k = 'construction/in development'
-                } else if (k === 'retired-plus') {
-                    display_k = 'retired/closed/<br>decommissioned';
-                } else {
-                    display_k = k;
-                }
-
-                if (capacity[k] === 0) {
-                    if (config.color_association.field === config.statusField) {
-                        if (count[k] !== 0) {
-                            // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
-                            detail_capacity +=
-                                '<div class="row">' +
-                                '<div class="col-5">' +
-                                '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
-                                display_k +
-                                '</div>' +
-                                '<div class="col-4">' + 'Not found or N/A' + '</div>' +
-                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
-                                '</div>';
-                        }
-                    } else {
-                        if (count[k] !== 0) {
-                            detail_capacity +=
-                                '<div class="row">' +
-                                '<div class="col-5">' + display_k + '</div>' +
-                                '<div class="col-4">' + 'Not found or N/A' + '</div>' +
-                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
-                                '</div>';
-                        }
-                    }
-                } else {
-                    if (config.color_association.field === config.statusField) {
-                        if (count[k] !== 0) {
-                            // TODO I need to have a dictionary to reverse from status-legend to status Display so we can still filter by status legend but show the status display via k
-                            detail_capacity +=
-                                '<div class="row">' +
-                                '<div class="col-5">' +
-                                '<span class="legend-dot" style="background-color:' + config.color_association.values[k] + '"></span>' +
-                                display_k +
-                                '</div>' +
-                                '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
-                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
-                                '</div>';
-                        }
-                    } else {
-                        if (count[k] !== 0) {
-                            detail_capacity +=
-                                '<div class="row">' +
-                                '<div class="col-5">' + display_k + '</div>' +
-                                '<div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div>' +
-                                '<div class="col-3">' + count[k] + ' of ' + features.length + '</div>' +
-                                '</div>';
-                        }
-                    }
-                }
-            });
             detail_text +=
                 '<div>' +
-                '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
-                '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row ">' +
-                '<div class="col-5 text-capitalize">Status</div>' +
-                '<div class="col-4">Capacity (' + capacityLabel + ')</div>' +
-                '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
-                '</div>' +
-                detail_capacity +
+                    '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+                    '<div class="row" style="height: 2px"><hr/></div>' +
+                    '<div class="row ">' +
+                        '<div class="col-5 text-capitalize">Status</div>' +
+                        '<div class="col-4">Capacity (' + capacityLabel + ')</div>' +
+                        '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
+                    '</div>' +
+                    detail_capacity +
                 '</div>';
         }
         // else when there is only one feature or one unit per project in the popup modal
