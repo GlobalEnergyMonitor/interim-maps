@@ -119,7 +119,7 @@ var site_config = {
         },
     ],
 
-    countryFile: '../../src/countries.json', 
+    countryFile: '../../src/countries.json',  // fixme may need to make this default for all trackers
     allCountrySelect: true,
     multiCountry: false,  // TODO determine if needed
 
