@@ -676,7 +676,7 @@ function enableUX() {
 
     // TODO what these functions do, collectively
     console.log('enabling UX');  // TODO DELETE
-    buildFilters();
+    buildLegendFilters();
     updateSummary();
     buildTable();
     enableModal();
@@ -860,36 +860,43 @@ function makeDomSafe(value) {
         .replace(/[^\w\-]/g, '');
 }
 
-function buildFilters() {
+function buildLegendFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
-        // go through each filter in config 
-        if (config.showToolTip) {  // used by Europe map and GIST
-            // create more space for europe legend
-            if (filter.primary && filter.field_hover_text) {
-            $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
-            '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + 
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
-            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
-            // add eventlistener for infobox and tooltip to show on hover
-            }
-            else if (filter.field_hover_text) {
-            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text +
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
-            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
-            }
-            else {
-            // do same as below but append infobox
-            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
-            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
-            }
-        }
-        // this creates the section title and adds the select all feature only to the sections after the first one, if there is no tooltip logic so for all non europe maps
-        else if (config.color_association.field !== filter.field) {
-            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll('_',' ')) +
-            '</div></div></h7> <div class="col-12 text-left small" id="all-select-section-level"><a href="" onclick="selectAllFilterSection(\'' +
-            filter.field + '\'); return false;">select all section</a> | <a href="" onclick="clearAllFilterSection(\'' + filter.field + '\'); return false;">clear all section</a></div>');
+        const title = filter.label || filter.field.replaceAll("_", " ");
+        const hasTooltip = !!filter.field_hover_text;
+        const isPrimaryWithTooltip = filter.primary && hasTooltip;
+
+        const tooltipHtml = hasTooltip
+            ? `<div class="infobox" id="infobox">
+                    <span>i</span>
+                    <div class="tooltip" id="tooltip">${filter.field_hover_text}</div>
+               </div>`
+            : '';
+
+        const hrHtml = (config.showToolTip && !isPrimaryWithTooltip) || (!config.showToolTip && config.color_association.field !== filter.field)
+            ? '<hr />'
+            : '';
+
+        const sectionControls = `
+            <div class="col-12 text-left small" id="all-select-section-level">
+                <a href="" onclick="selectAllFilterSection('${filter.field}'); return false;">
+                    select all section
+                </a> |
+                <a href="" onclick="clearAllFilterSection('${filter.field}'); return false;">
+                    clear all section
+                </a>
+            </div>`;
+
+        if (config.showToolTip || (!config.showToolTip && config.color_association.field !== filter.field)) {
+            $("#filter-form").append(`
+                ${hrHtml}
+                <h7 class="card-title">
+                    ${title}
+                    ${tooltipHtml}
+                </h7>
+                ${sectionControls}
+            `);
         }
 
         for (let i = 0; i < filter.values.length; i++) {
@@ -1137,8 +1144,9 @@ function filterGeoJSON() {
             if (config.selectedSearchFields.split(',').filter((field) => {
                 // remove diacritics from mapValue
                 if (feature.properties[field] != null) {
-                    let mapValue = removeDiacritics(feature.properties[field]);
-                    return mapValue.toLowerCase().includes(config.searchText);
+                    let mapValue = removeDiacritics(feature.properties[field]).toLowerCase();
+                    let searchValue = removeDiacritics(config.searchText).toLowerCase();
+                    return mapValue.includes(searchValue);
                 }
             }).length === 0) include = false;
         }
@@ -1607,7 +1615,7 @@ function enableNavFilters() {
 
     document.addEventListener('DOMContentLoaded', function() {
         // make it as accordion for smaller screens
-        if (window.innerWidth < 992) {  // TODO Magic number
+        if (window.innerWidth < 992) {  // fixme Magic number
             // close all inner dropdowns when parent is closed
             $('.navbar .dropup').forEach((everydropdown) => {
                 everydropdown.addEventListener('hidden.bs.dropdown', function () {
@@ -1721,7 +1729,6 @@ function buildCountrySelect() {
 // this removes diacritics in the data so that when you search you get all the possible options ignored special diacritics
 // this is applied so that only the non tile maps are impacted
 // for tile maps it'll be too slow so we do it in data prep (having a special search column and adding that to the column options to search within)
-// TODO possibly make redundant by prepping geojson files properly
 function removeDiacritics(value) {
     let noDiacriticsValue = value;
     for (const char of value) {

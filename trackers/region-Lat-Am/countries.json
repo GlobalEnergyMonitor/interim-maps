@@ -1,6 +1,5 @@
 {
   "Latam": [
-
     "Anguilla",
     "Antigua and Barbuda",
     "Argentina",
@@ -38,6 +37,7 @@
     "Panama",
     "Paraguay",
     "Peru",
+    "Puerto Rico",
     "Saint Barthélemy",
     "Saint Kitts and Nevis",
     "Saint Lucia",
@@ -51,6 +51,7 @@
     "Uruguay",
     "Venezuela",
     "Virgin Islands (British)",
+    "Virgin Islands (U.S.)",
     "Venezuela-Trinidad and Tobago"
   ]
 }
