@@ -1359,7 +1359,7 @@ function displayDetails(features) {
                 }
             } else if (config.detailView[detail]['display'] === 'hyperlink') {  // TODO To delete, likely
                 detail_text += '<br/><a href="' + features[0].properties[detail] + '" target="_blank">More Info on the related infrastructure project here</a><br/>';
-            } else if (config.detailView[detail]['display'] === 'location') {
+            } else if (config.detailView[detail]['display'] === 'location') {  // TODO To delete, likely. Replace with direct grab of location-display below
                 if (Object.keys(features[0].properties).includes(detail)) {
                     if (location_text.length > 0) {
                         location_text += ', ';
@@ -1559,16 +1559,16 @@ function displayDetails(features) {
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html(
         '<div class="row m-0">' +
-        '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
-        (config.selectModal !== '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
-        '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
-
-        '<span class="detail-location">' + location_text + '</span><br/>' +
-        '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
-        (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
-        '</div>' +
-        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
-        '</div>');
+            '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
+                (config.selectModal !== '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
+                '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
+                '<span class="detail-location">' + location_text + '</span><br/>' +  // TODO Replace with direct grab of location-display
+                (features[0].properties[config.urlField] !== '' ? '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>': '') +
+                (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
+            '</div>' +
+            '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
+        '</div>'
+    );
 
     setHighlightFilter(features[0].properties[config.linkField]);
 }
