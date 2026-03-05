@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggit/2025-11/ggit_map_2025-11-25.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggit-lng_map_2026-03-05.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Gas Infrastructure projects',
@@ -9,17 +9,16 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m', 'status', 'region', 'areas', 'subnational', 'start-year', 'tracker-display'],
+        values: ['name', 'unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m', 'status', 'region', 'all-countries', 'subnational', 'start-year', 'tracker-display'],
         labels: ['Project', 'Unit', 'Owner', 'Parent', 'Capacity', '', 'Status', 'Region', 'Country/Area(s)', 'Subnational unit (province/state)', 'Start year', 'Type'],
         clickColumns: ['name'],
         rightAlign: ['unit-name', 'capacity-table', 'start-year'],
-        toLocaleString: ['capacity-table'],
     },
 
     /* configure the search box;
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Infrastructure Type': ['tracker-custom'],
+        'Infrastructure Type': ['tracker-display'],
         'Project': ['name', 'name-search'],
         'Companies': ['owner', 'parent', 'owner-search'],
         'Start Year': ['start-year'],
@@ -34,12 +33,13 @@ var config = {
     */
     detailView: {
         'name': {'display': 'heading'},
+        'location-display': {'display': 'location'},
+
         'unit-name': {'label': 'Unit/Segment'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'start-year': {'label': 'Start Year'},
         'tracker-display': {'label': 'Type'},
-        'location-display': {'display': 'location'},
     },
     
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -52,24 +52,23 @@ var config = {
             'construction-plus': 'blue',
             'retired-plus': 'grey',
             'cancelled': 'grey',
-            'shelved': 'grey',
             'mothballed-plus': 'grey',
-            'announced': 'green',
+            'shelved': 'grey',
         },
     },
 
     filters: [
         {
-            field: 'status-legend',
+            field: 'status-group',
             label: 'Status',
-            values: ['operating','proposed-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
-            values_labels: ['Operating','Proposed/Announced/Discovered', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved']
+            values: ['operating', 'proposed-plus', 'construction-plus', 'retired-plus', 'cancelled', 'mothballed-plus', 'shelved'],
+            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Construction/In development', 'Retired/Closed/Decommissioned', 'Cancelled', 'Mothballed/Idle/Shut in', 'Shelved']
 
         },
         {
-            field: 'tracker-custom',
+            field: 'tracker-display',
             label: 'Infrastructure Type',
-            values: ['GGIT-import', 'GGIT-export', 'GGIT'],
+            values: ['LNG import terminal', 'LNG export terminal', 'Gas pipelines'],
             values_labels: ['LNG Terminals (Import)', 'LNG Terminals (Export)', 'Gas Pipelines']
         }
     ],
@@ -87,15 +86,5 @@ var config = {
     highZoomMaxRadius: 30,
 
     showMaxCapacity: false,
-    capacityField: 'capacity-scaled',
-    capacityLabel: {
-        field: 'tracker-custom',
-        values: {
-            'GGIT': 'bcm/y of gas',
-            'GGIT-import': 'MTPA of natural gas',
-            'GGIT-export': 'MTPA of natural gas',
-        },
-    },
-
     geometries: ['Point','LineString'],
 }

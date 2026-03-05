@@ -1233,7 +1233,7 @@ function createTable() {
             $('#site-style').get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
         });
     }
-    if ('noWrap' in config.tableHeaders) {
+    if ('noWrap' in config.tableHeaders) {  // fixme not currently used, but may be useful to keep
         config.tableHeaders.noWrap.forEach((col) => {
             $('#site-style').get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { white-space: nowrap }', 0);
         });        
@@ -1262,16 +1262,10 @@ function updateTable(force) {
     }
 }
 
-function geoJSON2Table() {  // TODO rework?
+function geoJSON2Table() {
     return config.geojson_filtered.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
             let value = feature.properties[header];
-            if ('displayValue' in config.tableHeaders && Object.keys(config.tableHeaders.displayValue).includes(header)) {
-                value = config[config.tableHeaders.displayValue[header]].values[value];
-            }
-            if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
-                value += ' ' + config[config.tableHeaders.appendValue[header]].values[feature.properties[config[config.tableHeaders.appendValue[header]].field]];
-            }
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
                 value = "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>';
             }
@@ -1447,9 +1441,6 @@ function displayDetails(features) {
     let assetLabel = typeof config.assetLabel === 'string'
         ? config.assetLabel
         : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
-    let capacityLabel = typeof config.capacityLabel === 'string'
-        ? config.capacityLabel
-        : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];  // TODO Use units-of-m
 
     if (config.includeCapacityByStatusInDetailView) {
         // if there are multiple units in this project
@@ -1516,7 +1507,7 @@ function displayDetails(features) {
                     '<div class="row" style="height: 2px"><hr/></div>' +
                     '<div class="row ">' +
                         '<div class="col-5 text-capitalize">Status</div>' +
-                        '<div class="col-4">Capacity (' + capacityLabel + ')</div>' +
+                        '<div class="col-4">Capacity (' + features[0].properties[config.capacityLabelField] + ')</div>' +
                         '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
                     '</div>' +
                     detail_capacity +
@@ -1533,7 +1524,7 @@ function displayDetails(features) {
                     capacityFloatandLabel = 'Not found or N/A';
                 } else if (!isNaN(Number(capacity))) {  // if capacity is a number
                     let capacityFloat = Number(capacity);
-                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + capacityLabel;
+                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + features[0].properties[config.capacityLabelField];
                 } else {  // if capacity is any other string
                     capacityFloatandLabel = capacity;
                 }
