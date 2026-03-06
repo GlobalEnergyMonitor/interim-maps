@@ -101,8 +101,6 @@ var config = {
         },
     ],
 
-    capacityLabel: '',
-
     multiCountry: true,
     countryField: 'all-countries',
     showAllPhases: true,

@@ -65,5 +65,4 @@ var config = {
     ],
 
     minMaxCapacityFilterLabel: 'Capacity (Mt)',
-    capacityLabel: 'Mt',
 }

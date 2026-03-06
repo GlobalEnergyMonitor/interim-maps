@@ -89,6 +89,5 @@ var config = {
     ],
 
     minMaxCapacityFilterLabel: 'millions metric tonnes per annum',
-    capacityLabel: 'mmtpa',
     includeCapacityByStatusInDetailView: false,
 }

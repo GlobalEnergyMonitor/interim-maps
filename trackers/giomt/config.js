@@ -66,6 +66,5 @@ var config = {
     minRadius: 3,
     maxRadius: 15,
     minMaxCapacityFilterLabel: 'Design Capacity (TTPA)',
-    capacityLabel: 'TTPA',
     includeCapacityByStatusInDetailView: false,
 }

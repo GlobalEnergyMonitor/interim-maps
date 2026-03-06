@@ -70,7 +70,6 @@ var config = {
         },
     ],
 
-    capacityLabel: 'BOEd',
     showMaxCapacity: false,
     countryField: 'all-countries',
     includeCapacityByStatusInDetailView: false,

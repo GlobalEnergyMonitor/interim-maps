@@ -71,7 +71,6 @@ var config = {
 
     countryField: 'all-countries',
     showMaxCapacity: false,
-    capacityLabel: 'million boe/y',
     includeCapacityByStatusInDetailView: false,
 
     geometries: ['Point'],  // 'Polygon'

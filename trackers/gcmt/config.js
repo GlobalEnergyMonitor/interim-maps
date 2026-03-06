@@ -79,5 +79,4 @@ var config = {
     ],
 
     showMaxCapacity: false,
-    capacityLabel: 'Mtpa',
 }

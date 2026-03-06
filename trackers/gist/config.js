@@ -79,7 +79,6 @@ var config = {
         },
     ],
 
-    capacityLabel: 'ttpa',
     includeCapacityByStatusInDetailView: false,  // create table instead since input file does not have individual units
     useDefaultCapacityInDetailView: false,
     showToolTip: true,
