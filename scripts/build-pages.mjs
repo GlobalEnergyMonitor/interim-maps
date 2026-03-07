@@ -42,6 +42,7 @@ async function main() {
     const TRACKERS_DIR = path.resolve("trackers");
     const SITE_CONFIG = path.resolve("site-config.js");
     const PACKAGES_DIR = path.resolve("packages");
+    const TRACKERS_INDEX = path.join(TRACKERS_DIR, "index.html");
 
     const SRC_INDEX = path.join(SRC_DIR, "index.html");
 
@@ -78,6 +79,12 @@ async function main() {
     // 3. Optional: publish a root index.html (same as src/index.html)
     console.log("Publishing root index.html");
     await copyFile(SRC_INDEX, path.join(DIST, "index.html"));
+
+    // 3b. Publish trackers index if present
+    if (await exists(TRACKERS_INDEX)) {
+        console.log("Publishing trackers/index.html");
+        await copyFile(TRACKERS_INDEX, path.join(DIST, "trackers", "index.html"));
+    }
 
     // 4. Build tracker pages
     const trackerFolders = await fs.readdir(TRACKERS_DIR, { withFileTypes: true });
