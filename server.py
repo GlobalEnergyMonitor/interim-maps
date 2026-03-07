@@ -4,12 +4,11 @@ import urllib.parse
 
 PORT = 8080
 
-# Set to "/maps" if your HTML uses absolute paths like "/maps/src/site.js".
-# Set to "" if your HTML uses relative paths like "src/site.js".
 BASE_PATH = "/maps"
 
 REPO_ROOT = os.path.abspath(".")
 SRC_INDEX = os.path.join(REPO_ROOT, "src", "index.html")
+TRACKERS_INDEX = os.path.join(REPO_ROOT, "trackers", "index.html")
 
 class FrontController(SimpleHTTPRequestHandler):
     # Serve files from the repo root regardless of where server.py lives.
@@ -51,6 +50,12 @@ class FrontController(SimpleHTTPRequestHandler):
             route_path = req_path[len(BASE_PATH):]  # starts with "/"
         else:
             route_path = req_path
+
+        # Special case: /trackers/ should serve trackers/index.html if present
+        if route_path == "/trackers/" or route_path == "/trackers":
+            if os.path.isfile(TRACKERS_INDEX):
+                self.path = (BASE_PATH + "/trackers/index.html") if BASE_PATH else "/trackers/index.html"
+                return super().do_GET()
 
         # Compute the actual on-disk path for the requested URL
         fs_path = self.translate_path(self.path)
