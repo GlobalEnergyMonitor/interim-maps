@@ -174,7 +174,8 @@ function addGeoJSON(jsonData) {
     if (!config.tiles) {
         map.addSource('assets-source', {
             'type': 'geojson',
-            'data': config.geojson
+            'data': config.geojson,
+            'tolerance': 0.05  // set lower than the default 0.375 to render smaller lines at far zoom levels; affects performance
         });
     }
 }
