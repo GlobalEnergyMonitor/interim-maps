@@ -562,29 +562,36 @@ function addPointLayers() {
     }
 
     // Set circle radius
-    try {
-        // Handle case where all capacity values are the same
+    function getCircleRadius(layer_type) {
         if (config.minPointCapacity === config.maxPointCapacity) {
-            paint['circle-radius'] = [
+            // Handle case where all capacity values are the same
+            return [
                 'interpolate', interpolateExpression, ['zoom'],
                 1, config.minRadius,
                 10, config.highZoomMinRadius
             ];
-        } else {
-            paint['circle-radius'] = [
-                'interpolate', interpolateExpression, ['zoom'],
-                1,  ['interpolate', interpolateExpression,
-                    ['to-number',['get', config.capacityScaledField]],
-                    config.minPointCapacity, config.minRadius,
-                    config.maxPointCapacity, config.maxRadius
-                ],
-                10, ['interpolate', interpolateExpression,
-                    ['to-number',['get', config.capacityScaledField]],
-                    config.minPointCapacity, config.highZoomMinRadius,
-                    config.maxPointCapacity, config.highZoomMaxRadius
-                ]
-            ];
         }
+        let scale = 1;
+        if (layer_type === 'symbol') {
+           scale = 2 / 64;  // because the symbol diameters are 64px
+        }
+        return [
+            'interpolate', interpolateExpression, ['zoom'],
+            1,  ['interpolate', interpolateExpression,
+                getScaled,
+                minVal, config.minRadius * scale,
+                maxVal, config.maxRadius * scale
+            ],
+            10, ['interpolate', interpolateExpression,
+                getScaled,
+                minVal, config.highZoomMinRadius * scale,
+                maxVal, config.highZoomMaxRadius * scale
+            ]
+        ]
+    }
+
+    try {
+        paint['circle-radius'] = getCircleRadius('circle');
     } catch (e) {
         console.error('Error setting circle-radius. config.capacityScaledField:', config.capacityScaledField);
         throw e;
@@ -601,6 +608,7 @@ function addPointLayers() {
         'paint': paint,
         'icon-opacity': config.pointPaint['circle-opacity']
     });
+    // fixme? try to only have the points that don't have a symbol (proportional icon) to avoid duplicate circles
     config.layers.push('assets-points');
 
     // Add layer with proportional icons
@@ -613,34 +621,23 @@ function addPointLayers() {
         'layout': {
             'icon-image': ['get', 'icon'],
             'icon-allow-overlap': true,
-            'icon-size': [
-                'interpolate', interpolateExpression, ['zoom'],
-                1,  ['interpolate', interpolateExpression,
-                    getScaled,
-                    minVal, config.minRadius * 2 / 64,
-                    maxVal, config.maxRadius * 2 / 64],
-                10, ['interpolate', interpolateExpression,
-                    getScaled,
-                    minVal, config.highZoomMinRadius * 2 / 64,
-                    maxVal, config.highZoomMaxRadius * 2 / 64]
-            ]
+            'icon-size': getCircleRadius('symbol')
+        },
+        'paint': {
+            'icon-opacity': config.pointPaint['circle-opacity']
         }
     });
-    // config.layers.push('assets-symbol');// fixme create assets-symbol highlighted layer
-    // is the assets-points layer necessary if using symbol layer?
 
     // Add highlight layer
-    paint = config.pointPaint;  // reset paint obj
     paint['circle-color'] = '#FFEA00';
     map.addLayer({
         'id': 'assets-points-highlighted',
         'type': 'circle',
         'source': 'assets-source',
-        'filter': ['==', ['geometry-type'], 'Point'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {},
         'paint': paint,
-        'filter': ['in', (config.linkField), '']  // TODO resolve duplicate key
+        'filter': ['in', (config.linkField), '']  // highlights any points within the same linkField (eg project_id)
     });
 
     // Add label layer
