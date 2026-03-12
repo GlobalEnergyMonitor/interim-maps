@@ -389,7 +389,7 @@ function addLayers() {
 
 /* Adds polygon layer to map obj - Single-use function */
 function addPolygonLayers() {
-    console.log('Adding Polygon layers');  // TODO DELETE
+    console.log('adding Polygon layers');  // TODO DELETE
     let paint = { ...config.polygonPaint };
     const outlinePaint = { ...config.polygonOutlinePaint };
 
@@ -461,7 +461,7 @@ function addPolygonLayers() {
 
 /* Adds line layer to map obj - Single-use function */
 function addLineLayers() {
-    console.log('Adding Line layers');  // TODO DELETE
+    console.log('adding Line layers');  // TODO DELETE
     let paint = { ...config.linePaint };
 
     if ('color_association' in config) {
@@ -527,7 +527,7 @@ function addLineLayers() {
 
 /* Adds point layers to map obj - Single-use function */
 function addPointLayers() {
-    console.log('Adding Point layers');  // TODO DELETE
+    console.log('adding Point layers');  // TODO DELETE
     // Build circle colors from config.color_association
     let paint = config.pointPaint;
     if ('color_association' in config) {
@@ -597,26 +597,33 @@ function addPointLayers() {
         throw e;
     }
 
-    // Add layer of points per asset -- so points can be clicked on
+    // Add layer of circles representing assets with a single status/type
     map.addLayer({
         'id': 'assets-points',
         'type': 'circle',
         'source': 'assets-source',
-        'filter': ['==', ['geometry-type'], 'Point'],
+        'filter': [
+            'all',
+            ['==', ['geometry-type'], 'Point'],
+            ['!', ['has', 'icon']]  // only render circles that don't have icon
+        ],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {},
         'paint': paint,
-        'icon-opacity': config.pointPaint['circle-opacity']
+        'icon-opacity': paint['circle-opacity']
     });
-    // fixme? try to only have the points that don't have a symbol (proportional icon) to avoid duplicate circles
     config.layers.push('assets-points');
 
-    // Add layer with proportional icons
+    // Add layer with proportional icons representing assets with multiple statuses/types
     map.addLayer({
         'id': 'assets-symbol',
         'type': 'symbol',
         'source': 'assets-source',
-        'filter': ['==', ['geometry-type'], 'Point'],
+        'filter': [
+            'all',
+            ['==', ['geometry-type'], 'Point'],
+            ['has', 'icon']  // only render circles that have icon
+        ],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {
             'icon-image': ['get', 'icon'],
@@ -624,14 +631,24 @@ function addPointLayers() {
             'icon-size': getCircleRadius('symbol')
         },
         'paint': {
-            'icon-opacity': config.pointPaint['circle-opacity']
+            'icon-opacity': paint['circle-opacity']
         }
     });
+    config.layers.push('assets-symbol');
 
-    // Add highlight layer
+    // Add highlight layers
     paint['circle-color'] = '#FFEA00';
     map.addLayer({
         'id': 'assets-points-highlighted',
+        'type': 'circle',
+        'source': 'assets-source',
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': {},
+        'paint': paint,
+        'filter': ['in', (config.linkField), '']  // highlights any points within the same linkField (eg project_id)
+    });
+    map.addLayer({
+        'id': 'assets-symbol-highlighted',
         'type': 'circle',
         'source': 'assets-source',
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
