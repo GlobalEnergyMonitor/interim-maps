@@ -269,17 +269,14 @@ function linkAssets() {
                 icon[config.color_association.values[feature.properties[config.color_association.field]]] += Number(feature.properties[config.capacityField]);
             });
             if (Object.values(icon).filter(v => v != 0).length > 1) {  // if the icon will contain more than one color
-                // normalize values to 10
-                let current = 0;
                 let total = Object.values(icon).reduce((previous, current) => {
                     return previous + Number(current);
                 }, 0);
-                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(11 * (icon[k] / total)) })));  // use 11 and ceil to get 12 pieces on the circle
-                let string_icon = JSON.stringify(icon)
-                group_feature.properties['icon'] = string_icon;
-                if (! config.icons.includes(string_icon)) {
-                    generateIcon(icon);
-                    config.icons.push(string_icon);
+                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(11 * (icon[k] / total)) })));  // use 11 and ceil to get ~12 pieces on the circle
+                let icon_as_str = JSON.stringify(icon)
+                group_feature.properties['icon'] = icon_as_str;
+                if (! config.icons.includes(icon_as_str)) {
+                    generateIcon(icon, icon_as_str);
                 }
             }
         }
@@ -303,48 +300,51 @@ function linkAssets() {
 }
 
 /* Generates icon image circles for each unique asset combination - Frequent-use function: called once in linkAssets() in a forEach loop */
-function generateIcon(icon) {
-    let label = JSON.stringify(icon);
-    if (map.hasImage(label)) return;  // if the map has already created an icon (image) with the given label, return
+function generateIcon(icon, icon_as_str) {
+    if (map.hasImage(icon_as_str)) return;  // if the map has already created an icon (image) with the given label, return
     // ideally, should return more often for the longer time the user spend filtering
     // on initial load, this function will run for every unique icon (image)
 
-    let canvas = document.createElement('canvas');
-    canvas.width = 64; // set the size of the canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
     canvas.height = 64;
 
-    // get the canvas context
-    let context = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
 
-    // calculate the coordinates of the center of the circle
-    let centerX = canvas.width / 2;
-    let centerY = canvas.height / 2;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
 
-    let current = .75;  // start at vertical
-    let slices = Object.values(icon).reduce((previous, current) => {
-        return previous + Number(current);
-    }, 0);
+    let current = 0.75;  // start at vertical
 
-    Object.keys(icon).forEach((k) => {
-        if (icon[k] <= 0) return;  // don't attempt to draw a slice that is of a color not on this specific circle
-        let next = current + (icon[k] / slices);
-        context.fillStyle = k;
+    const slices = Object.values(icon).reduce((sum, v) => sum + Number(v), 0);
+    if (slices === 0) return;
+
+    for (const colorCode of Object.keys(icon)) {
+        if (icon[colorCode] <= 0) continue;  // don't attempt to draw a slice that is of a color not on this specific circle
+
+        const next = current + (icon[colorCode] / slices);
+        context.fillStyle = colorCode;
         context.beginPath();
         context.moveTo(centerX, centerY);
-        context.arc(centerX, centerY, canvas.width / 2, Math.PI * 2 * current, Math.PI * 2 * next);
+        context.arc(
+            centerX,
+            centerY,
+            canvas.width / 2,
+            Math.PI * 2 * current,
+            Math.PI * 2 * next
+        );
         context.fill();
 
         current = next;
-    });
+    }
 
-    // create a data URL for the canvas image
-    let dataURL = canvas.toDataURL();
-
-    // add the image to the map as a custom icon
-    map.loadImage(dataURL, (error, image) => {
-        if (error) throw error;
-        if (! map.hasImage(label)) map.addImage(label, image);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    map.addImage(icon_as_str, {
+        width: canvas.width,
+        height: canvas.height,
+        data: imageData.data
     });
+    config.icons.push(icon_as_str);
 }
 
 /*
