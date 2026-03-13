@@ -1,11 +1,10 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gspt_map_2026-03-11.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gspt_map_2026-03-13.geojson',
 
     /* Labels for describing the assets */
-    assetFullLabel: "Solar farm phases",
+    assetFullLabel: 'Solar farm phases',
     assetLabel: 'phase',
-    interpolate: ["cubic-bezier", 0, 0, 0, 1],
 
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
