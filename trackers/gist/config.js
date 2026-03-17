@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gist_map_2026-03-04.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gist_map_2026-03-17.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Iron and Steel Plants',
@@ -52,6 +52,7 @@ var config = {
             'Electric': 'light green',
             'Electric, oxygen': 'blue',
             'Oxygen': 'orange',
+            'Induction': 'yellow',
             'Ironmaking (BF)': 'light red',
             'Ironmaking (DRI)': 'light blue',
             'Integrated (BF)': 'red',
@@ -67,7 +68,7 @@ var config = {
         {
             field: 'prod-type',
             label: 'Production method',
-            values: ['Electric', 'Electric, oxygen', 'Oxygen', 'Ironmaking (BF)', 'Integrated (BF & DRI)', 'Ironmaking (DRI)', 'Integrated (DRI)', 'Integrated (BF)', 'Integrated (unknown)', 'Steel other/unspecified', 'Iron other/unspecified'],
+            values: ['Electric', 'Electric, oxygen', 'Oxygen', 'Induction', 'Ironmaking (BF)', 'Integrated (BF & DRI)', 'Ironmaking (DRI)', 'Integrated (DRI)', 'Integrated (BF)', 'Integrated (unknown)', 'Steel other/unspecified', 'Iron other/unspecified'],
             primary: true,
             field_hover_text: 'For full descriptions of steelmaking route categories, see the <a href="https://globalenergymonitor.org/projects/global-iron-and-steel-tracker/frequently-asked-questions/"> FAQs</a>.',
         },
