@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggit-lng_map_2026-03-20.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggit-lng_map_2026-03-23.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Gas Infrastructure projects',
@@ -45,25 +45,24 @@ var config = {
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
     color_association: {
-        field: 'status-group',
+        field: 'status',
         values: {
             'operating': 'red',
-            'proposed-plus': 'green',
-            'construction-plus': 'blue',
-            'retired-plus': 'grey',
-            'cancelled': 'grey',
-            'mothballed-plus': 'grey',
+            'proposed': 'green',
+            'construction': 'blue',
             'shelved': 'grey',
+            'cancelled': 'grey',
+            'idled': 'grey',
+            'mothballed': 'grey',
+            'retired': 'grey',
         },
     },
 
     filters: [
         {
-            field: 'status-group',
+            field: 'status',
             label: 'Status',
-            values: ['operating', 'proposed-plus', 'construction-plus', 'retired-plus', 'cancelled', 'mothballed-plus', 'shelved'],
-            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Construction/In development', 'Retired/Closed/Decommissioned', 'Cancelled', 'Mothballed/Idle/Shut in', 'Shelved']
-
+            values: ['operating', 'proposed', 'construction', 'shelved', 'cancelled', 'idled', 'mothballed', 'retired'],
         },
         {
             field: 'tracker-display',
