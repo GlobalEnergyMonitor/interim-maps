@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/goit_map_2026-03-04.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/goit_map_2025-03.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Pipelines',
