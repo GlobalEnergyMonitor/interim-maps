@@ -51,14 +51,15 @@ var config = {
             'cancelled': 'green',
             'retired': 'grey',
             'shelved': 'grey',
+            '': 'black',
         },
     },
 
     filters: [
         {
             field: 'status',
-            values: ['operating', 'proposed', 'construction', 'mothballed', 'cancelled', 'retired', 'shelved'],
-            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved'],
+            values: ['operating', 'proposed', 'construction', 'mothballed', 'cancelled', 'retired', 'shelved', ''],
+            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved', 'Unknown status'],
         },
         {
             field: 'fuel',
