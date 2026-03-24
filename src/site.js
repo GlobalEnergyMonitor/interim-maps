@@ -1282,7 +1282,7 @@ function geoJSON2Table() {
         return config.tableHeaders.values.map((header) => {
             let value = feature.properties[header];
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                value = "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>';
+                value = `<a href="` + feature.properties[config.urlField] + `" target="_blank">` + value + '</a>';
             }
             return value;
         });
