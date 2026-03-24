@@ -1663,7 +1663,7 @@ function enableCountrySelect() {
 
 function buildCountrySelect() {
     if (config.allCountrySelect) {
-        $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>');
+        $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li><li><hr class="dropdown-divider"></li>');
     }
     Object.keys(config.countries).forEach((continent, continent_idx) => {
         let dropdown_html = '';
