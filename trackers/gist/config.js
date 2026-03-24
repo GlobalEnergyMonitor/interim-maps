@@ -83,4 +83,5 @@ var config = {
     includeCapacityByStatusInDetailView: false,  // create table instead since input file does not have individual units
     useDefaultCapacityInDetailView: false,
     showToolTip: true,
+    minMaxCapacityFilterLabel: 'Capacity (ttpa)',
 }
