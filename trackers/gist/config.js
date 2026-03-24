@@ -35,7 +35,7 @@ var config = {
         'name': {'display': 'heading'},
         'location-display': {'display': 'location'},
 
-        'prod-method-tier-display': {'label': 'Production Method'},
+        'prod-type': {'label': 'Production Method'},
         'parent': {'label': 'Parent'},
         'owner': {'label': 'Owner'},
         'start-year': {'label': 'Start date'},
