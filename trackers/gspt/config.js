@@ -73,5 +73,6 @@ var config = {
     ],
 
     minRadius: 0.8,
+    showMaxCapacity: true,
     showMinCapacity: true,
 }

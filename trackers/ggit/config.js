@@ -84,6 +84,5 @@ var config = {
     highZoomMinRadius: 5,
     highZoomMaxRadius: 30,
 
-    showMaxCapacity: false,
     geometries: ['Point','LineString'],
 }

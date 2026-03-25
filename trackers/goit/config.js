@@ -71,7 +71,6 @@ var config = {
         },
     ],
 
-    showMaxCapacity: false,
     countryField: 'all-countries',
     includeCapacityByStatusInDetailView: false,
 

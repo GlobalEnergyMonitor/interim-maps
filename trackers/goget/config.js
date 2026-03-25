@@ -70,7 +70,6 @@ var config = {
     ],
 
     countryField: 'all-countries',
-    showMaxCapacity: false,
     includeCapacityByStatusInDetailView: false,
 
     geometries: ['Point'],  // 'Polygon'

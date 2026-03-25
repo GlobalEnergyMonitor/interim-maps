@@ -42,4 +42,5 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
+    showMaxCapacity: true,
 }

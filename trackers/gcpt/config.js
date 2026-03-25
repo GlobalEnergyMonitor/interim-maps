@@ -65,5 +65,6 @@ var config = {
         },
     ],
 
+    showMaxCapacity: true,
     showMinCapacity: true,
 }

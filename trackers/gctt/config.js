@@ -64,5 +64,6 @@ var config = {
         },
     ],
 
+    showMaxCapacity: true,
     minMaxCapacityFilterLabel: 'Capacity (Mt)',
 }

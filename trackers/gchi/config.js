@@ -54,6 +54,5 @@ var config = {
     minRadius: 4,
     highZoomMinRadius: 6,
 
-    showMaxCapacity: false,
     includeCapacityByStatusInDetailView: false,
 }

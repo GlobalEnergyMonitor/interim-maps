@@ -77,6 +77,4 @@ var config = {
             values_labels: ['Thermal', 'Met', 'Thermal & Met', 'Not found']
         },
     ],
-
-    showMaxCapacity: false,
 }

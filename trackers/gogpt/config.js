@@ -64,4 +64,5 @@ var config = {
         }
     ],
 
+    showMaxCapacity: true,
 }

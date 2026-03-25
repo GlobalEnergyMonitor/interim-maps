@@ -3,7 +3,7 @@ var config = {
     geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/gwpt_map_2026-02.geojson',
 
     /* Labels for describing the assets */
-    assetFullLabel: "Wind farm phases",
+    assetFullLabel: 'Wind farm phases',
     assetLabel: 'phase',
 
     /* configure the table view, selecting which columns to show, how to label them, 
@@ -72,4 +72,6 @@ var config = {
             values: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
         },
     ],
+
+    showMaxCapacity: true,
 }

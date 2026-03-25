@@ -88,6 +88,7 @@ var config = {
         },
     ],
 
+    showMaxCapacity: true,
     minMaxCapacityFilterLabel: 'millions metric tonnes per annum',
     includeCapacityByStatusInDetailView: false,
 }

@@ -54,4 +54,6 @@ var config = {
             'announced': 'green',
         },
     },
+
+    showMaxCapacity: true,
 }

@@ -97,7 +97,7 @@ var site_config = {
 
     /* by default, no all phases link; override in tracker config where appropriate */
     showAllPhases: false,
-    showMaxCapacity: true,
+    showMaxCapacity: false,  // default behavior is to not include  // todo remove entirely? figure out which trackers actively want it
     showMinCapacity: false,
     minMaxCapacityFilterLabel: 'Capacity (MW)',
     includeCapacityByStatusInDetailView: true,
