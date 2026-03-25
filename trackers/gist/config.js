@@ -10,10 +10,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
        and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'owner', 'parent', 'status-display', 'start-year', 'prod-type', 'tech-type', 'subnational', 'country-area1'],
-        labels: ['Plant', 'Owner', 'Parent', 'Plant Status', 'Start date', 'Production Method', 'Main Production Equipment', 'Subnational Unit', 'Country/Area'],
+        values: ['name', 'owner', 'parent', 'status-display', 'start-year', 'capacity-table', 'prod-type', 'tech-type', 'subnational', 'country-area1'],
+        labels: ['Plant', 'Owner', 'Parent', 'Plant Status', 'Start date', 'Capacity (ttpa)', 'Production Method', 'Main Production Equipment', 'Subnational Unit', 'Country/Area'],
         clickColumns: ['name'],
-        rightAlign: ['start-year'],
+        rightAlign: ['start-year', 'capacity-table'],
     },
 
     /* configure the search box; 
