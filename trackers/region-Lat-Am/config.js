@@ -88,8 +88,8 @@ var config = {
         {
             field: 'status-group',
             label: 'Status',
-            values: ['operating', 'proposed-plus', 'pre-construction-plus', 'construction-plus', 'retired-plus', 'cancelled', 'mothballed-plus', 'shelved', 'not-found'],
-            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Pre-construction/Pre-permit/Permitted', 'Construction/In development', 'Retired/Closed/Decommissioned', 'Cancelled', 'Mothballed/Idle/Shut in', 'Shelved', 'Not Found']
+            values: ['operating', 'proposed-plus', 'pre-construction-plus', 'construction-plus', 'retired-plus', 'cancelled', 'mothballed-plus', 'shelved', 'other'],
+            values_labels: ['Operating', 'Proposed/Announced/Discovered', 'Pre-construction/Pre-permit/Permitted', 'Construction/In development', 'Retired/Closed/Decommissioned', 'Cancelled', 'Mothballed/Idle/Shut in', 'Shelved', 'Other or Not Found']
         },
     ],
 
