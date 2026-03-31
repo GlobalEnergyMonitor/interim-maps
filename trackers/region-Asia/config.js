@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/asia_map_2026-03-27.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/asia_map_2026-03-31.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Units / Pipelines',
@@ -40,8 +40,8 @@ var config = {
         'location-accuracy': {'label': 'Location Accuracy'},
         'prod-gas': {'label': 'Gas Production', 'trailing-label': 'million m³/y'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
-        'prod-unspecified': {'label': 'Unspecified Hydrocarbons Production', 'trailing-label': 'million boe/y'},
-        'prod-year-unspecified': {'label': 'Production Year - Hydrocarbons (unspecified)'},
+        'prod-hydrocarbons': {'label': 'Unspecified Hydrocarbons Production', 'trailing-label': 'million boe/y'},
+        'prod-year-hydrocarbons': {'label': 'Production Year - Hydrocarbons (unspecified)'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},

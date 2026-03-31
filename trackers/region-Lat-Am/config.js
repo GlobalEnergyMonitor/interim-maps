@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/lat-am_map_2026-03-27.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/lat-am_map_2026-03-31.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Units / Phases / Pipelines',
@@ -41,8 +41,8 @@ var config = {
         'prod-year-oil': {'label': 'Production Year - Oil'},
         'prod-gas': {'label': 'Gas Production', 'trailing-label': 'million m³/y'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
-        'prod-unspecified': {'label': 'Unspecified Hydrocarbons Production', 'trailing-label': 'million boe/y'},
-        'prod-year-unspecified': {'label': 'Production Year - Hydrocarbons (unspecified)'},
+        'prod-hydrocarbons': {'label': 'Unspecified Hydrocarbons Production', 'trailing-label': 'million boe/y'},
+        'prod-year-hydrocarbons': {'label': 'Production Year - Hydrocarbons (unspecified)'},
         'prod-coal': {'label': 'Production - Coal', 'trailing-label': 'million tonnes coal/y'},
 
         'start-year': {'label': 'Start Year'},
