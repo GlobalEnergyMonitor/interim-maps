@@ -108,6 +108,12 @@ async function main() {
 
         // Copy tracker config
         await copyFile(trackerConfig, path.join(outTrackerDir, "config.js"));
+
+        // Conditionally copy countries.json if it exists
+        const countriesFile = path.join(TRACKERS_DIR, trackerName, "countries.json");
+        if (await exists(countriesFile)) {
+            await copyFile(countriesFile, path.join(outTrackerDir, "countries.json"));
+        }
     }
 
     console.log("Build complete → _dist/");
