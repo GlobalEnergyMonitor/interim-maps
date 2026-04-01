@@ -93,7 +93,7 @@ var config = {
     ],
 
     countryField: 'all-countries',
-    // countryFile: 'countries.json',  // fixme
+    countryFile: '../../trackers/region-Africa/countries.json',
 
     geometries: ['Point', 'LineString'],
     center: [15, 0],

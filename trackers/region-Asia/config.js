@@ -83,7 +83,7 @@ var config = {
     img_detail_zoom: 10,
 
     countryField: 'all-countries',
-    // countryFile: 'countries.json',  // fixme
+    countryFile: '../../trackers/region-Asia/countries.json',
 
     minLineWidth: 1,
     maxLineWidth: 3,

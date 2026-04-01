@@ -94,7 +94,7 @@ var config = {
     ],
 
     countryField: 'all-countries',
-    // countryFile: 'countries.json',  // fixme
+    countryFile: '../../trackers/region-Lat-Am/countries.json',
     
     geometries: ['Point', 'LineString'],
     center: [-60, 0],
