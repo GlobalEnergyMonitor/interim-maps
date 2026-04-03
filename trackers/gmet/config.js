@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gmet_map_2026-02-09.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/gmet_map_2026-04-02.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -76,11 +76,11 @@ var config = {
         field: 'tracker-display',
         label: 'Plume and Infrastructure Projects',
         values: {
-            'Reviewed plumes (has attribution data)': 'red',
-            'Reviewed plumes (no attribution data)': 'orange',
-            'Oil & gas extraction areas': 'blue',
-            'Gas pipelines': 'green',
-            'Coal mines': 'yellow',
+            'Reviewed plume (has attribution data)': 'red',
+            'Reviewed plume (no attribution data)': 'orange',
+            'Oil & gas extraction area': 'blue',
+            'Gas pipeline': 'green',
+            'Coal mine': 'yellow',
             'LNG import terminal': 'green',
             'LNG export terminal': 'green',
         },
@@ -90,7 +90,7 @@ var config = {
         {
             field: 'tracker-display',
             label: 'Plume and Infrastructure Projects',
-            values: ['Oil & gas extraction areas', 'Coal mines', 'LNG import terminal', 'LNG export terminal', 'Gas pipelines', 'Reviewed plumes (has attribution data)', 'Reviewed plumes (no attribution data)'],
+            values: ['Oil & gas extraction area', 'Coal mine', 'LNG import terminal', 'LNG export terminal', 'Gas pipeline', 'Reviewed plume (has attribution data)', 'Reviewed plume (no attribution data)'],
             primary: true
         },
         {
@@ -112,7 +112,6 @@ var config = {
     highZoomMaxLineWidth: 32,
 
     geometries: ['Point', 'LineString'],
-
-    showMaxCapacity: false,
+    
     includeCapacityByStatusInDetailView: false
 }
