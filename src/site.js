@@ -1337,21 +1337,21 @@ function displayDetails(features) {
                 if (value && value !== '') {
                     detail_text += '<br/><div>' + value + '</div><br/>';
                 }
-            } else if (config.detailView[detail]['display'] === 'join') {  // TODO To delete, likely
+            } else if (config.detailView[detail]['display'] === 'join') {  // used by GIPT to show all technologies/fuels
                 let join_array = features.map((feature) => feature.properties[detail]);
                 join_array = join_array.filter((value, index, array) => array.indexOf(value) === index);
                 if (join_array.length > 1) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ';
                     }
-                    detail_text += '<span class="text-capitalize">' + join_array.join(',').replaceAll('_', ' ') + '</span><br/>';
+                    detail_text += '<span class="text-capitalize">' + join_array.join('; ').replaceAll('_', ' ') + '</span><br/>';
                 } else {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][0] + '</span>: ';
                     }
                     detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_', ' ') + '</span><br/>';
                 }
-            } else if (config.detailView[detail]['display'] === 'range') {  // TODO To delete, likely
+            } else if (config.detailView[detail]['display'] === 'range') {  // used by GIPT to show range of start dates
                 let greatest = features.reduce((accumulator, feature) => {
                     return (feature.properties[detail] !== '' && feature.properties[detail] > accumulator ? feature.properties[detail] : accumulator);
                 }, 0);
@@ -1375,14 +1375,17 @@ function displayDetails(features) {
                     }
                     location_text += features[0].properties[detail];
                 }
-            } else if (config.detailView[detail]['display'] === 'colorcoded') {  // TODO To delete, likely
-                // to create the circle dot we have for most status
-                // if it has this colorcoded label then it goes to the color dictionary
-                // matches up the field name, uses fieldLabel to display label and then also uses color
-                let colorLabel = features.map((feature) => feature.properties[detail]);
-                detail_text += '<span class="fw-bold">' + config.color_association.fieldLabel + '</span>: ' +
-                    '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.color_association.field]] + '"></span>' +
-                    '<span class="text-capitalize">' + features[0].properties[config.color_association.field] + '</span><br/>';
+            } else if (config.detailView[detail]['display'] === 'colorcoded') {  // used by GIPT to show color for asset type
+                const uniqueAssetTypes = [...new Set(
+                    features.map(f => f.properties[detail])
+                )];
+                detail_text += '<span class="fw-bold">' + config.color_association.fieldLabel + '</span>: ';
+                uniqueAssetTypes.forEach(value => {
+                    detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[value] + '"></span>' +
+                                   '<span class="text-capitalize">' + value + '    </span>';
+                });
+                detail_text += '<br/>';
+
             }
         } else if (Object.keys(config.detailView[detail]).includes('table')) {  // make small table in detail view popup
             const tableConfig = config.detailView[detail];
@@ -1439,7 +1442,7 @@ function displayDetails(features) {
 
             detail_text += tableHtml;
         } else if (Object.keys(config.detailView[detail]).includes('label')) {
-            detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];
+            detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];  // TODO handle more than one feature
             if (Object.keys(config.detailView[detail]).includes('trailing-label')) {  // if the value has a trailing label (eg unit of measurement)
                 if (config.detailView[detail]['trailing-label'] === 'units-of-m') {
                     detail_text += ' ' + features[0].properties['units-of-m'];  // dynamically use the units of measurement from input file
