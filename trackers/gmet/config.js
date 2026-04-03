@@ -112,6 +112,6 @@ var config = {
     highZoomMaxLineWidth: 32,
 
     geometries: ['Point', 'LineString'],
-    
+
     includeCapacityByStatusInDetailView: false
 }
