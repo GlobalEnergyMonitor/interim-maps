@@ -64,7 +64,7 @@ var config = {
             primary: true
         },
         {
-            field: 'infra-filter',
+            field: 'tracker-display',
             label: 'Infrastructure Type',
             values: ['Gas Power Plants', 'LNG Terminals'],
         },
