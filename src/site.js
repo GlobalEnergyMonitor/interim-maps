@@ -262,7 +262,7 @@ function linkAssets() {
             return previous + Number(current.properties[config.capacityScaledField]);
         }, 0);
 
-        // Build summary count of capacity across all linked assets and generate icon based on that label if more than one status
+        // generate icon based on that label if more than one status
         if (group_feature.geometry.type === 'Point') {
             let icon = Object.assign(...Object.keys(config.color_association.values).map(k => ({ [config.color_association.values[k]]: 0 })));
             features_in_current_group.forEach((feature) => {

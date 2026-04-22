@@ -82,10 +82,7 @@ var config = {
     countryField: 'all-countries',
     countryFile: '../../trackers/ggft/countries.json',
 
-    allCountrySelect: false,  // why false? Can't revert to "all"  // todo why is false even an option??
-
-    includeCapacityByStatusInDetailView: false,
+    includeCapacityByStatusInDetailView: true,  // todo clean up
 
     minRadius: 4,
-    showAllPhases: true,  // todo verify
 }
