@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggft_map_2026-04-16.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggft_map_2026-04-22.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Units',
@@ -66,7 +66,7 @@ var config = {
         {
             field: 'tracker-display',
             label: 'Infrastructure Type',
-            values: ['Gas Power Plants', 'LNG Terminals'],
+            values: ['Gas Power Plant', 'LNG Terminal'],
         },
         {
             field: 'financing-bucket',
