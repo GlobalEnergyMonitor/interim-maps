@@ -266,16 +266,26 @@ function linkAssets() {
         if (group_feature.geometry.type === 'Point') {
             let icon = Object.assign(...Object.keys(config.color_association.values).map(k => ({ [config.color_association.values[k]]: 0 })));
             features_in_current_group.forEach((feature) => {
-                icon[config.color_association.values[feature.properties[config.color_association.field]]] += Number(feature.properties[config.capacityField]);
+                if (config.scaleCircleColorsProportionally) {
+                    // Sum capacity values
+                    icon[config.color_association.values[feature.properties[config.color_association.field]]] += Number(feature.properties[config.capacityField]);
+                } else {
+                    // Count features per color (equal split by object count)
+                    icon[config.color_association.values[feature.properties[config.color_association.field]]] += 1;
+                }
             });
             if (Object.values(icon).filter(v => v != 0).length > 1) {  // if the icon will contain more than one color
-                let total = Object.values(icon).reduce((previous, current) => {
-                    return previous + Number(current);
-                }, 0);
-                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(11 * (icon[k] / total)) })));  // use 11 and ceil to get ~12 pieces on the circle
-                let icon_as_str = JSON.stringify(icon)
+                if (config.scaleCircleColorsProportionally) {
+                    // Normalize to ~12 pieces using Math.ceil
+                    let total = Object.values(icon).reduce((previous, current) => {
+                        return previous + Number(current);
+                    }, 0);
+                    icon = Object.assign(...Object.keys(icon).map(k => ({ [k]: Math.ceil(11 * (icon[k] / total)) })));
+                }
+                // When not proportional, raw counts are used directly (no normalization needed)
+                let icon_as_str = JSON.stringify(icon);
                 group_feature.properties['icon'] = icon_as_str;
-                if (! config.icons.includes(icon_as_str)) {
+                if (!config.icons.includes(icon_as_str)) {
                     generateIcon(icon, icon_as_str);
                 }
             }

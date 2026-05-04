@@ -82,7 +82,8 @@ var config = {
     countryField: 'all-countries',
     countryFile: '../../trackers/ggft/countries.json',
 
-    includeCapacityByStatusInDetailView: true,  // todo clean up
+    includeCapacityByStatusInDetailView: false,
+    scaleCircleColorsProportionally: false,
 
     minRadius: 4,
 }

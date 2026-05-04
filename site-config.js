@@ -102,6 +102,7 @@ var site_config = {
     minMaxCapacityFilterLabel: 'Capacity (MW)',
     includeCapacityByStatusInDetailView: true,
     // showCapacityTable: true,
+    scaleCircleColorsProportionally: true,
 
     /* zoom level to set map when viewing all phases */
     phasesZoom: 10,
