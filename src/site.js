@@ -1437,10 +1437,9 @@ function displayDetails(features) {
                     }
 
                     // Numeric formatting if applicable
-                    const num = Number(value);
-                    const displayValue = Number.isFinite(num)
-                        ? num.toLocaleString()
-                        : value;
+                    const displayValue = value !== '' && Number.isFinite(Number(value))
+                        ? Number(value).toLocaleString()
+                        : value || '–';
 
                     tableHtml += `<td>${displayValue}</td>`;
                 });

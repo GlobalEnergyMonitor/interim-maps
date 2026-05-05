@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggft_map_2026-04-22.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/ggft_map_2026-05-05.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Units',
@@ -40,6 +40,8 @@ var config = {
         'status': {'label': 'Operating Status'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
+
+        'financier-details': {'table': 'Financier Details', 'tableHeaders': {'unit_id': 'GEM Unit ID', 'financing_status': 'Financing status', 'financier': 'Financier name', 'capacity': 'Amount (Million $USD)', 'financing_type': 'Financing type'}},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
