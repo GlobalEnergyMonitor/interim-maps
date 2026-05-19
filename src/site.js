@@ -291,16 +291,21 @@ function linkAssets() {
             }
         }
 
+        const isPolygon = (feature) => feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon';
+        const countableFeatures = config.polygonsAreIndependent
+            ? features_in_current_group
+            : features_in_current_group.filter((feature) => !isPolygon(feature));
+
         // Build summary count of filters for legend
         let summary_count = {};
         config.filters.forEach((filter) => {
             summary_count[filter.field] = Object.assign(...filter.values.map(f => ({[f]: 0})));
-            features_in_current_group.forEach((feature) => {
+            countableFeatures.forEach((feature) => {
                 summary_count[filter.field][feature.properties[filter.field]]++;
             });
         });
         group_feature.properties['summary_count'] = JSON.stringify(summary_count);
-        config.totalCount += features_in_current_group.length;
+        config.totalCount += countableFeatures.length;
 
         config.geojson_linked.features.push(group_feature);
     });
@@ -1333,17 +1338,25 @@ function displayDetails(features) {
     var detail_text = '';
     var location_text = '';
 
+    // When polygonsAreIndependent is false, property lookups should use the first non-polygon
+    // feature, since polygons may not carry the same attributes as point/line features.
+    const isPolygon = (feature) => feature.geometry?.type === 'Polygon' || feature.geometry?.type === 'MultiPolygon';
+    const primaryFeature = (!config.polygonsAreIndependent && features.some(f => !isPolygon(f)))
+        ? features.find(f => !isPolygon(f))
+        : features[0];
+
+
     Object.keys(config.detailView).forEach((detail) => {
-        const value = features[0].properties[detail];
+        const value = primaryFeature.properties[detail];
         const invalidValues = ['', 'unknown', 'unknown [unknown %]', 'undefined', 'nan', null, 0, [], undefined];
         if (invalidValues.includes(value) || Number.isNaN(value)) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
             // TODO remove unused options from this if-statement
             if (config.detailView[detail]['display'] === 'heading') {
-                detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
+                detail_text += '<h4>' + primaryFeature.properties[detail] + '</h4>';
             } else if (config.detailView[detail]['display'] === 'simple_markup') {
-                let value = features[0].properties[detail];
+                let value = primaryFeature.properties[detail];
                 if (value && value !== '') {
                     detail_text += '<br/><div>' + value + '</div><br/>';
                 }
@@ -1377,13 +1390,13 @@ function displayDetails(features) {
                     }
                 }
             } else if (config.detailView[detail]['display'] === 'hyperlink') {  // TODO To delete, likely
-                detail_text += '<br/><a href="' + features[0].properties[detail] + '" target="_blank">More Info on the related infrastructure project here</a><br/>';
+                detail_text += '<br/><a href="' + primaryFeature.properties[detail] + '" target="_blank">More Info on the related infrastructure project here</a><br/>';
             } else if (config.detailView[detail]['display'] === 'location') {  // TODO To delete, likely. Replace with direct grab of location-display below
-                if (Object.keys(features[0].properties).includes(detail)) {
+                if (Object.keys(primaryFeature.properties).includes(detail)) {
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
-                    location_text += features[0].properties[detail];
+                    location_text += primaryFeature.properties[detail];
                 }
             } else if (config.detailView[detail]['display'] === 'colorcoded') {  // used by GIPT to show color for asset type
                 const uniqueAssetTypes = [...new Set(
@@ -1401,7 +1414,7 @@ function displayDetails(features) {
             const tableConfig = config.detailView[detail];
             const tableTitle = tableConfig.table;
             const headerMap = tableConfig.tableHeaders;
-            const table_data_as_array = features[0].properties[detail];
+            const table_data_as_array = primaryFeature.properties[detail];
             if (!Array.isArray(table_data_as_array) || table_data_as_array.length === 0) { return; }
 
             let tableHtml = '<br/>';
@@ -1451,10 +1464,10 @@ function displayDetails(features) {
 
             detail_text += tableHtml;
         } else if (Object.keys(config.detailView[detail]).includes('label')) {
-            detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail];  // TODO handle more than one feature
+            detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + primaryFeature.properties[detail];  // TODO handle more than one feature
             if (Object.keys(config.detailView[detail]).includes('trailing-label')) {  // if the value has a trailing label (eg unit of measurement)
                 if (config.detailView[detail]['trailing-label'] === 'units-of-m') {
-                    detail_text += ' ' + features[0].properties['units-of-m'];  // dynamically use the units of measurement from input file
+                    detail_text += ' ' + primaryFeature.properties['units-of-m'];  // dynamically use the units of measurement from input file
                 } else {
                     detail_text += ' ' + config.detailView[detail]['trailing-label'];
                 }
@@ -1467,11 +1480,16 @@ function displayDetails(features) {
     // if a dict and not a string (eg in multi-tracker maps), get the specific labels for each tracker within
     let assetLabel = typeof config.assetLabel === 'string'
         ? config.assetLabel
-        : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
+        : config.assetLabel.values[primaryFeature.properties[config.assetLabel.field]];
+
+    // consistent with how linkAssets() handles totalCount and summary_count.
+    const countableFeatures = config.polygonsAreIndependent
+        ? features
+        : features.filter((feature) => !isPolygon(feature));
 
     if (config.includeCapacityByStatusInDetailView) {
         // if there are multiple units in this project
-        if (features.length > 1) {
+        if (countableFeatures.length > 1) {
             // Find the status filter
             const statusFilter = config.filters.find(f => f.field === config.statusField);
             const statuses = statusFilter?.values ?? [];
@@ -1481,7 +1499,7 @@ function displayDetails(features) {
             const count = Object.fromEntries(statuses.map(s => [s, 0]));
 
             // Aggregate
-            for (const feature of features) {
+            for (const feature of countableFeatures) {
                 const properties = feature?.properties ?? {};
                 const status = properties[config.statusField];
 
@@ -1515,7 +1533,7 @@ function displayDetails(features) {
                     `<div class="row">` +
                         `<div class="col-5">` + `${dotHtml(status)}${status}` + `</div>` +
                         `<div class="col-4">${formatCapacity(capacity[status] ?? 0)}</div>` +
-                        `<div class="col-3">${count[status]} of ${features.length}</div>` +
+                        `<div class="col-3">${count[status]} of ${countableFeatures.length}</div>` +
                     `</div>`
                 );
             };
@@ -1534,7 +1552,7 @@ function displayDetails(features) {
                     '<div class="row" style="height: 2px"><hr/></div>' +
                     '<div class="row ">' +
                         '<div class="col-5 text-capitalize">Status</div>' +
-                        '<div class="col-4">Capacity (' + features[0].properties[config.capacityLabelField] + ')</div>' +
+                        '<div class="col-4">Capacity (' + primaryFeature.properties[config.capacityLabelField] + ')</div>' +
                         '<div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div>' +
                     '</div>' +
                     detail_capacity +
@@ -1545,13 +1563,13 @@ function displayDetails(features) {
             // add default capacity to detail view popup
             if (config.useDefaultCapacityInDetailView) {
                 let capacityFloatandLabel;
-                let capacity = features[0].properties[config.capacityDisplayField];
+                let capacity = primaryFeature.properties[config.capacityDisplayField];
 
                 if (capacity === '') {  // if capacity is an empty string
                     capacityFloatandLabel = 'Not found or N/A';
                 } else if (!isNaN(Number(capacity))) {  // if capacity is a number
                     let capacityFloat = Number(capacity);
-                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + features[0].properties[config.capacityLabelField];
+                    capacityFloatandLabel = parseFloat(capacityFloat).toFixed(2).replace(/\.?0+$/, '') + ' ' + primaryFeature.properties[config.capacityLabelField];
                 } else {  // if capacity is any other string
                     capacityFloatandLabel = capacity;
                 }
@@ -1561,15 +1579,15 @@ function displayDetails(features) {
             // add status to detail view popup
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: '
             if (config.color_association.field === config.statusField) {  // add color dot if it is an expected status
-                detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>'
+                detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>'
             }
-            detail_text += '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+            detail_text += '<span class="text-capitalize">' + primaryFeature.properties[config.statusDisplayField] + '</span><br/>';
         }
     } else {  // only put project-wide status in detail view
         if (config.color_association.field === 'status') {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color_association.values[features[0].properties[config.statusDisplayField]] + '"></span>' +
-                '<span class="text-lowercase">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+                '<span class="legend-dot" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>' +
+                '<span class="text-lowercase">' + primaryFeature.properties[config.statusDisplayField] + '</span><br/>';
         }
     }
 
@@ -1581,14 +1599,14 @@ function displayDetails(features) {
                 (config.selectModal !== '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
                 '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
                 '<span class="detail-location">' + location_text + '</span><br/>' +  // TODO Replace with direct grab of location-display
-                (features[0].properties[config.urlField] !== '' ? '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>': '') +
-                (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
+                (primaryFeature.properties[config.urlField] !== '' ? '<span class="align-bottom p-1" id="detail-more-info"><a href="' + primaryFeature.properties[config.urlField] + '" target="_blank">MORE INFO</a></span>': '') +
+                (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + primaryFeature.properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
             '</div>' +
             '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
         '</div>'
     );
 
-    setHighlightFilter(features[0].properties[config.linkField]);
+    setHighlightFilter(primaryFeature.properties[config.linkField]);
 }
 
 function enableModal() {

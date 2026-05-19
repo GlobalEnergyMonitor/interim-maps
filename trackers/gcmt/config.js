@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/gcmt_map_2025-05.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/gcmt-smp_map_2026-05.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Coal Mine Projects',
@@ -51,16 +51,16 @@ var config = {
             'operating': 'red',
             'proposed': 'blue',
             'cancelled': 'green',
-            'retired': 'orange',
             'shelved': 'dark grey',
             'mothballed': 'grey',
+            'closed': 'orange',
         },
     },
 
     filters: [
         {
             field: 'status',
-            values: ['operating', 'proposed', 'cancelled', 'retired', 'shelved', 'mothballed'],
+            values: ['operating', 'proposed', 'cancelled', 'shelved', 'mothballed', 'closed'],
             primary: true
         },
         {
@@ -73,8 +73,11 @@ var config = {
         {
             field: 'coal-grade',
             label: 'Coal Grade',
-            values: ['Thermal', 'Met', 'Thermal & Met', ''],
-            values_labels: ['Thermal', 'Met', 'Thermal & Met', 'Not found']
+            values: ['Thermal', 'Met', 'Thermal & Met', 'Chemical', 'Thermal & Chemical', ''],
+            values_labels: ['Thermal', 'Met', 'Thermal & Met', 'Chemical', 'Thermal & Chemical', 'Not found']
         },
     ],
+
+    geometries: ['Point', 'Polygon'],
+    polygonsAreIndependent: false,
 }
