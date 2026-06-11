@@ -45,6 +45,19 @@ var config = {
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
+    filters: [
+        {
+            field: 'status',
+            values: ['operating', 'construction', 'pre-construction', 'announced', 'shelved', 'mothballed', 'retired', 'cancelled'],
+            primary: true
+        },
+        {
+            field: 'tech-type',
+            label: 'Technology Type',
+            values: ['conventional storage', 'run-of-river', 'pumped storage', 'conventional and run-of-river', 'conventional and pumped storage', 'unknown'],
+        },
+    ],
+
     showMaxCapacity: true,
     countryField: 'all-countries',
 }
