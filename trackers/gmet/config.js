@@ -51,7 +51,7 @@ var config = {
         'instrument': {'label': 'Instrument'},
 
         // GCMT, GOIT, LNG
-        'emissions': {'label': 'Methane Emissions Estimate', 'trailing-label': 'mt/yr'},
+        'emissions': {'label': 'Annual Methane Emissions, if operational', 'trailing-label': 'mt/yr'},
         'capacity-display': {'label': 'Capacity', 'trailing-label': 'units-of-m'},  // dynamic units of measurement from input file
 
         // GCMT
