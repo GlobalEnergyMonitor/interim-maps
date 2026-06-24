@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/gmet_map_2025-12.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/gmet-smp_map_2025-12.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Projects',
@@ -111,7 +111,8 @@ var config = {
     highZoomMinLineWidth: 4,
     highZoomMaxLineWidth: 32,
 
-    geometries: ['Point', 'LineString'],
+    geometries: ['Point', 'LineString', 'Polygon'],
+    polygonsAreIndependent: false,
 
     includeCapacityByStatusInDetailView: false
 }

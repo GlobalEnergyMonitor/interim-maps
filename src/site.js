@@ -1293,6 +1293,7 @@ function updateTable(force) {
 }
 
 function geoJSON2Table() {
+    // TODO remove dependent polygons from table view (ie SMP mine boundaries)
     return config.geojson_filtered.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
             let value = feature.properties[header];
