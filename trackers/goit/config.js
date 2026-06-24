@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/goit_map_2025-03.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/goit_map_2026-06.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Pipelines',
@@ -51,15 +51,15 @@ var config = {
             'cancelled': 'green',
             'retired': 'grey',
             'shelved': 'grey',
-            '': 'black',
+            //'': 'black',
         },
     },
 
     filters: [
         {
             field: 'status',
-            values: ['operating', 'proposed', 'construction', 'mothballed', 'cancelled', 'retired', 'shelved', ''],
-            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved', 'Unknown status'],
+            values: ['operating', 'proposed', 'construction', 'mothballed', 'cancelled', 'retired', 'shelved',], //''],
+            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved',], //'Unknown status'],
         },
         {
             field: 'fuel',
