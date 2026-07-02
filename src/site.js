@@ -1091,13 +1091,22 @@ function filterData() {
 
 function filterTiles() {
     let filterStatus = {};
+    // checkbox ids carry makeDomSafe'd values but the tiles carry the raw ones
+    // (e.g. id says 'utility-scale-solar', the tile attribute says 'utility-scale solar'),
+    // so map each id back to its raw filter value before building the expression
+    let rawValues = {};
     config.filters.forEach(filter => {
         filterStatus[filter.field] = [];
+        rawValues[filter.field] = {};
+        filter.values.forEach(val => {
+            rawValues[filter.field][makeDomSafe(val)] = val;
+        });
     });
     $('.form-check-input').each(function() {
         if (this.checked) {
             let [field, ...value] = this.id.split('_');
-            filterStatus[field].push(value.join('_'));
+            let domSafeValue = value.join('_');
+            filterStatus[field].push(rawValues[field][domSafeValue] ?? domSafeValue);
         }
     });
 
