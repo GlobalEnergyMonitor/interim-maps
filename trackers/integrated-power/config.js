@@ -1,13 +1,20 @@
 var config = {
-    // csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Integrated/2025-09/gipt-data-2025-10-02.csv',
-    // tiles: [
-    //     // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
-    //     'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-09/{z}/{x}/{y}.pbf'
-    //     ],
-    // tileSourceLayer: 'integrated',
+    /* Vector tiles render the map; the CSV supplies the full per-unit data for the
+       table view, detail popups, legend counts, and search.
+       Local tiles generated from the geojson with (see scripts/geojson-to-csv.py for the CSV):
+         tippecanoe -e trackers/integrated-power/tiles -l integrated -Z0 -z10 -r1 \
+           --no-feature-limit --no-tile-size-limit --no-tile-compression \
+           -y project-id -y name -y asset-type -y status -y all-countries -y capacity-scaled \
+           trackers/integrated-power/integrated_map_2026-05-06.geojson */
+    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Integrated/2026-05/gipt-data-2026-05-06.csv',
+    tiles: ['https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2026-05/{z}/{x}/{y}.pbf'],
+    // local copies for offline testing (uploaded by scripts/upload-integrated-map.py):
+    // csv: '/maps/trackers/integrated-power/gipt-data-2026-05-06.csv',
+    // tiles: [window.location.origin + '/maps/trackers/integrated-power/tiles/{z}/{x}/{y}.pbf'],
+    tileSourceLayer: 'integrated',
 
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/integrated_map_2026-05-06.geojson',
+    // geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/integrated_map_2026-05-06.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'units / phases',

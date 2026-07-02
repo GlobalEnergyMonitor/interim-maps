@@ -117,6 +117,7 @@ function parseCsv(url) {
         Papa.parse(url, {
             download: true,
             header: true,
+            worker: true,  // parse off the main thread so the map keeps rendering during the multi-second parse of large files
             complete: function(results) {
                 resolve(results.data);
             },
@@ -132,7 +133,7 @@ function addTiles() {
     map.addSource('assets-source', {
         'type': 'vector',
         'tiles': config.tiles,
-        'minzoom': 1,
+        'minzoom': 0,
         'maxzoom': 10
     });
 }
@@ -311,7 +312,11 @@ function linkAssets() {
     });
 
     // set the map to use the linked assets as input data
-    map.getSource('assets-source').setData(config.geojson_linked);
+    // (tile maps render the tiles as-is — vector sources have no setData in mapbox-gl v2;
+    // geojson_linked still feeds the legend counts, table, and detail views for them)
+    if (!config.tiles) {
+        map.getSource('assets-source').setData(config.geojson_linked);
+    }
 }
 
 /* Generates icon image circles for each unique asset combination - Frequent-use function: called once in linkAssets() in a forEach loop */
@@ -1099,12 +1104,20 @@ function filterTiles() {
 
     config.filterExpression = [];
     if (config.searchText.length >= 3) {
-        let searchExpression = ['any'];
-        config.selectedSearchFields.split(',').forEach((field) => {
-            searchExpression.push(['in', ['literal', config.searchText], ['downcase', ['get', field]]]);
-
+        // run the search in JS against the full CSV-side data, then filter the tiles by
+        // the matching link ids; this keeps the search columns (owner, parent, *-search)
+        // out of the tiles entirely, which is what keeps the tiles small
+        let ids = new Set();
+        config.geojson.features.forEach((feature) => {
+            if (featureMatchesSearch(feature)) {
+                ids.add(feature.properties[config.linkField]);
+            }
         });
-        config.filterExpression.push(searchExpression);
+        config.filterExpression.push(
+            ids.size > 0
+                ? ['match', ['get', config.linkField], [...ids], true, false]
+                : ['boolean', false]  // 'match' requires a non-empty label list
+        );
     }
     if (config.selectedCountries.length > 0) {
         // updated to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
@@ -1147,6 +1160,18 @@ function filterTiles() {
     }
 }
 
+/* Shared by filterGeoJSON (table/summary) and filterTiles (map) so both apply the same search */
+function featureMatchesSearch(feature) {
+    return config.selectedSearchFields.split(',').filter((field) => {
+        // remove diacritics from mapValue
+        if (feature.properties[field] != null) {
+            let mapValue = removeDiacritics(feature.properties[field]).toLowerCase();
+            let searchValue = removeDiacritics(config.searchText).toLowerCase();
+            return mapValue.includes(searchValue);
+        }
+    }).length > 0;
+}
+
 function filterGeoJSON() {
     map.off('idle', filterGeoJSON);
 
@@ -1171,14 +1196,7 @@ function filterGeoJSON() {
         }
         // filter by text search bar
         if (config.searchText.length >= 3) {
-            if (config.selectedSearchFields.split(',').filter((field) => {
-                // remove diacritics from mapValue
-                if (feature.properties[field] != null) {
-                    let mapValue = removeDiacritics(feature.properties[field]).toLowerCase();
-                    let searchValue = removeDiacritics(config.searchText).toLowerCase();
-                    return mapValue.includes(searchValue);
-                }
-            }).length === 0) include = false;
+            if (!featureMatchesSearch(feature)) include = false;
         }
         // filter by country select, gets hit when just filtering by legend too
         if (config.selectedCountries.length > 0) {
