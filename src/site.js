@@ -1155,7 +1155,12 @@ function filterTiles() {
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
     } else {
-        map.on('idle', filterGeoJSON);
+        // run right after this click's call stack so the map filter is dispatched first.
+        // Waiting for 'idle' (the previous behavior) could stall the summary/legend update
+        // indefinitely: the spinning globe and post-setFilter tile work keep the map busy,
+        // which is why the first filter click used to take so long.
+        clearTimeout(config.filterGeoJSONTimeout);
+        config.filterGeoJSONTimeout = setTimeout(filterGeoJSON, 0);
     }
 }
 
