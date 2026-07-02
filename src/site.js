@@ -30,7 +30,7 @@ const secondsPerRevolution = 150;
 const maxSpinZoom = 5;
 // Rotate at intermediate speeds between zoom levels 3 and 5.
 const slowSpinZoom = 3;
-let spinEnabled = true;
+let spinEnabled = false;
 
 
 /*

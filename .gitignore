@@ -27,7 +27,6 @@ npm-debug.log
 *.csv
 *.geojson
 *.pbf
-trackers/integrated-power/tiles/
 *client_secret.json
 _dist/
 
