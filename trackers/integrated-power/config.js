@@ -32,11 +32,13 @@ var config = {
     /* configure the search box;
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Project': ['name', 'name-search'],
-        'Companies': ['owner', 'parent', 'owner-search', 'parent-search'],
+        // the *-search columns (pre-stripped diacritics) are redundant now that
+        // removeDiacritics() folds accents at runtime; searching fewer columns is faster
+        'Project': ['name'],
+        'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
         'Country/Area': ['all-countries'],
-        'Type': ['type'],
+        'Type': ['asset-type'],
         'Status': ['status']
     },
 
