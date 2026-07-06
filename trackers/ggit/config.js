@@ -72,7 +72,6 @@ var config = {
         }
     ],
 
-    multiCountry: true,
     countryField: 'all-countries',
 
     minLineWidth: 1,
@@ -84,5 +83,5 @@ var config = {
     highZoomMinRadius: 5,
     highZoomMaxRadius: 30,
 
-    geometries: ['Point','LineString'],
+    geometries: ['Point', 'LineString'],
 }

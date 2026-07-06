@@ -92,6 +92,6 @@ if __name__ == "__main__":
 
     server = HTTPServer(("localhost", PORT), FrontController)
     base = BASE_PATH if BASE_PATH else ""
-    print(f"Serving repo root at http://localhost:{PORT}{base}/")
+    print(f"Serving repo root at http://localhost:{PORT}{base}/trackers/")
     print(f"Example tracker: http://localhost:{PORT}{base}/trackers/gbpt/")
     server.serve_forever()

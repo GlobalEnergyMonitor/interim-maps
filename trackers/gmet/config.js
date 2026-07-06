@@ -101,7 +101,6 @@ var config = {
         },
     ],
 
-    multiCountry: true,
     countryField: 'all-countries',
     showAllPhases: true,
 

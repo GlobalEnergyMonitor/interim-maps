@@ -1,20 +1,19 @@
 var config = {
     /* Vector tiles render the map; the CSV supplies the full per-unit data for the
        table view, detail popups, legend counts, and search.
-       Local tiles generated from the geojson with (see scripts/geojson-to-csv.py for the CSV):
-         tippecanoe -e trackers/integrated-power/tiles -l integrated -Z0 -z10 -r1 \
-           --no-feature-limit --no-tile-size-limit --no-tile-compression \
-           -y project-id -y name -y asset-type -y status -y all-countries -y capacity-scaled \
-           trackers/integrated-power/integrated_map_2026-05-06.geojson */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/integrated-power/2026-05/integrated_map_2026-05-06.csv',
+       Local tiles generated from the geojson with :
+            MapFileCreation repo -> geojson_to_csv.py
+            The following tippecanoe command, which is implemented in run_tippecanoe.py in MapFileCreation repo:
+               tippecanoe -e integrated-power/tiles -l integrated -Z0 -z10 -r1 \
+               --no-feature-limit --no-tile-size-limit --no-tile-compression \
+               -y project-id -y name -y asset-type -y status -y all-countries -y capacity-scaled \
+               integrated-power/integrated_map_2026-05-06.geojson */
     tiles: ['https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/integrated-power/2026-05/tiles/{z}%5C{x}%5C{y}.pbf'],
-    // local copies for offline testing (uploaded by scripts/upload-integrated-map.py):
-    // csv: '/maps/trackers/integrated-power/gipt-data-2026-05-06.csv',
-    // tiles: [window.location.origin + '/maps/trackers/integrated-power/tiles/{z}/{x}/{y}.pbf'],
     tileSourceLayer: 'integrated',
 
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
     // geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/integrated_map_2026-05-06.geojson',
+    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/integrated-power/2026-05/integrated_map_2026-05-06.csv',
 
     /* Labels for describing the assets */
     assetFullLabel: 'units / phases',
@@ -32,8 +31,6 @@ var config = {
     /* configure the search box;
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        // the *-search columns (pre-stripped diacritics) are redundant now that
-        // removeDiacritics() folds accents at runtime; searching fewer columns is faster
         'Project': ['name'],
         'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
@@ -92,7 +89,6 @@ var config = {
 
     projection: 'globe',
     countryField: 'all-countries',
-    multiCountry: true,
 
     img_detail_zoom: 10,
 };

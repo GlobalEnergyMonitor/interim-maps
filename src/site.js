@@ -1128,16 +1128,14 @@ function filterTiles() {
         );
     }
     if (config.selectedCountries.length > 0) {
-        // updated to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
-        // added ';' at end of each country
+        // all-countries values are '; '-separated with no trailing delimiter, so wrap both
+        // the field and the search term with '; ' on each side before checking substring
+        // containment: this makes position in the list (first/middle/last) irrelevant and
+        // avoids false positives from countries that are substrings of each other (Niger/Nigeria)
         let countryExpression = ['any'];
+        let wrappedField = ['concat', '; ', ['string', ['get', config.countryField]], '; '];
         config.selectedCountries.forEach(country => {
-            if (config.multiCountry) {
-                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region // TODO verify if actually needed, at any stage in processing
-                countryExpression.push(['in', ['string', country], ['string', ['get', config.countryField]]]);
-            } else {
-                countryExpression.push(['==', ['string', country], ['string', ['get', config.countryField]]]);
-            }
+            countryExpression.push(['in', ['concat', '; ', country, '; '], wrappedField]);
         })
         config.filterExpression.push(countryExpression);
     }
