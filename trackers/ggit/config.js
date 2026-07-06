@@ -19,8 +19,8 @@ var config = {
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
         'Infrastructure Type': ['tracker-display'],
-        'Project': ['name', 'name-search'],
-        'Companies': ['owner', 'parent', 'owner-search'],
+        'Project': ['name'],
+        'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
     },
 
@@ -72,7 +72,6 @@ var config = {
         }
     ],
 
-    multiCountry: true,
     countryField: 'all-countries',
 
     minLineWidth: 1,
@@ -84,5 +83,5 @@ var config = {
     highZoomMinRadius: 5,
     highZoomMaxRadius: 30,
 
-    geometries: ['Point','LineString'],
+    geometries: ['Point', 'LineString'],
 }

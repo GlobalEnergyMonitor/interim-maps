@@ -18,8 +18,8 @@ var config = {
     /* configure the search box; 
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Project': ['name', 'name-noneng', 'name-search'],
-        'Companies': ['owner', 'parent', 'owner-noneng', 'owner-search'],
+        'Project': ['name', 'name-noneng'],
+        'Companies': ['owner', 'parent', 'owner-noneng'],
         'Opening Year': ['start-year'],
     },
 

@@ -26,6 +26,7 @@ npm-debug.log
 *issues/
 *.csv
 *.geojson
+*.pbf
 *client_secret.json
 _dist/
 

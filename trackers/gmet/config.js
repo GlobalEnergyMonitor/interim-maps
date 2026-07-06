@@ -20,7 +20,7 @@ var config = {
     searchFields: {
         'Country/Area(s)': ['all-countries'],
         'Project Type': ['tracker-display'],
-        'Project': ['name', 'name-search', 'associated-asset'],
+        'Project': ['name', 'associated-asset'],
         'Companies': ['operator'],
         'Type of Infrastructure': ['infrastructure-type'],
     },
@@ -101,7 +101,6 @@ var config = {
         },
     ],
 
-    multiCountry: true,
     countryField: 'all-countries',
     showAllPhases: true,
 

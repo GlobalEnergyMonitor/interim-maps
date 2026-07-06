@@ -1,13 +1,19 @@
 var config = {
-    // csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Integrated/2025-09/gipt-data-2025-10-02.csv',
-    // tiles: [
-    //     // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
-    //     'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-09/{z}/{x}/{y}.pbf'
-    //     ],
-    // tileSourceLayer: 'integrated',
+    /* Vector tiles render the map; the CSV supplies the full per-unit data for the
+       table view, detail popups, legend counts, and search.
+       Local tiles generated from the geojson with :
+            MapFileCreation repo -> geojson_to_csv.py
+            The following tippecanoe command, which is implemented in run_tippecanoe.py in MapFileCreation repo:
+               tippecanoe -e integrated-power/tiles -l integrated -Z0 -z10 -r1 \
+               --no-feature-limit --no-tile-size-limit --no-tile-compression \
+               -y project-id -y name -y asset-type -y status -y all-countries -y capacity-scaled \
+               integrated-power/integrated_map_2026-05-06.geojson */
+    tiles: ['https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/integrated-power/2026-05/tiles/{z}%5C{x}%5C{y}.pbf'],
+    tileSourceLayer: 'integrated',
 
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/integrated_map_2026-05-06.geojson',
+    // geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/refactor_testing/integrated_map_2026-05-06.geojson',
+    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/integrated-power/2026-05/integrated_map_2026-05-06.csv',
 
     /* Labels for describing the assets */
     assetFullLabel: 'units / phases',
@@ -25,11 +31,11 @@ var config = {
     /* configure the search box;
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
-        'Project': ['name', 'name-search'],
-        'Companies': ['owner', 'parent', 'owner-search', 'parent-search'],
+        'Project': ['name'],
+        'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
         'Country/Area': ['all-countries'],
-        'Type': ['type'],
+        'Type': ['asset-type'],
         'Status': ['status']
     },
 
@@ -83,7 +89,6 @@ var config = {
 
     projection: 'globe',
     countryField: 'all-countries',
-    multiCountry: true,
 
     img_detail_zoom: 10,
 };

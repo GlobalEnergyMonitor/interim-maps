@@ -122,7 +122,6 @@ var site_config = {
 
     countryFile: '../../src/countries.json',  // fixme may need to make this default for all trackers
     allCountrySelect: true,
-    multiCountry: false,  // TODO determine if needed
 
     hitArea: 5, 
     sqrt: true, // need this to trigger the square root interpolation circle asset sizing logic

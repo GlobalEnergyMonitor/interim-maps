@@ -15,14 +15,12 @@ function processConfig() {
     Global variable declaration
 */
 let userInteracting = false;
-const diacriticMap = {
-    a: ['a', 'á', 'à', 'â', 'ã', 'ä', 'å'],
-    e: ['e', 'é', 'è', 'ê', 'ë'],
-    i: ['i', 'í', 'ì', 'î', 'ï'],
-    o: ['o', 'ó', 'ò', 'ô', 'õ', 'ö', 'ø'],
-    u: ['u', 'ú', 'ù', 'û', 'ü'],
-    c: ['c', 'ç'],
-    n: ['n', 'ñ'],
+// letters that NFKD normalization can't decompose, mapped to their ascii search
+// equivalent (quotes/okina fold to nothing); see removeDiacritics()
+const diacriticSpecialChars = {
+    'æ': 'ae', 'ð': 'd', 'ø': 'o', 'þ': 'th', 'ß': 'ss',
+    'đ': 'd', 'ı': 'i', 'ł': 'l', 'œ': 'oe',
+    '–': '-', '—': '-',  // en/em dashes fold to hyphen
 };
 
 // The following values can be changed to control rotation speed:
@@ -32,7 +30,7 @@ const secondsPerRevolution = 150;
 const maxSpinZoom = 5;
 // Rotate at intermediate speeds between zoom levels 3 and 5.
 const slowSpinZoom = 3;
-let spinEnabled = true;
+let spinEnabled = false;
 
 
 /*
@@ -117,6 +115,7 @@ function parseCsv(url) {
         Papa.parse(url, {
             download: true,
             header: true,
+            worker: true,  // parse off the main thread so the map keeps rendering during the multi-second parse of large files
             complete: function(results) {
                 resolve(results.data);
             },
@@ -132,7 +131,7 @@ function addTiles() {
     map.addSource('assets-source', {
         'type': 'vector',
         'tiles': config.tiles,
-        'minzoom': 1,
+        'minzoom': 0,
         'maxzoom': 10
     });
 }
@@ -174,7 +173,9 @@ function addGeoJSON(jsonData) {
     if (!config.tiles) {
         map.addSource('assets-source', {
             'type': 'geojson',
-            'data': config.geojson,
+            // start empty: layers are only added after linkAssets() supplies the grouped
+            // data via setData(), so tiling the full raw data here would be wasted work
+            'data': {'type': 'FeatureCollection', 'features': []},
             'tolerance': 0.05  // set lower than the default 0.375 to render smaller lines at far zoom levels; affects performance
         });
     }
@@ -223,6 +224,18 @@ function linkAssets() {
 
     config.totalCount = 0;
 
+    // Legend counts and capacity range for the currently filtered data, tallied in the
+    // group loop below; updateSummary() and buildLegendFilters() read these directly
+    config.filterCount = {};
+    config.filters.forEach((filter) => {
+        config.filterCount[filter.field] = {};
+        filter.values.forEach((val) => {
+            config.filterCount[filter.field][makeDomSafe(val)] = 0;
+        });
+    });
+    config.maxFilteredCapacity = 0;
+    config.minFilteredCapacity = 1000000;
+
     // First, create a lookup table for linked assets based on linkField
     config.linked_assets = {};
     config.geojson_filtered.features.forEach((feature) => {
@@ -253,9 +266,25 @@ function linkAssets() {
         'features': []
     };
 
+    // The map layers only read these properties, so the grouped features carry nothing else;
+    // that shrinks what setData() ships to the mapbox worker for tiling.
+    // Full-property features remain available via config.linked_assets.
+    const mapFields = [
+        config.nameField,
+        config.linkField,
+        config.color_association.field,
+        config.capacityScaledField
+    ].filter((field) => field != null);
+
     Object.keys(grouped_assets).forEach((key) => {
-        let features_in_current_group = grouped_assets[key]; //deep copy
-        let group_feature = JSON.parse(JSON.stringify(features_in_current_group[0]))  // make a group (total) feature, deep-copied from the first feature in the group
+        let features_in_current_group = grouped_assets[key];
+        // make a group (total) feature from the first feature in the group,
+        // with a fresh properties object holding only the map-rendered fields
+        let group_feature = Object.assign({}, features_in_current_group[0]);
+        group_feature.properties = {};
+        mapFields.forEach((field) => {
+            group_feature.properties[field] = features_in_current_group[0].properties[field];
+        });
 
         // Sum capacity across all linked assets
         group_feature.properties[config.capacityScaledField] = features_in_current_group.reduce((previous, current) => {
@@ -296,22 +325,36 @@ function linkAssets() {
             ? features_in_current_group
             : features_in_current_group.filter((feature) => !isPolygon(feature));
 
-        // Build summary count of filters for legend
-        let summary_count = {};
+        // Tally the legend filter counts (previously round-tripped through a per-feature
+        // summary_count JSON string, which bloated the map data and had to be re-parsed
+        // for all features on every legend update)
         config.filters.forEach((filter) => {
-            summary_count[filter.field] = Object.assign(...filter.values.map(f => ({[f]: 0})));
             countableFeatures.forEach((feature) => {
-                summary_count[filter.field][feature.properties[filter.field]]++;
+                let value = makeDomSafe(feature.properties[filter.field]);
+                if (value in config.filterCount[filter.field]) {
+                    config.filterCount[filter.field][value]++;
+                }
             });
         });
-        group_feature.properties['summary_count'] = JSON.stringify(summary_count);
         config.totalCount += countableFeatures.length;
+
+        let groupCapacity = parseFloat(features_in_current_group[0].properties[config.capacityField]);
+        if (groupCapacity > config.maxFilteredCapacity) {
+            config.maxFilteredCapacity = groupCapacity;
+        }
+        if (groupCapacity < config.minFilteredCapacity) {
+            config.minFilteredCapacity = groupCapacity;
+        }
 
         config.geojson_linked.features.push(group_feature);
     });
 
     // set the map to use the linked assets as input data
-    map.getSource('assets-source').setData(config.geojson_linked);
+    // (tile maps render the tiles as-is — vector sources have no setData in mapbox-gl v2;
+    // geojson_linked still feeds the legend counts, table, and detail views for them)
+    if (!config.tiles) {
+        map.getSource('assets-source').setData(config.geojson_linked);
+    }
 }
 
 /* Generates icon image circles for each unique asset combination - Frequent-use function: called once in linkAssets() in a forEach loop */
@@ -891,7 +934,7 @@ function makeDomSafe(value) {
 }
 
 function buildLegendFilters() {
-    countFilteredFeatures();
+    // config.filterCount is tallied by linkAssets(), which always runs before this
     config.filters.forEach(filter => {
         const title = filter.label || filter.field.replaceAll("_", " ");
         const hasTooltip = !!filter.field_hover_text;
@@ -1035,45 +1078,6 @@ function clearAllFilterSection(fieldRow) {
     filterData();
 }
 
-function countFilteredFeatures() {
-    config.filterCount = {};
-    config.filters.forEach(filter => {
-        config.filterCount[filter.field] = {};
-        filter.values.forEach(val => {
-            config.filterCount[filter.field][makeDomSafe(val)] = 0;
-        });
-    });
-
-    config.maxFilteredCapacity = 0;
-    config.minFilteredCapacity = 1000000;
-
-    config.geojson_linked.features.forEach(feature => {
-        if ('summary_count' in feature.properties) {
-            let summary_count = JSON.parse(feature.properties.summary_count);
-            Object.keys(summary_count).forEach((filter) => {
-                Object.keys(summary_count[filter]).forEach((val) => {
-                    config.filterCount[filter][makeDomSafe(val)] += summary_count[filter][val];
-                });
-            });
-        } else {
-            config.filters.forEach(filter => {
-                filter.values.forEach(val => {
-                    if (feature.properties[filter.field] === makeDomSafe(val)) {
-                        config.filterCount[filter.field][makeDomSafe(val)]++;
-                    }
-                });
-            });
-        }
-
-        if (parseFloat(feature.properties[config.capacityField]) > config.maxFilteredCapacity) {
-            config.maxFilteredCapacity =  parseFloat(feature.properties[config.capacityField]);
-        }
-        if (parseFloat(feature.properties[config.capacityField]) < config.minFilteredCapacity) {
-            config.minFilteredCapacity =  parseFloat(feature.properties[config.capacityField]);
-        }       
-    });
-}
-
 function filterData() {
     $('#spinner-container').removeClass('d-none')
     $('#spinner-container').addClass('d-flex')
@@ -1087,36 +1091,51 @@ function filterData() {
 
 function filterTiles() {
     let filterStatus = {};
+    // checkbox ids carry makeDomSafe'd values but the tiles carry the raw ones
+    // (e.g. id says 'utility-scale-solar', the tile attribute says 'utility-scale solar'),
+    // so map each id back to its raw filter value before building the expression
+    let rawValues = {};
     config.filters.forEach(filter => {
         filterStatus[filter.field] = [];
+        rawValues[filter.field] = {};
+        filter.values.forEach(val => {
+            rawValues[filter.field][makeDomSafe(val)] = val;
+        });
     });
     $('.form-check-input').each(function() {
         if (this.checked) {
             let [field, ...value] = this.id.split('_');
-            filterStatus[field].push(value.join('_'));
+            let domSafeValue = value.join('_');
+            filterStatus[field].push(rawValues[field][domSafeValue] ?? domSafeValue);
         }
     });
 
     config.filterExpression = [];
     if (config.searchText.length >= 3) {
-        let searchExpression = ['any'];
-        config.selectedSearchFields.split(',').forEach((field) => {
-            searchExpression.push(['in', ['literal', config.searchText], ['downcase', ['get', field]]]);
-
+        // run the search in JS against the full CSV-side data, then filter the tiles by
+        // the matching link ids; this keeps the search columns (owner, parent, *-search)
+        // out of the tiles entirely, which is what keeps the tiles small
+        let ids = new Set();
+        config.geojson.features.forEach((feature) => {
+            if (featureMatchesSearch(feature)) {
+                ids.add(feature.properties[config.linkField]);
+            }
         });
-        config.filterExpression.push(searchExpression);
+        config.filterExpression.push(
+            ids.size > 0
+                ? ['match', ['get', config.linkField], [...ids], true, false]
+                : ['boolean', false]  // 'match' requires a non-empty label list
+        );
     }
     if (config.selectedCountries.length > 0) {
-        // updated to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
-        // added ';' at end of each country
+        // all-countries values are '; '-separated with no trailing delimiter, so wrap both
+        // the field and the search term with '; ' on each side before checking substring
+        // containment: this makes position in the list (first/middle/last) irrelevant and
+        // avoids false positives from countries that are substrings of each other (Niger/Nigeria)
         let countryExpression = ['any'];
+        let wrappedField = ['concat', '; ', ['string', ['get', config.countryField]], '; '];
         config.selectedCountries.forEach(country => {
-            if (config.multiCountry) {
-                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region // TODO verify if actually needed, at any stage in processing
-                countryExpression.push(['in', ['string', country], ['string', ['get', config.countryField]]]);
-            } else {
-                countryExpression.push(['==', ['string', country], ['string', ['get', config.countryField]]]);
-            }
+            countryExpression.push(['in', ['concat', '; ', country, '; '], wrappedField]);
         })
         config.filterExpression.push(countryExpression);
     }
@@ -1143,8 +1162,25 @@ function filterTiles() {
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
     } else {
-        map.on('idle', filterGeoJSON);
+        // run right after this click's call stack so the map filter is dispatched first.
+        // Waiting for 'idle' (the previous behavior) could stall the summary/legend update
+        // indefinitely: the spinning globe and post-setFilter tile work keep the map busy,
+        // which is why the first filter click used to take so long.
+        clearTimeout(config.filterGeoJSONTimeout);
+        config.filterGeoJSONTimeout = setTimeout(filterGeoJSON, 0);
     }
+}
+
+/* Shared by filterGeoJSON (table/summary) and filterTiles (map) so both apply the same search */
+function featureMatchesSearch(feature) {
+    return config.selectedSearchFields.split(',').filter((field) => {
+        // remove diacritics from mapValue
+        if (feature.properties[field] != null) {
+            let mapValue = removeDiacritics(feature.properties[field]).toLowerCase();
+            let searchValue = removeDiacritics(config.searchText).toLowerCase();
+            return mapValue.includes(searchValue);
+        }
+    }).length > 0;
 }
 
 function filterGeoJSON() {
@@ -1171,14 +1207,7 @@ function filterGeoJSON() {
         }
         // filter by text search bar
         if (config.searchText.length >= 3) {
-            if (config.selectedSearchFields.split(',').filter((field) => {
-                // remove diacritics from mapValue
-                if (feature.properties[field] != null) {
-                    let mapValue = removeDiacritics(feature.properties[field]).toLowerCase();
-                    let searchValue = removeDiacritics(config.searchText).toLowerCase();
-                    return mapValue.includes(searchValue);
-                }
-            }).length === 0) include = false;
+            if (!featureMatchesSearch(feature)) include = false;
         }
         // filter by country select, gets hit when just filtering by legend too
         if (config.selectedCountries.length > 0) {
@@ -1211,7 +1240,7 @@ function updateSummary() {
     $('#spinner-container').removeClass('d-flex')
     $('#total_in_view').text(config.totalCount.toLocaleString())
     $('#summary').html('Total ' + config.assetFullLabel + ' selected');
-    countFilteredFeatures();
+    // config.filterCount is tallied by linkAssets(), which always runs before this
     config.filters.forEach((filter) => {
         for (let i = 0; i < filter.values.length; i++) {
             const count_id = filter.field + "_" + makeDomSafe(filter.values[i]) + "-count";
@@ -1767,15 +1796,10 @@ function buildCountrySelect() {
 // this is applied so that only the non tile maps are impacted
 // for tile maps it'll be too slow so we do it in data prep (having a special search column and adding that to the column options to search within)
 function removeDiacritics(value) {
-    let noDiacriticsValue = value;
-    for (const char of value) {
-        for (const [key, values] of Object.entries(diacriticMap)) {
-            if (values.includes(char)) {
-                noDiacriticsValue = noDiacriticsValue.replace(char, key);
-            }
-        }
-    }
-    return noDiacriticsValue;
+    return String(value)
+        .normalize('NFKD')  // split letters from their combining accent marks
+        .replace(/[\u0300-\u036f]/g, '')  // drop the accent marks
+        .replace(/[æÆðÐøØþÞßđĐıŁłœŒʻ'‘’‚"“”–—]/g, (char) => diacriticSpecialChars[char.toLowerCase()] ?? '');
 }
 
 function enableSearch() {
