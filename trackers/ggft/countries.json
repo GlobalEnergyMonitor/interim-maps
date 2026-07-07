@@ -6,19 +6,36 @@
         "Japan",
         "Malaysia",
         "Myanmar",
+        "Pakistan",
         "Philippines",
         "Singapore",
+        "South Korea",
         "Taiwan",
         "Thailand",
         "Vietnam"
-
     ],
     "Americas": [
+        "Antigua and Barbuda",
+        "Argentina",
+        "Aruba",
+        "Bahamas",
+        "Brazil",
         "Canada",
-        "Mexico"
+        "Chile",
+        "Colombia",
+        "Dominican Republic",
+        "Ecuador",
+        "Guyana",
+        "Honduras",
+        "Mexico",
+        "Nicaragua",
+        "Panama",
+        "Peru",
+        "Puerto Rico",
+        "Suriname",
+        "Venezuela"
     ],
     "Oceania": [
         "Australia"
     ]
-
 }

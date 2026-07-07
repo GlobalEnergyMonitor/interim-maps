@@ -41,7 +41,15 @@ var config = {
         'start-year': {'label': 'Start date'},
         'location-accuracy': {'label': 'Coordinate Accuracy'},
 
-        'capacity-by-status': {'table': 'Capacity by Status', 'tableHeaders': {'status': 'Unit status', 'method': 'Main production equipment', 'capacity': 'Capacity (ttpa)'}},
+        'capacity-by-status': {
+            'table': 'Capacity by Status',
+            'tableHeaders': {
+                'status': 'Unit status',
+                'method': 'Main production equipment',
+                'capacity': 'Capacity (ttpa)'
+            },
+            'excludeEmptyColumns': false
+        },
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */

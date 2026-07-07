@@ -1458,7 +1458,22 @@ function displayDetails(features) {
                         <tr>`;
 
             // populate header row of the table
-            const keys = Object.keys(headerMap);
+            const allKeys = Object.keys(headerMap);
+            const excludeEmpty = tableConfig.excludeEmptyColumns === true;
+
+            const isEmptyCell = (value) => {
+                if (value === undefined || value === null) return true;
+                const s = String(value).trim();
+                return s === '' || s === '-' || s === '–';
+            };
+
+            const keys = excludeEmpty
+                ? allKeys.filter(key => !table_data_as_array.every(row => isEmptyCell(row[key])))
+                : allKeys;
+
+            // If every column got filtered out, return nothing
+            if (keys.length === 0) { return; }
+
             keys.forEach(key => {
                 tableHtml += `
                     <th style='text-transform: none; font-size: 0.7rem;'>

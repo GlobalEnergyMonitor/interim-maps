@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/ggft_map_2025-12.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/ggft_map_2026-07.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Units',
@@ -9,8 +9,8 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
     tableHeaders: {
-        values: ['financier', 'name', 'unit-name', 'financing-type', 'owner', 'parent', 'facility-type', 'status', 'country-area1', 'start-year', 'capacity-mw', 'capacity-mtpa'],
-        labels: ['Financier', 'Project Name', 'Unit Name', 'Financing Type', 'Owner', 'Parent', 'Terminal Facility Type', 'Operational Status', 'Country/Area(s)', 'Start year', 'Capacity (MW)', 'Capacity (MTPA)'],
+        values: ['financier', 'name', 'unit-name', 'financing-type', 'financing-advisor', 'epc-contractor', 'power-purchaser', 'owner', 'parent', 'facility-type', 'status', 'country-area1', 'start-year', 'capacity-mw', 'capacity-mtpa'],
+        labels: ['Financier', 'Project Name', 'Unit Name', 'Financing Type', 'Loan Arranger / Financial Advisor', 'EPC Contractor', 'Power Purchaser', 'Owner', 'Parent', 'Terminal Facility Type', 'Operational Status', 'Country/Area(s)', 'Start year', 'Capacity (MW)', 'Capacity (MTPA)'],
         clickColumns: ['name'],
         rightAlign: ['startyear'],
     },
@@ -33,15 +33,26 @@ var config = {
         'name': {'display': 'heading'},
         'location-display': {'display': 'location'},
 
-        // 'financing-debt': {'label': 'Debt Project Financing ($ million)'},
-        // 'financing-equity': {'label': 'Equity Project Financing ($ million)'},
         'start-year': {'label': 'Start Year'},
         'financier': {'label': 'Financier'},
         'status': {'label': 'Operating Status'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
 
-        'financier-details': {'table': 'Financier Details', 'tableHeaders': {'unit_id': 'GEM Unit ID', 'financing_status': 'Financing status', 'financier': 'Financier name', 'capacity': 'Amount (Million $USD)', 'financing_type': 'Financing type'}},
+        'financier-details': {
+            'table': 'Financier Details',
+            'tableHeaders': {
+                'unit_id': 'GEM Unit ID',
+                'financing_status': 'Financing status',
+                'financier': 'Financier name',
+                'capacity': 'Amount (Million $USD)',
+                'financing_type': 'Financing type',
+                'financing_advisor': 'Loan Arranger / Financial Advisor',
+                'epc_contractor': 'EPC Contractor',
+                'power_purchaser': 'Power Purchaser'
+            },
+            'excludeEmptyColumns': true
+        },
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
