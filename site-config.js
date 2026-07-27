@@ -17,10 +17,13 @@ var site_config = {
     site_colors: {
         'red': '#c74a48',
             'light red': '#f28b82',
+            'dark red': '#7e2b2a',
         'orange': '#fd7e14',
+            'light orange': '#ffb673',
         'yellow': '#fdda0d',
         'green': '#4c9d4f',
             'light green': '#66c26e',
+            'dark green': '#2e5e2f',
         'blue': '#5c62cf',
             'light blue': '#74add1',
         'purple': '#9370db',
