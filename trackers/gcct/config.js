@@ -86,13 +86,13 @@ var config = {
             field: 'cement-type',
             label: 'Majority Cement Type',
             values: ['opc', 'blended', 'blast furnace cement', 'unknown', 'N/A'],
-            values_labels: ['OPC', 'Blended', 'Blast furnace cement', 'Unknown', 'N/A (Clinker-only plants)'],
+            values_labels: ['OPC', 'Blended', 'Blast furnace cement', 'Unknown', 'N/A (Clinker only)'],
         },
         {
             field: 'color',
             label: 'Cement Color',
             values: ['both', 'grey', 'white', 'unknown', 'N/A'],
-            values_labels: ['Grey & White', 'Grey', 'White', 'Unknown', 'N/A (Clinker-only plants)'],
+            values_labels: ['Grey & White', 'Grey', 'White', 'Unknown', 'N/A (Clinker only)'],
         },
     ],
 
