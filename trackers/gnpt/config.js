@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/gnpt_map_2025-09.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/gnpt/gnpt_map_2026-08.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: "Nuclear Power Plant Units",
