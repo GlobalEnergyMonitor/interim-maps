@@ -8,11 +8,11 @@ var config = {
                --no-feature-limit --no-tile-size-limit --no-tile-compression \
                -y project-id -y name -y asset-type -y status -y all-countries -y capacity-scaled \
                integrated-power/integrated_map_2026-05-06.geojson */
-    tiles: ['https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/integrated-power/2026-08/tiles/{z}%5C{x}%5C{y}.pbf'],
+    tiles: ['https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/integrated-power/2026-08-v2/tiles/{z}%5C{x}%5C{y}.pbf'],
     tileSourceLayer: 'integrated',
 
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/integrated-power/2026-08/integrated_map_2026-08.csv',
+    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/integrated-power/2026-08-v2/integrated_map_2026-08-v2.csv',
 
     /* Labels for describing the assets */
     assetFullLabel: 'units / phases',
