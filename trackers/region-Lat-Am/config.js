@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format */
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/region-Lat-Am/lat-am_map_2026-08-v2.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Current_maps/region-Lat-Am/lat-am_map_2026-08-v3.geojson',
 
     /* Labels for describing the assets */
     assetFullLabel: 'Units / Phases / Pipelines',
